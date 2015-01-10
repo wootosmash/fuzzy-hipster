@@ -1,0 +1,6 @@
+C:\Users\Al\Documents\SharpDevelop Projects\RWTorrent\RWTorrent\obj\Debug\RWTorrent.csprojResolveAssemblyReference.cache
+C:\Users\Al\Documents\SharpDevelop Projects\RWTorrent\RWTorrent\bin\Debug\RWTorrent.exe.config
+C:\Users\Al\Documents\SharpDevelop Projects\RWTorrent\RWTorrent\bin\Debug\RWTorrent.exe
+C:\Users\Al\Documents\SharpDevelop Projects\RWTorrent\RWTorrent\bin\Debug\RWTorrent.pdb
+C:\Users\Al\Documents\SharpDevelop Projects\RWTorrent\RWTorrent\obj\Debug\RWTorrent.exe
+C:\Users\Al\Documents\SharpDevelop Projects\RWTorrent\RWTorrent\obj\Debug\RWTorrent.pdb
