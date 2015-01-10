@@ -36,6 +36,8 @@ namespace RWTorrent.Catalog
 			get;
 			set;
 		}
+	  
+	  public long LastUpdate { get; set; }	    
 
 		public FileDescriptorCollection Files {
 			get;
@@ -51,6 +53,7 @@ namespace RWTorrent.Catalog
 		{
 			Files = new FileDescriptorCollection();
 			BlockIndex = new BlockIndexItemCollection();
+			LastUpdate = DateTime.Now.ToFileTimeUtc();
 		}
 
 		public bool VerifyBlock(Block block)

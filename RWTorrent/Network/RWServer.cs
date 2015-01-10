@@ -1,11 +1,14 @@
 ﻿
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
+using RWTorrent.Catalog;
 
 namespace RWTorrent.Network
 {
@@ -25,11 +28,21 @@ namespace RWTorrent.Network
   {
     public const int RWServerPort = 7892;
     
-    // Thread signal.
-    private ManualResetEvent allDone = new ManualResetEvent(false);
-
+    public Peer Me { get; set; }
+    public SortedList<Guid, Peer> Peers { get; set; }
+    public List<Socket> Sockets { get; set; }
+    public IPEndPoint LocalEndPoint { get; set; }
+    public Socket Listener { get; set; }
+    
+    Random random = new Random(DateTime.Now.Millisecond);
+    ManualResetEvent allDone = new ManualResetEvent(false);
+    
     public RWServer()
     {
+      Me = new Peer();
+      Peers = new SortedList<Guid, Peer>();
+      Peers.Add(Me.Guid, Me);
+      Sockets = new List<Socket>();
     }
 
     public void StartListening()
@@ -37,30 +50,22 @@ namespace RWTorrent.Network
       // Data buffer for incoming data.
       byte[] bytes = new Byte[1024];
 
-      // Establish the local endpoint for the socket.
-      // The DNS name of the computer
-      // running the listener is "host.contoso.com".
-      //      IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-      //      IPAddress ipAddress = ipHostInfo.AddressList[0];
-      var localEndPoint = new IPEndPoint(IPAddress.Any, RWServerPort);
-
-      // Create a TCP/IP socket.
-      var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp );
+      LocalEndPoint = new IPEndPoint(IPAddress.Any, RWServerPort);
+      Listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp );
 
       // Bind the socket to the local endpoint and listen for incoming connections.
       try {
-        listener.Bind(localEndPoint);
-        listener.Listen(100);
+        Listener.Bind(LocalEndPoint);
+        Listener.Listen(100);
 
-        while (true) {
+        while (true)
+        {
           // Set the event to nonsignaled state.
           allDone.Reset();
 
-          // Start an asynchronous socket to listen for connections.
-          Console.WriteLine("Waiting for a connection...");
-          listener.BeginAccept(
+          Listener.BeginAccept(
             new AsyncCallback(AcceptCallback),
-            listener );
+            Listener );
 
           // Wait until a connection is made before continuing.
           allDone.WaitOne();
@@ -84,12 +89,14 @@ namespace RWTorrent.Network
       Socket listener = ar.AsyncState as Socket;
       Socket handler = listener.EndAccept(ar);
       
+      Sockets.Add(handler);
+      
       Console.WriteLine("WE GOT ONE...");
 
       // Create the state object.
-      RWServerStateObject state = new RWServerStateObject();
+      var state = new RWServerStateObject();
       state.WorkSocket = handler;
-      handler.BeginReceive( state.buffer, 0, Marshal.SizeOf(typeof(NetMessage)), 0,
+      handler.BeginReceive( state.buffer, 0, state.buffer.Length, 0,
                            new AsyncCallback(WaitMessageCallback), state);
     }
 
@@ -102,78 +109,184 @@ namespace RWTorrent.Network
       
       if ( bytesRead > 0 )
       {
-        
         Console.WriteLine("WaitMessage Recev");
 
-        NetMessage message = NetMessage.FromBytes(state.buffer, typeof(NetMessage));
+        NetMessage message = NetMessage.FromBytes(state.buffer);
         
-        // get the rest of the message
-        
-        handler.BeginReceive(state.buffer, bytesRead, message.Length - bytesRead, 0,
-                             new AsyncCallback(ProcessMessageCallback), state);
-      }
-      else
-      {
-        handler.BeginReceive( state.buffer, 0, Marshal.SizeOf(typeof(NetMessage)), 0,
-                             new AsyncCallback(WaitMessageCallback), state);
+        ProcessMessage(message, state);
       }
     }
     
-    void ProcessMessageCallback( IAsyncResult ar )
+    void ProcessMessage(NetMessage msg, RWServerStateObject state)
     {
-      var state =  ar.AsyncState as RWServerStateObject;
-      Socket handler = state.WorkSocket;
+      Console.WriteLine("MSG: {0}", msg);
       
-      NetMessage message = NetMessage.FromBytes(state.buffer, typeof(NetMessage));
-      
-      switch( message.Type )
+      switch( msg.Type )
       {
         case MessageType.Hello:
-          Console.WriteLine("Got a hello message");
           break;
           
         case MessageType.PeerStatus:
-          var msg = PeerStatusNetMessage.FromBytes(state.buffer, typeof(PeerStatusNetMessage)) as PeerStatusNetMessage;
-          Console.WriteLine("Got status message: {0}", msg.ToString());
+        case MessageType.PeerList:
+          var status = msg as PeerListNetMessage;
+          
+          if ( Peers.ContainsKey(status.Peers[0].Guid))
+            Peers.Remove(status.Peers[0].Guid);
+          
+          Peers.Add(status.Peers[0].Guid, status.Peers[0]);
           break;
           
-//        case MessageType.RequestPeers:          
-//          var msg = RequestPeersNetMessage.FromBytes(state.buffer) as RequestPeersNetMessage;
-//          Console.WriteLine("Peer Request: {0}", msg.ToString());
-//          break;
+        case MessageType.RequestPeers:
+          var request = msg as RequestPeersNetMessage;
+          SendPeerList(state.WorkSocket, request.Count);
+          break;
+          
+        case MessageType.RequestStacks:
+          var stacks = msg as RequestStacksNetMessage;
+          SendStacks( state.WorkSocket, stacks.Recency, stacks.Count );
+          break;
+          
+        case MessageType.RequestWads:
+          var wads = msg as RequestWadsNetMessage;
+          SendWads( state.WorkSocket, wads.Recency, wads.Count, wads.StackGuid );
+          break;
+          
       }
+    }
+    
+    public void Connect( string hostname, int port )
+    {
+      var state = new RWServerStateObject();
+      Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+      state.WorkSocket = socket;
       
-      handler.BeginReceive( state.buffer, 0, Marshal.SizeOf(typeof(NetMessage)), 0,
-                           new AsyncCallback(WaitMessageCallback), state);
+      IPHostEntry ipHostInfo = Dns.Resolve(hostname);
+      IPAddress ipAddress = ipHostInfo.AddressList[0];
+      IPEndPoint remoteEP = new IPEndPoint( ipAddress, port);
+      socket.BeginConnect( remoteEP, ConnectCallback, state);
+    }
+    
+    void ConnectCallback( IAsyncResult result )
+    {
+      var state = result.AsyncState  as RWServerStateObject;
+      state.WorkSocket.EndConnect(result);
+      Sockets.Add(state.WorkSocket);
       
+      SendMyStatus( state.WorkSocket );
+    }
+    
+    public void RequestStacks( Socket workSocket, long recency, int count )
+    {
+      var msg = new RequestStacksNetMessage();
+      msg.Recency = recency;
+      msg.Count = count;
+      Send(workSocket, msg);      
+    }
+
+    public void SendStacks( Socket workSocket, long recency, int count )
+    {
+      var msg = new StacksNetMessage();
+      msg.Stacks = RWTorrent.Singleton.Catalog.Stacks.ToArray();      
+      Send(workSocket, msg);
+    }
+    
+    
+    public void RequestWads(Socket workSocket, long recency, int count, Guid stackGuid )
+    {
+      var msg = new RequestWadsNetMessage();
+      msg.Recency = recency;
+      msg.Count = count;
+      msg.StackGuid = stackGuid;      
+      Send(workSocket, msg);      
+    }
+    
+    public void SendWads( Socket workSocket, long recency, int count, Guid stackGuid )
+    {
+      if ( RWTorrent.Singleton.Catalog.Stacks[stackGuid] == null )
+        return;
+
+      var wads = new List<FileWad>();
+      var msg = new WadsNetMessage();
+      msg.Wads = RWTorrent.Singleton.Catalog.Stacks[stackGuid].GetWadsByRecency( recency, count );
+      
+      Send(workSocket, msg);
+    }
+    
+    public void SendMyStatus(Socket workSocket )
+    {
+      var msg = new PeerListNetMessage();
+
+      msg.Peers = new Peer[]{ Me };
+      
+      Send(workSocket, msg);
       
     }
     
-    void Send(Socket handler, String data)
+    public void SendPeerList(Socket workSocket, int count)
     {
-      // Convert the string data to byte data using ASCII encoding.
-      byte[] byteData = Encoding.ASCII.GetBytes(data);
+      var peers = new List<Peer>();
+      var msg = new PeerListNetMessage();
 
-      // Begin sending the data to the remote device.
-      handler.BeginSend(byteData, 0, byteData.Length, 0,
-                        new AsyncCallback(SendCallback), handler);
+      if ( Peers.Count < count )
+      {
+        foreach( Peer p in Peers.Values )
+          peers.Add(p);
+      }
+      else
+      {
+        int randomPeers = count / 2;
+        int seqentialPeers = count / 2;
+        
+        for ( int i=0;i<randomPeers;i++)
+          peers.Add(Peers.Values[random.Next(0, Peers.Count)]);
+        
+        for ( int i=0;i<seqentialPeers;i++)
+          peers.Add(Peers.Values[i]);
+        
+      }
+      
+      msg.Peers = peers.ToArray();
+      
+      Send(workSocket, msg);
+    }
+    
+    public void RequestPeers( Socket workSocket, int count )
+    {
+      var msg = new RequestPeersNetMessage();
+      Send( workSocket, msg);
+    }
+    
+    public void SendPeerStatus( Socket workSocket, Peer peer )
+    {
+      var msg = new PeerListNetMessage();
+      msg.Peers = new Peer[] {peer};
+      Send( workSocket, msg);
+    }
+    
+    
+    
+    public void Send( Socket workSocket, NetMessage msg )
+    {
+      var state = new SendState();
+      
+      state.Message = msg;
+      
+      byte[] buffer = msg.ToBytes();
+      
+      workSocket.BeginSend(buffer, 0, buffer.Length, 0, EndSendCallback, state);
     }
 
-    void SendCallback(IAsyncResult ar)
+    void EndSendCallback(IAsyncResult ar)
     {
       try
       {
-        // Retrieve the socket from the state object.
         var handler = ar.AsyncState as Socket;
 
-        // Complete sending the data to the remote device.
         int bytesSent = handler.EndSend(ar);
         Console.WriteLine("Sent {0} bytes to client.", bytesSent);
-
-        handler.Shutdown(SocketShutdown.Both);
-        handler.Close();
-
-      } catch (Exception e) {
+      }
+      catch (Exception e)
+      {
         Console.WriteLine(e.ToString());
       }
     }

@@ -45,6 +45,27 @@ namespace RWTorrent.Catalog
 		{
 			Wads = new List<FileWad>();
 		}
+		
+		/// <summary>
+		/// Gets the wads after a certain recency number oldest to newest
+		/// </summary>
+		/// <param name="recency"></param>
+		/// <param name="count"></param>
+		/// <returns></returns>
+		public FileWad[] GetWadsByRecency( long recency, int count )
+		{
+		  int i = 0;
+		  var wads = new List<FileWad>();
+		  
+		  while( i < count && i < Wads.Count )
+		  {
+		    if ( wads[i].LastUpdate > recency )
+		      wads.Add( Wads[i] );
+		    i++;
+		  }
+		  
+		  return wads.ToArray();
+		}
 	}
 }
 

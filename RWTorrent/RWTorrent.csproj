@@ -69,6 +69,7 @@
     <Compile Include="Catalog\FileWad.cs" />
     <Compile Include="Catalog\Stack.cs" />
     <Compile Include="Network\NetMessage.cs" />
+    <Compile Include="Network\Peer.cs" />
     <Compile Include="Network\RWClient.cs" />
     <Compile Include="Network\RWServer.cs" />
     <Compile Include="Program.cs" />

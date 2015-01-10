@@ -14,6 +14,17 @@ using System.Threading;
 using System.Xml.Serialization;
 namespace RWTorrent.Catalog
 {
+  public class StackCollection : List<Stack>
+  {
+    public Stack this[Guid stackGuid]
+    {
+      get 
+      {
+        return Find(x => x.Id == stackGuid );
+      }
+    }
+  }
+  
 	public class Catalog
 	{
 		public string Namespace {
@@ -32,14 +43,14 @@ namespace RWTorrent.Catalog
 		}
 
 	  [XmlIgnore()]
-		public List<Stack> Stacks {
+		public StackCollection Stacks {
 			get;
 			set;
 		}
 
 		public Catalog()
 		{
-			Stacks = new List<Stack>();
+			Stacks = new StackCollection();
 		}
 
 		public static Catalog Load(string basePath)
