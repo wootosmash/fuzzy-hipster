@@ -7,8 +7,10 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Xml.Serialization;
 namespace RWTorrent
 {
   [Serializable()]
@@ -32,8 +34,6 @@ namespace RWTorrent
     {
       return string.Format("[Peer Guid={0}, Name={1}, PeerCount={2}, CatalogRecency={3}, Uptime={4}, IPAddress={5}, Port={6}]", Guid, Name, PeerCount, CatalogRecency, Uptime, IPAddress, Port);
     }
-
-    
   }
 }
 

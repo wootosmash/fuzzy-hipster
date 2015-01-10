@@ -7,6 +7,7 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading;
 using NUnit.Framework;
@@ -53,7 +54,9 @@ namespace RWTorrent.Tests
         Guid = Guid.NewGuid(),
         PeerCount = 1,
         Uptime = 1234,
-        Name = "AND BINGO WAS HIS NAMEO"
+        Name = "AND BINGO WAS HIS NAMEO",
+        IPAddress = IPAddress.Parse("127.0.0.1"), 
+        Port = RWNetwork.RWDefaultPort+1
       };
       
       Thread.Sleep(10000);
@@ -61,7 +64,7 @@ namespace RWTorrent.Tests
       network.SendPeerList(network.Sockets[0], new Peer[]{peer});
       network.RequestPeers(network.Sockets[0], 30);
       
-      Thread.Sleep(10000);
+      Thread.Sleep(20000);
       //network.Disconnect();
       
     }

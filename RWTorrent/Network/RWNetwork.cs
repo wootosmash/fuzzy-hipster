@@ -49,6 +49,7 @@ namespace RWTorrent.Network
     public List<Socket> Sockets { get; set; }
     public IPEndPoint LocalEndPoint { get; set; }
     public Socket Listener { get; set; }
+    public int ActivePeers { get { return Sockets.Count; }}
     
     Random random = new Random(DateTime.Now.Millisecond);
     ManualResetEvent allDone = new ManualResetEvent(false);
@@ -117,12 +118,12 @@ namespace RWTorrent.Network
       Sockets = new List<Socket>();
     }
 
-    public void StartListening()
+    public void StartListening( int port )
     {
       // Data buffer for incoming data.
       byte[] bytes = new Byte[1024];
 
-      LocalEndPoint = new IPEndPoint(IPAddress.Any, RWDefaultPort);
+      LocalEndPoint = new IPEndPoint(IPAddress.Any, port);
       Listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp );
 
       // Bind the socket to the local endpoint and listen for incoming connections.
@@ -145,11 +146,7 @@ namespace RWTorrent.Network
 
       } catch (Exception e) {
         Console.WriteLine(e.ToString());
-      }
-
-      Console.WriteLine("\nPress ENTER to continue...");
-      Console.Read();
-      
+      }      
     }
 
     void AcceptCallback(IAsyncResult ar)

@@ -16,75 +16,86 @@ namespace RWTorrent.Catalog
 {
   
   
-	public class Catalog
-	{
-		public string Namespace {
-			get;
-			set;
-		}
+  public class Catalog
+  {
+    public string Namespace {
+      get;
+      set;
+    }
 
-		public string Description {
-			get;
-			set;
-		}
+    public string Description {
+      get;
+      set;
+    }
 
-		public string BasePath { get; set; }
-	  
-	  public long LastUpdated { get; set; }
+    public string BasePath { get; set; }
+    
+    public long LastUpdated { get; set; }
 
-	  [XmlIgnore()]
-		public StackCollection Stacks {
-			get;
-			set;
-		}
+    [XmlIgnore()]
+    public StackCollection Stacks {
+      get;
+      set;
+    }
 
-		public Catalog()
-		{
-			Stacks = new StackCollection();
-		}
+    public Catalog()
+    {
+      Stacks = new StackCollection();
+    }
 
-		public static Catalog Load(string basePath)
-		{
-		  Catalog catalog = null;
+    public static Catalog Load(string basePath)
+    {
+      string catalogEndPointPath = Path.Combine(basePath, @"Catalog\Catalog.xml");
+      Catalog catalog = null;
+      
+      if ( !Directory.Exists(Path.Combine(basePath, @"Catalog")) || !File.Exists(catalogEndPointPath) )
+      {
+        catalog = new Catalog();
+        catalog.BasePath = basePath;
+      }
+      else
+      {
+        var serialiser = new XmlSerializer(typeof(Catalog));
+        using (var reader = new StreamReader( catalogEndPointPath ))
+          catalog = (Catalog)serialiser.Deserialize(reader);
 
-		  var serialiser = new XmlSerializer(typeof(Catalog));
-			using (var reader = new StreamReader(Path.Combine(basePath, @"Catalog\Catalog.xml")))
-				catalog = (Catalog)serialiser.Deserialize(reader);
+        var serialiserStacks = new XmlSerializer(typeof(Stack));
+        foreach (string dir in Directory.GetDirectories(Path.Combine(basePath, @"Catalog\Stacks")))
+          using (var reader = new StreamReader(string.Format(@"{0}\Index.xml", dir)))
+            catalog.Stacks.Add((Stack)serialiserStacks.Deserialize(reader));
+      }
+      
+      return catalog;
+    }
 
-			var serialiserStacks = new XmlSerializer(typeof(Stack));
-			foreach (string file in Directory.GetFiles(Path.Combine(basePath, @"Catalog\Stacks")))
-				using (var reader = new StreamReader(file))
-					catalog.Stacks.Add((Stack)serialiserStacks.Deserialize(reader));
+    public void Save()
+    {
+      string catalogEndPointPath = Path.Combine(BasePath, @"Catalog\Catalog.xml");
 
-			return catalog;
-		}
+      if ( !Directory.Exists(Path.Combine(BasePath, @"Catalog")))
+        Directory.CreateDirectory(Path.Combine(BasePath, @"Catalog"));
+      
+      if ( !Directory.Exists(Path.Combine(BasePath, @"Catalog\Stacks\")))
+        Directory.CreateDirectory(Path.Combine(BasePath, @"Catalog\Stacks\"));
+      
+      var serialiser = new XmlSerializer(typeof(Catalog));
+      using (var writer = new StreamWriter(catalogEndPointPath))
+        serialiser.Serialize(writer, this);
+      
+      foreach (var stack in Stacks)
+        stack.Save();
+    }
 
-		public void Save()
-		{
-		  if ( !Directory.Exists(Path.Combine(BasePath, @"Catalog")))
-		    Directory.CreateDirectory(Path.Combine(BasePath, @"Catalog"));
-		  
-		  if ( !Directory.Exists(Path.Combine(BasePath, @"Catalog\Stacks\")))
-		    Directory.CreateDirectory(Path.Combine(BasePath, @"Catalog\Stacks\"));
-		  
-			var serialiser = new XmlSerializer(typeof(Catalog));
-			using (var writer = new StreamWriter(Path.Combine(BasePath, @"Catalog\Catalog.xml")))
-				serialiser.Serialize(writer, this);
-			
-			foreach (var stack in Stacks)
-			  stack.Save();
-		}
-
-		public FileWad GetFileWad(Guid id)
-		{
-			foreach (var stack in Stacks)
-				foreach (var wad in stack.Wads)
-					if (wad.Id == id)
-						return wad;
-			
-			return null;
-		}
-	}
+    public FileWad GetFileWad(Guid id)
+    {
+      foreach (var stack in Stacks)
+        foreach (var wad in stack.Wads)
+          if (wad.Id == id)
+            return wad;
+      
+      return null;
+    }
+  }
 }
 
 

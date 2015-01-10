@@ -15,7 +15,7 @@ namespace RWTorrent
 {
 	public class Settings
 	{
-	  public int ActivePeers { get; set; }
+	  public int MaxActivePeers { get; set; }
 		public int HeartbeatPeerRequestCount {get; set; }
 		public int HeartbeatStackRequestCount {get; set; }
 		public int HeartbeatInterval {get; set; }
@@ -23,7 +23,7 @@ namespace RWTorrent
 
 		public Settings()
 		{
-			ActivePeers = 30;
+			MaxActivePeers = 30;
 			HeartbeatPeerRequestCount = 30;
 			HeartbeatStackRequestCount = 3;
 			HeartbeatInterval = 60000;

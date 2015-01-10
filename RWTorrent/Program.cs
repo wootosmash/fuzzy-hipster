@@ -20,10 +20,26 @@ namespace RWTorrent
     public static void Main(string[] args)
     {
       
+      var threadOne = new Thread(new ThreadStart(delegate {
+                                                   
+                                                   var catalog = Catalog.Catalog.Load(".");
+                                                   var torrent = new RWTorrent(catalog);
+                                                   torrent.Start();
+                                                   
+                                                 }));
+      threadOne.Start();
       
-      var catalog = Catalog.Catalog.Load(".");
-      var torrent = new RWTorrent(catalog);
-      torrent.Start();
+      var threadTwo = new Thread(new ThreadStart(delegate {
+                                                   
+                                                   string testdir = @"C:\temp\testcatalog";
+                                                   var emptyCatalog = Catalog.Catalog.Load(testdir);
+                                                   var testTorrent = new RWTorrent(emptyCatalog);
+                                                   testTorrent.Settings.Port ++;
+                                                   testTorrent.Start();
+                                                 }));
+      
+      threadTwo.Start();
+      
       
       Console.Write("Press any key to continue . . . ");
       Console.ReadKey(true);

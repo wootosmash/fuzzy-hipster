@@ -69,11 +69,19 @@ namespace RWTorrent
     
     void NetworkNewPeer( object sender, GenericEventArgs<Peer> e) {
       
+      Console.WriteLine(e.Value.ToString());
+      
       // ignore an update to my own peer record
       if ( e.Value.Guid == Me.Guid )
         return;
       
       Peers.RefreshPeer(e.Value);
+      
+      if ( Network.ActivePeers < Settings.MaxActivePeers )
+      {
+        Console.WriteLine(string.Format("New Peer, lets connect to {0}:{1}", e.Value.IPAddress, e.Value.Port));
+        Network.Connect(e.Value.IPAddress.ToString(), e.Value.Port);
+      }
     }
     
     void NetworkNewStack( object sender, GenericEventArgs<Stack> e) {
@@ -95,7 +103,7 @@ namespace RWTorrent
     
     public void Start()
     {
-      Network.StartListening();
+      Network.StartListening(Settings.Port);
     }
   }
 
