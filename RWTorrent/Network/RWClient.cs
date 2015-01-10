@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Xml.Serialization;
 using RWTorrent.Catalog;
@@ -18,6 +19,11 @@ namespace RWTorrent.Network
   public class SendBlockState
   {
     public Block Block { get; set; }
+  }
+  
+  public class SendState
+  {
+    public NetMessage Message { get; set; }
   }
   
   public class RWClient
@@ -36,6 +42,17 @@ namespace RWTorrent.Network
       Stream = Client.GetStream();
     }
     
+    public void Send( NetMessage msg )
+    {
+      var state = new SendState();
+      
+      state.Message = msg;
+      
+      byte[] buffer = msg.ToBytes();
+      
+      Stream.BeginWrite(buffer, 0, buffer.Length, EndSend, state);
+    }
+    
     public void SendBlock( Block block )
     {
       var state = new SendBlockState();
@@ -48,6 +65,11 @@ namespace RWTorrent.Network
       Client.Close();
     }
 
+    void EndSend(IAsyncResult result )  
+    {
+      Stream.EndWrite(result);
+    }
+    
     void EndSendBlock( IAsyncResult result )
     {
       Stream.EndWrite(result);

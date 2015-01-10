@@ -19,6 +19,12 @@ namespace RWTorrent
   {
     public static void Main(string[] args)
     {
+      
+      
+      var catalog = Catalog.Catalog.Load(".");
+      var torrent = new RWTorrent(catalog);
+      torrent.Start();
+      
       Console.Write("Press any key to continue . . . ");
       Console.ReadKey(true);
     }

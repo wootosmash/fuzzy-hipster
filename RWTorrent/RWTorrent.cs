@@ -8,11 +8,7 @@
  */
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Sockets;
-using System.Threading;
 using RWTorrent.Network;
-using RWTorrent.Catalog;
 
 namespace RWTorrent
 {
@@ -20,15 +16,9 @@ namespace RWTorrent
 	{
 	  public static RWTorrent Singleton { get; protected set; }
 	  
-		public RWServer Server {
-			get;
-			set;
-		}
+	  public RWServer Server { get; set; }
 
-		public List<RWClient> Clients {
-			get;
-			set;
-		}
+	  public List<RWClient> Clients { get; set; }
 	  
 	  public Catalog.Catalog Catalog { get; set; }
 
