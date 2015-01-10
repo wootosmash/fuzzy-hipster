@@ -4,6 +4,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # SharpDevelop 5.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RWTorrent", "RWTorrent\RWTorrent.csproj", "{79FC4477-ABD2-44FC-968D-EB2917CB4CBE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RWTorrent Tests", "RWTorrent Tests\RWTorrent Tests.csproj", "{96D6A248-20F9-4A28-879C-3DE82AAB15F6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,5 +16,9 @@ Global
 		{79FC4477-ABD2-44FC-968D-EB2917CB4CBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79FC4477-ABD2-44FC-968D-EB2917CB4CBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79FC4477-ABD2-44FC-968D-EB2917CB4CBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96D6A248-20F9-4A28-879C-3DE82AAB15F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96D6A248-20F9-4A28-879C-3DE82AAB15F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96D6A248-20F9-4A28-879C-3DE82AAB15F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96D6A248-20F9-4A28-879C-3DE82AAB15F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
