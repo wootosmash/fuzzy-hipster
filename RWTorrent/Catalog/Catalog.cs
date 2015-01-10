@@ -14,16 +14,7 @@ using System.Threading;
 using System.Xml.Serialization;
 namespace RWTorrent.Catalog
 {
-  public class StackCollection : List<Stack>
-  {
-    public Stack this[Guid stackGuid]
-    {
-      get 
-      {
-        return Find(x => x.Id == stackGuid );
-      }
-    }
-  }
+  
   
 	public class Catalog
 	{
@@ -37,10 +28,9 @@ namespace RWTorrent.Catalog
 			set;
 		}
 
-		public string BasePath {
-			get;
-			set;
-		}
+		public string BasePath { get; set; }
+	  
+	  public long LastUpdated { get; set; }
 
 	  [XmlIgnore()]
 		public StackCollection Stacks {
@@ -81,13 +71,11 @@ namespace RWTorrent.Catalog
 			using (var writer = new StreamWriter(Path.Combine(BasePath, @"Catalog\Catalog.xml")))
 				serialiser.Serialize(writer, this);
 			
-			var serialiserStacks = new XmlSerializer(typeof(Stack));
 			foreach (var stack in Stacks)
-				using (var writer = new StreamWriter(string.Format("{0}{1}.xml", Path.Combine(BasePath, @"Catalog\Stacks\"), stack.Id)))
-					serialiserStacks.Serialize(writer, stack);
+			  stack.Save();
 		}
 
-		public FileWad GetFileWad(string id)
+		public FileWad GetFileWad(Guid id)
 		{
 			foreach (var stack in Stacks)
 				foreach (var wad in stack.Wads)

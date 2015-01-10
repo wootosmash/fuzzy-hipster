@@ -78,7 +78,7 @@ namespace RWTorrent.Network
     
     public PeerListNetMessage()
     {
-      Type = MessageType.PeerList;
+      Type = MessageType.Peers;
     }
     
     public override string ToString()
@@ -168,7 +168,7 @@ namespace RWTorrent.Network
     PeerStatus = 3,
     
     RequestPeers = 10,
-    PeerList = 11,
+    Peers = 11,
     
     RequestStacks = 18,
     Stacks = 19,    

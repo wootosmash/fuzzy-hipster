@@ -10,6 +10,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using NUnit.Framework;
+using RWTorrent.Catalog;
 using RWTorrent.Network;
 
 namespace RWTorrent.Tests
@@ -20,31 +21,31 @@ namespace RWTorrent.Tests
     [Test]
     public void ConnectTest()
     {
-      var client = new RWClient();
-      client.Connect("localhost", RWServer.RWServerPort);
-      client.Disconnect();
+      var client = new RWNetwork();
+      client.Connect("localhost", RWNetwork.RWDefaultPort);
+//      client.Disconnect();
     }
     
     [Test]
     public void HelloMessageTest()
     {
-      var client = new RWClient();
-      client.Connect("localhost", RWServer.RWServerPort);
+      var client = new RWNetwork();
+      client.Connect("localhost", RWNetwork.RWDefaultPort);
       
       var msg = new NetMessage();
       msg.Type = MessageType.Hello;
       msg.Length = Marshal.SizeOf(msg);
       
-      client.Send( msg );
-      client.Disconnect();
+      client.Send( client.Sockets[0], msg );
+//      client.Disconnect();
       
     }
     
     [Test]
     public void PeerStatusMessageTest()
     {
-      var network = new RWServer();
-      network.Connect("localhost", RWServer.RWServerPort);
+      var network = new RWNetwork();
+      network.Connect("localhost", RWNetwork.RWDefaultPort);
       
       var peer = new Peer()
       {
@@ -57,7 +58,7 @@ namespace RWTorrent.Tests
       
       Thread.Sleep(10000);
       
-      network.SendMyStatus(network.Sockets[0]);
+      network.SendPeerList(network.Sockets[0], new Peer[]{peer});
       network.RequestPeers(network.Sockets[0], 30);
       
       Thread.Sleep(10000);
@@ -68,8 +69,13 @@ namespace RWTorrent.Tests
     [Test]
     public void WadsMessageTest()
     {
-      var network = new RWServer();
-      network.Connect("localhost", RWServer.RWServerPort);
+      var network = new RWNetwork();
+      
+      network.NewStack += delegate(object sender, GenericEventArgs<Stack> e) {
+        Console.WriteLine(e.Value);
+      };
+      
+      network.Connect("localhost", RWNetwork.RWDefaultPort);
       
       Thread.Sleep(10000);
       
