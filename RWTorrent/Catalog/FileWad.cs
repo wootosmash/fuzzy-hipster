@@ -8,49 +8,37 @@
  */
 using System;
 using System.IO;
+using System.Xml.Serialization;
 namespace RWTorrent.Catalog
 {
 	public class FileWad
 	{
-		public string Id {
-			get;
-			set;
-		}
+	  public Guid Id { get; set; }
+	  
+	  public Guid StackId { get; set; }
 
-		public string Name {
-			get;
-			set;
-		}
+	  public string Name { get; set; }
 
-		public string Description {
-			get;
-			set;
-		}
+	  public string Description { get; set; }
 
-		public long BlockSize {
-			get;
-			set;
-		}
+	  public long BlockSize { get; set; }
 
-		public int TotalBlocks {
-			get;
-			set;
-		}
+	  public int TotalBlocks { get; set; }
+	  
+	  public long TotalSize { get; set; }
+	  
+	  public long LastUpdate { get; set; }	    
 
-		public FileDescriptorCollection Files {
-			get;
-			set;
-		}
+		public FileDescriptorCollection Files { get; set; }	    
 
-		public BlockIndexItemCollection BlockIndex {
-			get;
-			set;
-		}
+		public BlockIndexItemCollection BlockIndex { get; set; }
 
 		public FileWad()
 		{
+      Id = Guid.NewGuid();		  
 			Files = new FileDescriptorCollection();
 			BlockIndex = new BlockIndexItemCollection();
+			LastUpdate = DateTime.Now.ToFileTimeUtc();
 		}
 
 		public bool VerifyBlock(Block block)
@@ -118,6 +106,20 @@ namespace RWTorrent.Catalog
 			}
 		}
 
+    public void Save()
+    {
+      string basePath = RWTorrent.Singleton.Catalog.BasePath;
+      string stackPath = Path.Combine(basePath, string.Format(@"Catalog\Stacks\{0}\", StackId));
+      
+      if ( !Directory.Exists(stackPath))
+        Directory.CreateDirectory(stackPath);
+      
+      var serialiserStacks = new XmlSerializer(typeof(FileWad));
+      using (var writer = new StreamWriter(string.Format("{0}{1}.xml", stackPath, Id)))
+        serialiserStacks.Serialize(writer, this);
+    }
+		
+		
 		private long RecursiveBuildFiles(string basePath, string path)
 		{
 			string[] files = Directory.GetFiles(path);

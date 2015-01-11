@@ -7,16 +7,13 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Net.Sockets;
-using System.Threading;
-using System.Xml.Serialization;
+
 namespace RWTorrent.Catalog
 {
 	public class Block
 	{
-		public string FileWadId {
+		public Guid FileWadId {
 			get;
 			set;
 		}
@@ -45,10 +42,13 @@ namespace RWTorrent.Catalog
 		{
 			FileWad wad = RWTorrent.Singleton.Catalog.GetFileWad(FileWadId);
 			FileDescriptor[] descriptors = wad.Files.GetDescriptorsByBlock(this);
-			foreach (var descriptor in descriptors) {
+			foreach (var descriptor in descriptors) 
+			{
 				if (!descriptor.IsAllocated)
 					descriptor.AllocateFile();
-				using (var writer = new BinaryWriter(new FileStream(descriptor.LocalFilepath, FileMode.OpenOrCreate))) {
+				
+				using (var writer = new BinaryWriter(new FileStream(descriptor.LocalFilepath, FileMode.OpenOrCreate))) 
+				{
 					long startOffset = ((long)wad.BlockSize * (long)descriptor.StartBlock) + descriptor.StartOffset;
 					writer.Seek((int)startOffset, SeekOrigin.Begin);
 					writer.Write(Data, 0, GetLengthOfBytesToWrite(descriptor));

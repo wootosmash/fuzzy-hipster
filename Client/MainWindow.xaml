@@ -2,11 +2,19 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="550" Width="725">
     <Grid>
        
             <StackPanel>
-                <ListView x:Name="StacksView" Margin="0" SelectionMode="Multiple" ItemsSource="{Binding stacks}">
+            <Menu>
+                <MenuItem Header="File" >
+                    <MenuItem x:Name="OpenStackOption" Header="Open" Click="OpenStackOption_Click"/>
+                    <MenuItem Header="Close"/>
+                 
+                    
+                </MenuItem>
+            </Menu>
+            <ListView x:Name="StacksView" Margin="0" SelectionMode="Multiple" ItemsSource="{Binding stacks}">
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Name">
@@ -30,7 +38,7 @@
                 
                 </ListView>
                 
-                
+           
             </StackPanel>
         </Grid>
 
