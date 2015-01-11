@@ -9,13 +9,16 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
+using RWTorrent.Network;
+
 namespace RWTorrent
 {
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  public class Peer
+  public class Peer 
   {
     public Guid Guid { get; set; }
     public string Name { get; set; }
@@ -24,6 +27,25 @@ namespace RWTorrent
     public long Uptime { get; set; }
     public IPAddress IPAddress { get; set; }
     public int Port { get; set; }
+    
+    public bool IsConnected { get {
+        if ( Socket == null )
+          return false;
+        return Socket.Connected;
+      }
+    }
+    
+    [XmlIgnore()]
+    [NonSerialized()]
+    Socket socket;
+    public Socket Socket {
+    get {
+      return socket;
+    }
+    set {
+      socket = value;
+    }
+  }
 
     public Peer()
     {

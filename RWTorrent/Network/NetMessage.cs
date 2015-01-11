@@ -91,7 +91,7 @@ namespace RWTorrent.Network
   [StructLayout(LayoutKind.Sequential, Pack=1)]
   public class RequestStacksNetMessage : NetMessage
   {
-    public long Recency { get; set; }    
+    public long Recency { get; set; }
     public int Count { get; set; }
 
     public RequestStacksNetMessage()
@@ -104,7 +104,7 @@ namespace RWTorrent.Network
       return string.Format("[RequestStacksNetMessage Recency={0}, Count={1}]", Recency, Count);
     }
   }
-    
+  
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack=1)]
   public class StacksNetMessage : NetMessage
@@ -118,16 +118,19 @@ namespace RWTorrent.Network
     
     public override string ToString()
     {
-      return string.Format("[StacksNetMessage Wads={0}]", Stacks);
+      if ( Stacks.Length == 0 )
+        return "[StacksNetMessage]";
+      else
+        return string.Format("[StacksNetMessage Stacks={0}]", Stacks);
     }
 
-  }  
+  }
   
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack=1)]
   public class RequestWadsNetMessage : NetMessage
   {
-    public long Recency { get; set; }    
+    public long Recency { get; set; }
     public int Count { get; set; }
     public Guid StackGuid { get; set; }
 
@@ -141,7 +144,7 @@ namespace RWTorrent.Network
       return string.Format("[RequestWadsNetMessage Recency={0}, Count={1}, StackGuid={2}]", Recency, Count, StackGuid);
     }
   }
-    
+  
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack=1)]
   public class WadsNetMessage : NetMessage
@@ -171,7 +174,7 @@ namespace RWTorrent.Network
     Peers = 11,
     
     RequestStacks = 18,
-    Stacks = 19,    
+    Stacks = 19,
     RequestWads = 20,
     Wads = 21,
     

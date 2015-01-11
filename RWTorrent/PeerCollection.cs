@@ -13,7 +13,9 @@ namespace RWTorrent
     {
       if (ContainsKey(peer.Guid))
         this[peer.Guid] = peer;
-      this.Add(peer.Guid, peer);
+      else
+        Add(peer.Guid, peer);
+      
     }
 
     public void Add(Peer peer)

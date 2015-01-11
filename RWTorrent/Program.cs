@@ -40,8 +40,6 @@ namespace RWTorrent
       
       threadTwo.Start();
       
-      
-      Console.Write("Press any key to continue . . . ");
       Console.ReadKey(true);
     }
   }

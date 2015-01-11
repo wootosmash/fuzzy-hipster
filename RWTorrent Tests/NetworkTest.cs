@@ -19,26 +19,38 @@ namespace RWTorrent.Tests
   [TestFixture]
   public class NetworkTest
   {
+    Peer localHostPeer = new Peer()
+    {
+      IPAddress = IPAddress.Parse("127.0.0.1"),
+      Port = RWNetwork.RWDefaultPort
+    };
+    
+    Peer localHostPeer2 = new Peer()
+    {
+      IPAddress = IPAddress.Parse("127.0.0.1"),
+      Port = RWNetwork.RWDefaultPort + 1
+    };
+
+    
     [Test]
     public void ConnectTest()
     {
       var client = new RWNetwork();
-      client.Connect("localhost", RWNetwork.RWDefaultPort);
-//      client.Disconnect();
+      client.Connect(localHostPeer);
     }
     
     [Test]
     public void HelloMessageTest()
     {
       var client = new RWNetwork();
-      client.Connect("localhost", RWNetwork.RWDefaultPort);
+      client.Connect(localHostPeer);
       
       var msg = new NetMessage();
       msg.Type = MessageType.Hello;
       msg.Length = Marshal.SizeOf(msg);
       
-      client.Send( client.Sockets[0], msg );
-//      client.Disconnect();
+      client.Send( localHostPeer, msg );
+      //      client.Disconnect();
       
     }
     
@@ -46,23 +58,22 @@ namespace RWTorrent.Tests
     public void PeerStatusMessageTest()
     {
       var network = new RWNetwork();
-      network.Connect("localhost", RWNetwork.RWDefaultPort);
+      network.Connect(localHostPeer2);
       
       var peer = new Peer()
       {
-        CatalogRecency = 1,
-        Guid = Guid.NewGuid(),
-        PeerCount = 1,
+        CatalogRecency = 0,
+        Guid = Guid.Empty,
+        PeerCount = 0,
         Uptime = 1234,
         Name = "AND BINGO WAS HIS NAMEO",
-        IPAddress = IPAddress.Parse("127.0.0.1"), 
-        Port = RWNetwork.RWDefaultPort+1
+        IPAddress = IPAddress.Parse("127.0.0.1"),
+        Port = RWNetwork.RWDefaultPort
       };
       
       Thread.Sleep(10000);
       
-      network.SendPeerList(network.Sockets[0], new Peer[]{peer});
-      network.RequestPeers(network.Sockets[0], 30);
+      network.SendPeerList(localHostPeer2, new Peer[]{peer});
       
       Thread.Sleep(20000);
       //network.Disconnect();
@@ -78,12 +89,11 @@ namespace RWTorrent.Tests
         Console.WriteLine(e.Value);
       };
       
-      network.Connect("localhost", RWNetwork.RWDefaultPort);
-      
+      network.Connect(localHostPeer);
       Thread.Sleep(10000);
       
-      foreach( var socket in network.Sockets )
-        network.RequestStacks( socket, 0, 10);
+      foreach( var peer in network.ActivePeers )
+        network.RequestStacks( peer, 0, 10);
       
       Thread.Sleep(10000);
       //network.Disconnect();

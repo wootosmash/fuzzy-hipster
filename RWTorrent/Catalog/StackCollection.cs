@@ -16,6 +16,7 @@ namespace RWTorrent.Catalog
 {
 	public class StackCollection : List<Stack>
 	{
+	  
 		public Stack this[Guid stackGuid] {
 			get {
 				return Find(x => x.Id == stackGuid);
