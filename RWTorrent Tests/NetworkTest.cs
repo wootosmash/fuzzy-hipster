@@ -21,13 +21,13 @@ namespace RWTorrent.Tests
   {
     Peer localHostPeer = new Peer()
     {
-      IPAddress = IPAddress.Parse("127.0.0.1"),
+      IPAddress = "127.0.0.1",
       Port = RWNetwork.RWDefaultPort
     };
     
     Peer localHostPeer2 = new Peer()
     {
-      IPAddress = IPAddress.Parse("127.0.0.1"),
+      IPAddress = "127.0.0.1",
       Port = RWNetwork.RWDefaultPort + 1
     };
 
@@ -58,26 +58,27 @@ namespace RWTorrent.Tests
     public void PeerStatusMessageTest()
     {
       var network = new RWNetwork();
-      network.Connect(localHostPeer2);
       
-      var peer = new Peer()
+      for ( int i=1;i<=10;i++)
       {
-        CatalogRecency = 0,
-        Guid = Guid.Empty,
-        PeerCount = 0,
-        Uptime = 1234,
-        Name = "AND BINGO WAS HIS NAMEO",
-        IPAddress = IPAddress.Parse("127.0.0.1"),
-        Port = RWNetwork.RWDefaultPort
-      };
-      
-      Thread.Sleep(10000);
-      
-      network.SendPeerList(localHostPeer2, new Peer[]{peer});
-      
+        network.Connect(localHostPeer);
+        
+        var peer = new Peer()
+        {
+          CatalogRecency = 0,
+          Guid = Guid.NewGuid(),
+          PeerCount = 0,
+          Uptime = 1234,
+          Name = "AND BINGO WAS HIS NAMEO",
+          IPAddress = "127.0.0.1",
+          Port = RWNetwork.RWDefaultPort + i
+        };
+        
+        network.SendPeerList(localHostPeer, new Peer[]{peer});
+        
+        //network.Disconnect();
+      }
       Thread.Sleep(20000);
-      //network.Disconnect();
-      
     }
     
     [Test]
@@ -100,6 +101,19 @@ namespace RWTorrent.Tests
       
     }
     
+    [Test]
+    public void UPnPTest()
+    {
+      try
+      {
+        Console.WriteLine(UPnP.Discover());
+        Console.WriteLine("You have an UPnP-enabled router and your IP is: "+UPnP.GetExternalIP());
+      }
+      catch
+      {
+        Console.WriteLine("You do not have an UPnP-enabled router.");
+      }
+    }
     
   }
 }

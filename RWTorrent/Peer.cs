@@ -18,16 +18,18 @@ namespace RWTorrent
 {
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  public class Peer 
+  public class Peer
   {
     public Guid Guid { get; set; }
     public string Name { get; set; }
     public int PeerCount { get; set; }
     public int CatalogRecency { get; set; }
     public long Uptime { get; set; }
-    public IPAddress IPAddress { get; set; }
+    
+    public string IPAddress { get; set; }
     public int Port { get; set; }
     
+    [XmlIgnore()]
     public bool IsConnected { get {
         if ( Socket == null )
           return false;
@@ -38,23 +40,34 @@ namespace RWTorrent
     [XmlIgnore()]
     [NonSerialized()]
     Socket socket;
+
+    [XmlIgnore()]
     public Socket Socket {
-    get {
-      return socket;
+      get {
+        return socket;
+      }
+      set {
+        socket = value;
+      }
     }
-    set {
-      socket = value;
-    }
-  }
 
     public Peer()
     {
       Guid = Guid.NewGuid();
     }
     
+    public void UpdateFromCopy( Peer peer )
+    {
+      Guid = peer.Guid;
+      Name = peer.Name;
+      PeerCount = peer.PeerCount;
+      CatalogRecency = peer.CatalogRecency;
+      Uptime = peer.Uptime;
+    }
+    
     public override string ToString()
     {
-      return string.Format("[Peer Guid={0}, Name={1}, PeerCount={2}, CatalogRecency={3}, Uptime={4}, IPAddress={5}, Port={6}]", Guid, Name, PeerCount, CatalogRecency, Uptime, IPAddress, Port);
+      return string.Format("[Peer Socket={0}, Guid={1}, Name={2}, PeerCount={3}, CatalogRecency={4}, Uptime={5}, IPAddress={6}, Port={7}]", socket, Guid, Name, PeerCount, CatalogRecency, Uptime, IPAddress, Port);
     }
   }
 }

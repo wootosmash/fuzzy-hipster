@@ -11,6 +11,7 @@ using System.IO;
 using System.Xml.Serialization;
 namespace RWTorrent.Catalog
 {
+  [Serializable()]
 	public class FileWad
 	{
 	  public Guid Id { get; set; }

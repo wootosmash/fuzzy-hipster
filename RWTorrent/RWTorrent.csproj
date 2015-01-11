@@ -72,6 +72,7 @@
     <Compile Include="Network\IPSniffer.cs" />
     <Compile Include="Network\NetMessage.cs" />
     <Compile Include="Network\RWNetwork.cs" />
+    <Compile Include="Network\UPnP.cs" />
     <Compile Include="Peer.cs" />
     <Compile Include="PeerCollection.cs" />
     <Compile Include="Program.cs" />

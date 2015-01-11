@@ -158,7 +158,10 @@ namespace RWTorrent.Network
     
     public override string ToString()
     {
-      return string.Format("[WadsNetMessage Wads={0}]", Wads);
+      if ( Wads == null || Wads.Length == 0 )
+        return "[WadsNetMessage]";
+      else
+        return string.Format("[WadsNetMessage Wads={0}]", Wads);
     }
 
   }

@@ -182,7 +182,7 @@ namespace RWTorrent.Network
       {
         Guid = Guid.Empty,
         Socket = handler,
-        IPAddress = (handler.RemoteEndPoint as IPEndPoint).Address,
+        IPAddress = (handler.RemoteEndPoint as IPEndPoint).Address.ToString(),
         Port = (handler.RemoteEndPoint as IPEndPoint).Port,
         CatalogRecency = 0,
         PeerCount = 0,
@@ -211,8 +211,6 @@ namespace RWTorrent.Network
         
         if ( bytesRead > 0 )
         {
-          Log("WaitMessage Recev");
-
           NetMessage message = NetMessage.FromBytes(state.Buffer);
           
           ProcessMessage(message, state);
@@ -296,7 +294,7 @@ namespace RWTorrent.Network
         peer.Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         state.Peer = peer;
         
-        IPEndPoint remoteEP = new IPEndPoint( peer.IPAddress, peer.Port);
+        IPEndPoint remoteEP = new IPEndPoint( IPAddress.Parse(peer.IPAddress), peer.Port);
         peer.Socket.BeginConnect( remoteEP, ConnectCallback, state);
       }
       catch (Exception)
@@ -392,7 +390,7 @@ namespace RWTorrent.Network
 
     public void Send( Peer peer, NetMessage msg )
     {
-      Log("SEND: {1} {2}", Id, peer.Socket.RemoteEndPoint, msg);
+      Log("SEND: {0} {1}", Id, msg);
       
       var state = new SendState();
       
