@@ -10,3 +10,9 @@ C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent\bin\Debug\RW
 C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent\obj\Debug\RWTorrent.csprojResolveAssemblyReference.cache
 C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent\obj\Debug\RWTorrent.exe
 C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent\obj\Debug\RWTorrent.pdb
+D:\wootcollab\fuzzy-hipster\RWTorrent\bin\Debug\RWTorrent.exe.config
+D:\wootcollab\fuzzy-hipster\RWTorrent\bin\Debug\RWTorrent.exe
+D:\wootcollab\fuzzy-hipster\RWTorrent\bin\Debug\RWTorrent.pdb
+D:\wootcollab\fuzzy-hipster\RWTorrent\obj\Debug\RWTorrent.csprojResolveAssemblyReference.cache
+D:\wootcollab\fuzzy-hipster\RWTorrent\obj\Debug\RWTorrent.exe
+D:\wootcollab\fuzzy-hipster\RWTorrent\obj\Debug\RWTorrent.pdb

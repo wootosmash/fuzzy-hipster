@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="Client.ExpanedStack"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" Width="728.825">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="359*"/>
+            <ColumnDefinition Width="370*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Margin="10" IsManipulationEnabled="True">
+            <TextBlock HorizontalAlignment="Left"  TextWrapping="Wrap" FontSize="20px" Text="asd" VerticalAlignment="Top"/>
+            <TextBlock HorizontalAlignment="Left"  TextWrapping="Wrap" FontSize="12px" Text="asd" VerticalAlignment="Top"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

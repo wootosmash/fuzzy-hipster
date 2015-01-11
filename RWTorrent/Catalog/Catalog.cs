@@ -44,7 +44,7 @@ namespace RWTorrent.Catalog
 
 		public static Catalog Load(string basePath)
 		{
-			Catalog catalog = null;
+			Catalog catalog = new Catalog();
 			catalog.BasePath = basePath;
 			var serialiser = new XmlSerializer(typeof(Catalog));
 			using (var reader = new StreamReader(Path.Combine(basePath, @"Catalog\Catalog.xml")))
