@@ -39,12 +39,14 @@ namespace RWTorrent
       Me.IPAddress = IPSniffer.GetPublicIP().ToString();
       Me.Port = Settings.Port;
       
-      Peers = new PeerCollection();
-      Peers.Add(Me);
+      Peers = PeerCollection.Load(Catalog.BasePath);
+      Peers.RefreshPeer(Me);
+      Peers.ResetConnectionAttempts();
 
       Network = new RWNetwork();
       
       Network.PeerConnected += NetworkPeerConnected;
+      Network.PeerConnectFailed += NetworkPeerConnectFailed;
       
       Network.NewPeer += NetworkNewPeer;
       //Network.NewStack += NetworkNewStack;
@@ -61,7 +63,14 @@ namespace RWTorrent
     
     void NetworkPeerConnected( object sender, GenericEventArgs<Peer> e)
     {
+      e.Value.FailedConnectionAttempts = 0;
       Network.SendMyStatus(e.Value, Me);
+    }
+    
+    void NetworkPeerConnectFailed( object sender, GenericEventArgs<Peer> e)
+    {
+      e.Value.FailedConnectionAttempts++;
+      e.Value.NextConnectionAttempt = DateTime.Now.AddSeconds(Math.Pow(Settings.ConnectAttemptWaitTime, e.Value.FailedConnectionAttempts));
     }
     
     void NetworkPeersRequested( object sender, MessageComposite<RequestPeersNetMessage> e )
@@ -123,10 +132,20 @@ namespace RWTorrent
     
     void HeartbeatElapsed(object sender, ElapsedEventArgs e)
     {
+      // talk to connected peers and see if they've got anything for us
       foreach( var peer in Network.ActivePeers )
       {
         Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
         Network.RequestStacks(peer, Catalog.LastUpdated, Settings.HeartbeatStackRequestCount);
+      }
+      
+      // see if we need some new peers
+      if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
+      {
+        foreach( var peer in Peers.Values ) // for each peer that we're not connected to 
+          if ( !peer.IsConnected ) // we're not connected
+            if ( peer.NextConnectionAttempt < DateTime.Now ) // wait is over
+              Network.Connect(peer);
       }
     }
     

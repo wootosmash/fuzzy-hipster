@@ -8,10 +8,9 @@
  */
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Sockets;
 using System.Threading;
 using RWTorrent.Catalog;
+using RWTorrent.Network;
 
 namespace RWTorrent
 {
@@ -19,22 +18,17 @@ namespace RWTorrent
   {
     public static void Main(string[] args)
     {
-      List<RWTorrent> torrents = new List<RWTorrent>();
       List<Thread> threads = new List<Thread>();
       
-      for ( int i=0;i<10;i++)
-      {
-        var catalog = Catalog.Catalog.Load(@".\Localhost" + i + @"\");
-        var torrent = new RWTorrent(catalog);
-        torrents.Add(torrent);
-        torrent.Settings.Port += i;
-        torrent.Me.Port = torrent.Settings.Port;
-        
-        threads.Add(new Thread(new ThreadStart(delegate {
-                                                 torrent.Start();
-                                               })));
-        threads[i].Start();
-      }
+      string port = args.Length > 0 ? args[0] : RWNetwork.RWDefaultPort.ToString();
+      
+      var catalog = Catalog.Catalog.Load(string.Format(@".\Localhost-{0}\", port));
+      var torrent = new RWTorrent(catalog);
+      
+      threads.Add(new Thread(new ThreadStart(delegate {
+                                               torrent.Start();
+                                             })));
+      threads[0].Start();
       
       ConsoleKeyInfo key = Console.ReadKey(true);
       while ( key.Key != ConsoleKey.Q )
@@ -48,12 +42,10 @@ namespace RWTorrent
         
         if ( key.Key == ConsoleKey.P )
         {
-          foreach( RWTorrent t in torrents )
-          {
-            Console.WriteLine("Peers " + t.Me.Guid);
-            foreach( Peer p in t.Peers.Values )
-              Console.WriteLine(p);
-          }
+          
+          Console.WriteLine("Peers " + torrent.Me.Guid);
+          foreach( Peer p in torrent.Peers.Values )
+            Console.WriteLine(p);
         }
         
       }

@@ -16,6 +16,11 @@ namespace RWTorrent
 	public class Settings
 	{
 	  public int MaxActivePeers { get; set; }
+	  
+	  /// <summary>
+	  /// Amount of seconds to wait between connect attempts to the same peer. Will be used in exponential backoff.
+	  /// </summary>
+	  public int ConnectAttemptWaitTime { get; set; }
 		public int HeartbeatPeerRequestCount {get; set; }
 		public int HeartbeatStackRequestCount {get; set; }
 		public int HeartbeatInterval {get; set; }
@@ -28,6 +33,7 @@ namespace RWTorrent
 			HeartbeatStackRequestCount = 3;
 			HeartbeatInterval = 60000;
 			Port = RWNetwork.RWDefaultPort;
+			ConnectAttemptWaitTime = 60;
 		}
 		
 		public static Settings Load(string path)

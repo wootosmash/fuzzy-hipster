@@ -40,27 +40,50 @@ namespace RWTorrent
       Add(peer.Guid, peer);
     }
     
+    public static PeerCollection Load( string basePath )
+    {
+      var col = new PeerCollection();
+      string peersPath = Path.Combine(basePath, @"Catalog\");
+
+      if ( !Directory.Exists(peersPath))
+        Directory.CreateDirectory(peersPath);
+
+      if ( File.Exists(peersPath + "Peers.xml"))
+      {
+        var serialiser = new XmlSerializer(typeof(List<Peer>));
+        using (var reader = new StreamReader(peersPath + "Peers.xml"))
+        {
+          var list = serialiser.Deserialize(reader) as List<Peer>;
+          foreach( var peer in list )
+            col.Add(peer);
+        }
+      }
+
+      return col;
+    }
+    
     public void Save()
     {
-      lock(this)
-      {
-        string basePath = RWTorrent.Singleton.Catalog.BasePath;
-        string peersPath = Path.Combine(basePath, @"Catalog\");
-        
-        if ( !Directory.Exists(peersPath))
-          Directory.CreateDirectory(peersPath);
-        
-        var list = new List<Peer>();
-        
-        foreach( var peer in Values )
-          list.Add(peer);
-        
-        Console.WriteLine(peersPath + "Peers.xml");
-        
-        var serialiserStacks = new XmlSerializer(typeof(List<Peer>));
-        using (var writer = new StreamWriter(peersPath + "Peers.xml"))
-          serialiserStacks.Serialize(writer, list);
-      }
+      string basePath = RWTorrent.Singleton.Catalog.BasePath;
+      string peersPath = Path.Combine(basePath, @"Catalog\");
+      
+      if ( !Directory.Exists(peersPath))
+        Directory.CreateDirectory(peersPath);
+      
+      var list = new List<Peer>();
+      
+      foreach( var peer in Values )
+        list.Add(peer);
+      
+      var serialiser = new XmlSerializer(typeof(List<Peer>));
+      using (var writer = new StreamWriter(peersPath + "Peers.xml"))
+        serialiser.Serialize(writer, list);
+    }
+    
+    public void ResetConnectionAttempts()
+    {
+      foreach( var peer in Values )
+        peer.ResetConnectionAttempts();
     }
     
   }

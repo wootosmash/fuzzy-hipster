@@ -7,12 +7,9 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
-using System.IO;
-using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
-using RWTorrent.Network;
 
 namespace RWTorrent
 {
@@ -25,6 +22,9 @@ namespace RWTorrent
     public int PeerCount { get; set; }
     public int CatalogRecency { get; set; }
     public long Uptime { get; set; }
+
+    public DateTime NextConnectionAttempt { get; set; }
+    public int FailedConnectionAttempts { get; set; }
     
     public string IPAddress { get; set; }
     public int Port { get; set; }
@@ -54,6 +54,8 @@ namespace RWTorrent
     public Peer()
     {
       Guid = Guid.NewGuid();
+      NextConnectionAttempt = DateTime.MinValue;
+      FailedConnectionAttempts = 0;
     }
     
     public void UpdateFromCopy( Peer peer )
@@ -62,7 +64,16 @@ namespace RWTorrent
       Name = peer.Name;
       PeerCount = peer.PeerCount;
       CatalogRecency = peer.CatalogRecency;
-      Uptime = peer.Uptime;
+      Uptime = peer.Uptime;      
+    }
+    
+    /// <summary>
+    /// Tells the program to attempt to connect to this peer as soon as its ready
+    /// </summary>
+    public void ResetConnectionAttempts()
+    {
+      NextConnectionAttempt = DateTime.MinValue;
+      FailedConnectionAttempts = 0;
     }
     
     public override string ToString()
