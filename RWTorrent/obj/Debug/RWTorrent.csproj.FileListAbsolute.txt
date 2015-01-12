@@ -1,15 +1,3 @@
-C:\Users\Al\Documents\SharpDevelop Projects\RWTorrent\RWTorrent\obj\Debug\RWTorrent.csprojResolveAssemblyReference.cache
-C:\Users\Al\Documents\SharpDevelop Projects\RWTorrent\RWTorrent\bin\Debug\RWTorrent.exe.config
-C:\Users\Al\Documents\SharpDevelop Projects\RWTorrent\RWTorrent\bin\Debug\RWTorrent.exe
-C:\Users\Al\Documents\SharpDevelop Projects\RWTorrent\RWTorrent\bin\Debug\RWTorrent.pdb
-C:\Users\Al\Documents\SharpDevelop Projects\RWTorrent\RWTorrent\obj\Debug\RWTorrent.exe
-C:\Users\Al\Documents\SharpDevelop Projects\RWTorrent\RWTorrent\obj\Debug\RWTorrent.pdb
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent\bin\Debug\RWTorrent.exe.config
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent\bin\Debug\RWTorrent.exe
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent\bin\Debug\RWTorrent.pdb
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent\obj\Debug\RWTorrent.csprojResolveAssemblyReference.cache
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent\obj\Debug\RWTorrent.exe
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent\obj\Debug\RWTorrent.pdb
 D:\wootcollab\fuzzy-hipster\RWTorrent\bin\Debug\RWTorrent.exe.config
 D:\wootcollab\fuzzy-hipster\RWTorrent\bin\Debug\RWTorrent.exe
 D:\wootcollab\fuzzy-hipster\RWTorrent\bin\Debug\RWTorrent.pdb

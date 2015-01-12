@@ -16,13 +16,19 @@ using System.Windows.Shapes;
 namespace Client
 {
     /// <summary>
-    /// Interaction logic for ExpanedStack.xaml
+    /// Interaction logic for MyListView.xaml
     /// </summary>
-    public partial class ExpanedStack : UserControl
+    public partial class MyListView : UserControl
     {
-        public ExpanedStack()
+        public MyListView()
         {
             InitializeComponent();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            MyListViewModel svm = (MyListViewModel)MainWindowModel.CurrentView();
+            svm.Description = "ASdddddddddddddddd";
         }
     }
 }

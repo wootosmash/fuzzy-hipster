@@ -11,7 +11,6 @@ D:\wootcollab\fuzzy-hipster\RWTorrent Tests\bin\Debug\RWTorrent Tests.dll
 D:\wootcollab\fuzzy-hipster\RWTorrent Tests\bin\Debug\RWTorrent Tests.pdb
 D:\wootcollab\fuzzy-hipster\RWTorrent Tests\bin\Debug\RWTorrent.exe
 D:\wootcollab\fuzzy-hipster\RWTorrent Tests\bin\Debug\RWTorrent.pdb
-D:\wootcollab\fuzzy-hipster\RWTorrent Tests\bin\Debug\nunit.framework.xml
 D:\wootcollab\fuzzy-hipster\RWTorrent Tests\obj\Debug\RWTorrent Tests.csprojResolveAssemblyReference.cache
 D:\wootcollab\fuzzy-hipster\RWTorrent Tests\obj\Debug\RWTorrent Tests.dll
 D:\wootcollab\fuzzy-hipster\RWTorrent Tests\obj\Debug\RWTorrent Tests.pdb

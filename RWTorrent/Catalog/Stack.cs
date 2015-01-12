@@ -98,8 +98,9 @@ namespace RWTorrent.Catalog
       using (var writer = new StreamWriter(string.Format("{0}Index.xml", stackPath)))
         serialiserStacks.Serialize(writer, this);
       
-      foreach( var wad in Wads)
-        wad.Save();
+      if ( Wads != null )
+        foreach( var wad in Wads)
+          wad.Save();
     }
     
 

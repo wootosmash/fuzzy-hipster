@@ -32,9 +32,10 @@ namespace Client
         {
 
             settings = new UserSettings();
+            //settings.Keys 
 
             var catalog = Catalog.Load(@".");
-            _stacks = new ObservableCollection<Stack>(catalog.Stacks);
+            //_stacks = new ObservableCollection<Stack>(catalog.Stacks);
             InitializeComponent();
         }
 

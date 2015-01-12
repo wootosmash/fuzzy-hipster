@@ -10,16 +10,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace Client
 {
     /// <summary>
-    /// Interaction logic for LoadWindow.xaml
+    /// Interaction logic for CatalogView.xaml
     /// </summary>
-    public partial class LoadWindow : Window
+    public partial class CatalogView : UserControl
     {
-        public LoadWindow()
+        public CatalogView()
         {
             InitializeComponent();
         }

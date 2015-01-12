@@ -15,7 +15,10 @@ namespace Client
         {
             get
             {
-                
+                if (this["Keys"] == null){
+                    this["Keys"] = new List<KeyValuePair<string, string>>();
+                }
+
                 return ((List<KeyValuePair<string, string>>)this["Keys"]);
             }
             set

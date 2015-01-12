@@ -13,21 +13,19 @@ using RWTorrent.Catalog;
 namespace RWTorrent.Network
 {
   // State object for reading client data asynchronously
-  public class ReceiveStateObject {
+  public class ReceiveStateObject
+  {
+    public const int BufferSize = 2048;
 
-    public Socket WorkSocket = null;
+    public Peer Peer = null;
 
-    public const int BufferSize = 1024;
-
-    public byte[] buffer = new byte[BufferSize];
-
-    public StringBuilder sb = new StringBuilder();
+    public byte[] Buffer = new byte[BufferSize];
   }
   
   public class SendState
   {
     public NetMessage Message;
-    public Socket Socket;
+    public Peer Peer;
   }
   
   public class GenericEventArgs<T> : EventArgs
@@ -40,23 +38,49 @@ namespace RWTorrent.Network
     }
   }
 
-  
+  public class MessageComposite<T> : EventArgs
+  {
+    public Peer Peer { get; set; }
+    public T Value { get; set; }
+    
+    public MessageComposite( Peer peer, T value )
+    {
+      Peer = peer;
+      Value = value;
+    }
+  }
   
   public class RWNetwork
   {
     public const int RWDefaultPort = 7892;
     
-    public List<Socket> Sockets { get; set; }
+    public List<Peer> ActivePeers { get; set; }
     public IPEndPoint LocalEndPoint { get; set; }
     public Socket Listener { get; set; }
-    public int ActivePeers { get { return Sockets.Count; }}
+    public Guid Id { get; set; }
     
     Random random = new Random(DateTime.Now.Millisecond);
     ManualResetEvent allDone = new ManualResetEvent(false);
     
     #region events
+    
+    public event EventHandler<GenericEventArgs<Peer>> PeerDisconnected;
+    protected virtual void OnPeerDisconnected(GenericEventArgs<Peer> e)
+    {
+      var handler = PeerDisconnected;
+      if (handler != null)
+        handler(this, e);
+    }
+    
+    public event EventHandler<GenericEventArgs<Peer>> PeerConnected;
+    protected virtual void OnPeerConnected(GenericEventArgs<Peer> e)
+    {
+      var handler = PeerConnected;
+      if (handler != null)
+        handler(this, e);
+    }
+    
     public event EventHandler<GenericEventArgs<Stack>> NewStack;
-
     protected virtual void OnNewStack(GenericEventArgs<Stack> e)
     {
       var handler = NewStack;
@@ -65,7 +89,6 @@ namespace RWTorrent.Network
     }
 
     public event EventHandler<GenericEventArgs<FileWad>> NewWad;
-
     protected virtual void OnNewWad(GenericEventArgs<FileWad> e)
     {
       var handler = NewWad;
@@ -74,7 +97,6 @@ namespace RWTorrent.Network
     }
 
     public event EventHandler<GenericEventArgs<Peer>> NewPeer;
-
     protected virtual void OnNewPeer(GenericEventArgs<Peer> e)
     {
       var handler = NewPeer;
@@ -82,29 +104,26 @@ namespace RWTorrent.Network
         handler(this, e);
     }
 
-
-    
-    public event EventHandler<GenericEventArgs<RequestPeersNetMessage>> PeersRequested;
-
-    protected virtual void OnPeersRequested(GenericEventArgs<RequestPeersNetMessage> e)
+    public event EventHandler<MessageComposite<RequestPeersNetMessage>> PeersRequested;
+    protected virtual void OnPeersRequested(MessageComposite<RequestPeersNetMessage> e)
     {
       var handler = PeersRequested;
       if (handler != null)
         handler(this, e);
     }
 
-    public event EventHandler<GenericEventArgs<RequestStacksNetMessage>> StacksRequested;
+    public event EventHandler<MessageComposite<RequestStacksNetMessage>> StacksRequested;
 
-    protected virtual void OnStacksRequested(GenericEventArgs<RequestStacksNetMessage> e)
+    protected virtual void OnStacksRequested(MessageComposite<RequestStacksNetMessage> e)
     {
       var handler = StacksRequested;
       if (handler != null)
         handler(this, e);
     }
 
-    public event EventHandler<GenericEventArgs<RequestWadsNetMessage>> WadsRequested;
+    public event EventHandler<MessageComposite<RequestWadsNetMessage>> WadsRequested;
 
-    protected virtual void OnWadsRequested(GenericEventArgs<RequestWadsNetMessage> e)
+    protected virtual void OnWadsRequested(MessageComposite<RequestWadsNetMessage> e)
     {
       var handler = WadsRequested;
       if (handler != null)
@@ -115,7 +134,8 @@ namespace RWTorrent.Network
     
     public RWNetwork()
     {
-      Sockets = new List<Socket>();
+      ActivePeers = new List<Peer>();
+      Id = Guid.NewGuid();
     }
 
     public void StartListening( int port )
@@ -146,7 +166,7 @@ namespace RWTorrent.Network
 
       } catch (Exception e) {
         Console.WriteLine(e.ToString());
-      }      
+      }
     }
 
     void AcceptCallback(IAsyncResult ar)
@@ -158,47 +178,61 @@ namespace RWTorrent.Network
       Socket listener = ar.AsyncState as Socket;
       Socket handler = listener.EndAccept(ar);
       
-      Sockets.Add(handler);
+      var peer = new Peer()
+      {
+        Guid = Guid.Empty,
+        Socket = handler,
+        IPAddress = (handler.RemoteEndPoint as IPEndPoint).Address,
+        Port = (handler.RemoteEndPoint as IPEndPoint).Port,
+        CatalogRecency = 0,
+        PeerCount = 0,
+        Name = "",
+        Uptime = 0
+      };
       
-      Console.WriteLine("WE GOT ONE...");
-
+      ActivePeers.Add(peer);
+      
       // Create the state object.
       var state = new ReceiveStateObject();
-      state.WorkSocket = handler;
-      handler.BeginReceive( state.buffer, 0, state.buffer.Length, 0,
+      state.Peer = peer;
+      handler.BeginReceive( state.Buffer, 0, state.Buffer.Length, 0,
                            new AsyncCallback(WaitMessageCallback), state);
     }
 
     void WaitMessageCallback(IAsyncResult ar)
     {
+      var state =  ar.AsyncState as ReceiveStateObject;
+      Peer peer = state.Peer;
+      
       try
       {
-        var state =  ar.AsyncState as ReceiveStateObject;
-        Socket handler = state.WorkSocket;
 
-        int bytesRead = handler.EndReceive(ar);
+        int bytesRead = peer.Socket.EndReceive(ar);
         
         if ( bytesRead > 0 )
         {
-          Console.WriteLine("WaitMessage Recev");
+          Log("WaitMessage Recev");
 
-          NetMessage message = NetMessage.FromBytes(state.buffer);
+          NetMessage message = NetMessage.FromBytes(state.Buffer);
           
           ProcessMessage(message, state);
         }
 
-        handler.BeginReceive( state.buffer, 0, state.buffer.Length, 0,
-                             new AsyncCallback(WaitMessageCallback), state);
+        peer.Socket.BeginReceive( state.Buffer, 0, state.Buffer.Length, 0,
+                                 new AsyncCallback(WaitMessageCallback), state);
       }
       catch( Exception ex )
       {
+        ActivePeers.Remove(peer);
+        peer.Socket.Dispose();
+        
         Console.WriteLine(ex);
       }
     }
     
     void ProcessMessage(NetMessage msg, ReceiveStateObject state)
     {
-      Console.WriteLine("MSG: {0}", msg);
+      Log("RECV: {1}", Id, msg);
       
       switch( msg.Type )
       {
@@ -207,24 +241,34 @@ namespace RWTorrent.Network
           
         case MessageType.RequestPeers:
           var request = msg as RequestPeersNetMessage;
-          OnPeersRequested(new GenericEventArgs<RequestPeersNetMessage>(request));
+          OnPeersRequested(new MessageComposite<RequestPeersNetMessage>(state.Peer, request));
           break;
           
         case MessageType.RequestStacks:
           var stacks = msg as RequestStacksNetMessage;
-          OnStacksRequested(new GenericEventArgs<RequestStacksNetMessage>(stacks));
+          OnStacksRequested(new MessageComposite<RequestStacksNetMessage>(state.Peer, stacks));
           break;
           
         case MessageType.RequestWads:
           var wads = msg as RequestWadsNetMessage;
-          OnWadsRequested(new GenericEventArgs<RequestWadsNetMessage>(wads));
+          OnWadsRequested(new MessageComposite<RequestWadsNetMessage>(state.Peer, wads));
           break;
           
         case MessageType.PeerStatus:
-        case MessageType.Peers:
           var status = msg as PeerListNetMessage;
           
-          foreach( var peer in status.Peers )
+          state.Peer.CatalogRecency = status.Peers[0].CatalogRecency;
+          state.Peer.Guid = status.Peers[0].Guid;
+          state.Peer.Name = status.Peers[0].Name;
+          state.Peer.PeerCount = status.Peers[0].PeerCount;
+          state.Peer.Uptime = status.Peers[0].Uptime;
+          
+          break;
+          
+        case MessageType.Peers:
+          var peerList = msg as PeerListNetMessage;
+          
+          foreach( var peer in peerList.Peers )
             OnNewPeer(new GenericEventArgs<Peer>(peer));
           break;
           
@@ -244,89 +288,126 @@ namespace RWTorrent.Network
       }
     }
     
-    public void Connect( string hostname, int port )
+    public void Connect( Peer peer )
     {
-      var state = new ReceiveStateObject();
-      Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-      state.WorkSocket = socket;
-      
-      IPHostEntry ipHostInfo = Dns.Resolve(hostname);
-      IPAddress ipAddress = ipHostInfo.AddressList[0];
-      IPEndPoint remoteEP = new IPEndPoint( ipAddress, port);
-      socket.BeginConnect( remoteEP, ConnectCallback, state);
+      try {
+        Log(string.Format("CONNECT: {0}", peer));
+        var state = new ReceiveStateObject();
+        peer.Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        state.Peer = peer;
+        
+        IPEndPoint remoteEP = new IPEndPoint( peer.IPAddress, peer.Port);
+        peer.Socket.BeginConnect( remoteEP, ConnectCallback, state);
+      }
+      catch (Exception)
+      {
+        Log("CONNECT FAILED: {0}", peer);
+        peer.Socket.Dispose();
+        peer.Socket = null;
+      }
     }
     
     void ConnectCallback( IAsyncResult result )
     {
       var connectState = result.AsyncState  as ReceiveStateObject;
-      connectState.WorkSocket.EndConnect(result);
-      Sockets.Add(connectState.WorkSocket);
-      
-      // Create the state object.
-      var recvState = new ReceiveStateObject();
-      recvState.WorkSocket = connectState.WorkSocket;
-      recvState.WorkSocket.BeginReceive( recvState.buffer, 0, recvState.buffer.Length, 0,
-                           new AsyncCallback(WaitMessageCallback), recvState);
-      
+
+      try
+      {
+        connectState.Peer.Socket.EndConnect(result);
+        ActivePeers.Add(connectState.Peer);
+        
+        OnPeerConnected(new GenericEventArgs<Peer>(connectState.Peer));
+        
+        // Create the state object.
+        var recvState = new ReceiveStateObject();
+        recvState.Peer = connectState.Peer;
+        recvState.Peer.Socket.BeginReceive( recvState.Buffer, 0, recvState.Buffer.Length, 0,
+                                           new AsyncCallback(WaitMessageCallback), recvState);
+      }
+      catch( Exception ex )
+      {
+        Log("CONNECT FAILED: {0}", connectState.Peer);
+        connectState.Peer.Socket.Dispose();
+        connectState.Peer.Socket = null;
+        ActivePeers.Remove(connectState.Peer);
+        
+      }
     }
     
-    public void RequestStacks( Socket workSocket, long recency, int count )
+    public void RequestStacks( Peer peer, long recency, int count )
     {
       var msg = new RequestStacksNetMessage();
       msg.Recency = recency;
       msg.Count = count;
-      Send(workSocket, msg);
+      Send(peer, msg);
     }
 
     
-    public void RequestWads(Socket workSocket, long recency, int count, Guid stackGuid )
+    public void RequestWads(Peer peer,  long recency, int count, Guid stackGuid )
     {
       var msg = new RequestWadsNetMessage();
       msg.Recency = recency;
       msg.Count = count;
       msg.StackGuid = stackGuid;
-      Send(workSocket, msg);
+      Send(peer, msg);
     }
     
-    public void RequestPeers( Socket workSocket, int count )
+    public void RequestPeers( Peer peer,  int count )
     {
       var msg = new RequestPeersNetMessage();
       msg.Count = count;
-      Send( workSocket, msg);
+      Send( peer, msg);
     }
     
-        
-    public void SendPeerList(Socket workSocket, Peer[] peers )
+    
+    public void SendPeerList(Peer peer, Peer[] peers )
     {
       var msg = new PeerListNetMessage();
       msg.Peers = peers;
-      Send(workSocket, msg);
+      Send(peer, msg);
     }
+
+    public void SendMyStatus(Peer peer, Peer me )
+    {
+      var msg = new PeerListNetMessage();
+      msg.Type = MessageType.PeerStatus;
+      msg.Peers = new []{me};
+      Send(peer, msg);
+    }
+
     
-    public void SendStacks( Socket workSocket, Stack[] stacks )
+    public void SendStacks( Peer peer, Stack[] stacks )
     {
       var msg = new StacksNetMessage();
       msg.Stacks = stacks;
-      Send(workSocket, msg);
+      Send(peer, msg);
     }
     
-    public void SendWads( Socket workSocket, FileWad[] wads )
+    public void SendWads( Peer peer, FileWad[] wads )
     {
       var msg = new WadsNetMessage();
       msg.Wads = wads;
-      Send(workSocket, msg);
+      Send(peer, msg);
     }
 
-    public void Send( Socket workSocket, NetMessage msg )
+    public void Send( Peer peer, NetMessage msg )
     {
+      Log("SEND: {1} {2}", Id, peer.Socket.RemoteEndPoint, msg);
+      
       var state = new SendState();
       
       state.Message = msg;
-      state.Socket = workSocket;
+      state.Peer = peer;
       
       byte[] buffer = msg.ToBytes();
       
-      workSocket.BeginSend(buffer, 0, buffer.Length, 0, EndSendCallback, state);
+      peer.Socket.BeginSend(buffer, 0, buffer.Length, 0, EndSendCallback, state);
+    }
+    
+    void Log( string format, params object [] args )
+    {
+      string str = string.Format(format, args );
+      Console.WriteLine("{0} {1}", Id, str);
     }
 
     void EndSendCallback(IAsyncResult ar)
@@ -335,8 +416,8 @@ namespace RWTorrent.Network
       {
         var state = ar.AsyncState as SendState;
         
-        int bytesSent = state.Socket.EndSend(ar);
-        Console.WriteLine("Sent {0} bytes to client.", bytesSent);
+        int bytesSent = state.Peer.Socket.EndSend(ar);
+        Log("SEND: Sent {1} bytes to client.", Id, bytesSent);
       }
       catch (Exception e)
       {

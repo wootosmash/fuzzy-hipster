@@ -12,6 +12,7 @@ using System.Timers;
 using RWTorrent.Catalog;
 using RWTorrent.Network;
 
+
 namespace RWTorrent
 {
   
@@ -25,16 +26,25 @@ namespace RWTorrent
     public Settings Settings { get; set; }
     public Peer Me { get; set; }
     public PeerCollection Peers { get; set; }
+    public bool IsConnectedToGrid { get { return Network.ActivePeers.Count > 0; } }
 
     Timer HeartbeatTimer = new Timer();
     
     public RWTorrent( Catalog.Catalog catalog )
     {
+      Settings = Settings.Load("settings.xml");
+
       Me = new Peer();
+      
+      Me.IPAddress = IPSniffer.GetPublicIP();
+      Me.Port = Settings.Port;
+      
       Peers = new PeerCollection();
       Peers.Add(Me);
-      Settings = Settings.Load("settings.xml");
+
       Network = new RWNetwork();
+      
+      Network.PeerConnected += NetworkPeerConnected;
       
       Network.NewPeer += NetworkNewPeer;
       Network.NewStack += NetworkNewStack;
@@ -51,53 +61,71 @@ namespace RWTorrent
       HeartbeatTimer.Start();
     }
     
-    void NetworkPeersRequested( object sender, GenericEventArgs<RequestPeersNetMessage> e )
+    void NetworkPeerConnected( object sender, GenericEventArgs<Peer> e)
     {
+      Network.SendMyStatus(e.Value, Me);
+    }
+    
+    void NetworkPeersRequested( object sender, MessageComposite<RequestPeersNetMessage> e )
+    {
+      var peers = new List<Peer>();
       
+      foreach( var peer in Peers.Values )
+        peers.Add(peer);
+      
+      Network.SendPeerList(e.Peer, peers.ToArray());
     }
 
-    void NetworkStacksRequested( object sender, GenericEventArgs<RequestStacksNetMessage> e )
+    void NetworkStacksRequested( object sender, MessageComposite<RequestStacksNetMessage> e )
     {
-      
+      Network.SendStacks(e.Peer, Catalog.Stacks.ToArray());
     }
 
-    void NetworkWadsRequested( object sender, GenericEventArgs<RequestWadsNetMessage> e )
+    void NetworkWadsRequested( object sender, MessageComposite<RequestWadsNetMessage> e )
     {
+      if ( Catalog.Stacks[e.Value.StackGuid] == null )
+        return;
       
+      Network.SendWads( e.Peer, Catalog.Stacks[e.Value.StackGuid].Wads.ToArray());
     }
 
     
-    void NetworkNewPeer( object sender, GenericEventArgs<Peer> e) {
-      
-      Console.WriteLine(e.Value.ToString());
-      
+    void NetworkNewPeer( object sender, GenericEventArgs<Peer> e)
+    {
       // ignore an update to my own peer record
       if ( e.Value.Guid == Me.Guid )
         return;
       
       Peers.RefreshPeer(e.Value);
       
-      if ( Network.ActivePeers < Settings.MaxActivePeers )
+      if ( e.Value.IPAddress != null && e.Value.Port > 0 )
       {
-        Console.WriteLine(string.Format("New Peer, lets connect to {0}:{1}", e.Value.IPAddress, e.Value.Port));
-        Network.Connect(e.Value.IPAddress.ToString(), e.Value.Port);
+        if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
+        {
+          Network.Connect(e.Value);
+        }
       }
     }
     
-    void NetworkNewStack( object sender, GenericEventArgs<Stack> e) {
+    void NetworkNewStack( object sender, GenericEventArgs<Stack> e)
+    {
       Catalog.Stacks.RefreshStack(e.Value);
+      
+      foreach( Peer peer in Network.ActivePeers )
+        Network.RequestWads( peer, 0, 30, e.Value.Id);
     }
     
-    void NetworkNewWad( object sender, GenericEventArgs<FileWad> e){
+    void NetworkNewWad( object sender, GenericEventArgs<FileWad> e)
+    {
       Catalog.Stacks[e.Value.StackId].RefreshWad(e.Value);
     }
     
     void HeartbeatElapsed(object sender, ElapsedEventArgs e)
     {
-      foreach( var socket in Network.Sockets )
+      foreach( var peer in Network.ActivePeers )
       {
-        Network.RequestPeers(socket, Settings.HeartbeatPeerRequestCount);
-        Network.RequestStacks(socket, Catalog.LastUpdated, Settings.HeartbeatStackRequestCount);
+        Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
+        Network.RequestStacks(peer, Catalog.LastUpdated, Settings.HeartbeatStackRequestCount);
       }
     }
     
