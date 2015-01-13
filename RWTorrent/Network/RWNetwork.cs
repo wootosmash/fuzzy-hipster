@@ -241,7 +241,7 @@ namespace RWTorrent.Network
     
     void ProcessMessage(NetMessage msg, ReceiveStateObject state)
     {
-      Log("RECV: {1}", Id, msg);
+      Log("RECV: {0}", msg);
       
       switch( msg.Type )
       {
@@ -446,7 +446,7 @@ namespace RWTorrent.Network
         var state = ar.AsyncState as SendState;
         
         int bytesSent = state.Peer.Socket.EndSend(ar);
-        Log("SEND: Sent {1} bytes to client.", Id, bytesSent);
+        Log("SEND: Sent {0} bytes to client.", bytesSent);
       }
       catch (Exception e)
       {

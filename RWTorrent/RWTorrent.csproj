@@ -69,6 +69,7 @@
     <Compile Include="Catalog\FileWad.cs" />
     <Compile Include="Catalog\Stack.cs" />
     <Compile Include="Catalog\StackCollection.cs" />
+    <Compile Include="Crypto\Key.cs" />
     <Compile Include="Network\IPSniffer.cs" />
     <Compile Include="Network\NetMessage.cs" />
     <Compile Include="Network\RWNetwork.cs" />
@@ -86,6 +87,7 @@
   <ItemGroup>
     <Folder Include="Catalog" />
     <Folder Include="Network" />
+    <Folder Include="Crypto" />
     <Folder Include="UI" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
