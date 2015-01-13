@@ -64,8 +64,18 @@ namespace RWTorrent.Catalog
 
         var serialiserStacks = new XmlSerializer(typeof(Stack));
         foreach (string dir in Directory.GetDirectories(Path.Combine(basePath, @"Catalog\Stacks")))
+        {
+          Stack stack = null;
           using (var reader = new StreamReader(string.Format(@"{0}\Index.xml", dir)))
-            catalog.Stacks.Add((Stack)serialiserStacks.Deserialize(reader));
+          {
+            stack = (Stack)serialiserStacks.Deserialize(reader);
+            catalog.Stacks.Add(stack);
+          }
+          
+          foreach( string file in Directory.GetFiles(Path.Combine(basePath, string.Format(@"Catalog\Stacks\{0}\",stack.Id))))
+            if ( !file.EndsWith("Index.xml"))
+              stack.Wads.Add(FileWad.Load(file));
+        }
       }
       
       return catalog;

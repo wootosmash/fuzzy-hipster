@@ -119,7 +119,16 @@ namespace RWTorrent.Catalog
       using (var writer = new StreamWriter(string.Format("{0}{1}.xml", stackPath, Id)))
         serialiserStacks.Serialize(writer, this);
     }
-		
+    
+    public static FileWad Load( string filePath )
+    {     
+      if ( !File.Exists(filePath))
+        return null;
+      
+      var serialiser = new XmlSerializer(typeof(FileWad));
+      using (var reader = new StreamReader(filePath))
+        return serialiser.Deserialize(reader) as FileWad;      
+    }
 		
 		private long RecursiveBuildFiles(string basePath, string path)
 		{
