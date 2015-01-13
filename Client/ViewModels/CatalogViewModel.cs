@@ -19,22 +19,33 @@ namespace Client
 
         }
 
-
+        private List<FileWad> _wads = null;
         public List<FileWad> Wads
         {
             get 
-            {
+            {   
+                if(_wads != null){
+                    return _wads;
+                }
                 StackCollection Stacks = RWTorrent.RWTorrent.Singleton.Catalog.Stacks;
-                List<FileWad> Wads = new List<FileWad>();
+                _wads = new List<FileWad>();
 
                 foreach (Stack s in Stacks)
                 {
-                    Wads.AddRange(s.Wads);
+                    _wads.AddRange(s.Wads);
                 }
 
-                return Wads; 
+                return _wads; 
             }
                          
+        }
+
+        public int WadCount
+        {
+            get
+            {
+                return Wads.Count;
+            }
         }
 
 

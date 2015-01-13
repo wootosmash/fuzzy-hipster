@@ -30,5 +30,10 @@
                 </GridView>
             </ListView.View>
         </ListView>
+        <StatusBar DockPanel.Dock="Bottom" Height="20px" VerticalContentAlignment="Bottom" VerticalAlignment="Bottom">
+            <StatusBarItem>
+                <TextBlock Text="{Binding WadCount}" ></TextBlock>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </UserControl>
