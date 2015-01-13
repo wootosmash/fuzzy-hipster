@@ -16,24 +16,18 @@ using System.Windows.Shapes;
 namespace Client
 {
     /// <summary>
-    /// Interaction logic for MyListView.xaml
+    /// Interaction logic for NewChannelView.xaml
     /// </summary>
-    public partial class MyListView : UserControl
+    public partial class NewChannelView : UserControl
     {
-        public MyListView()
+        public NewChannelView()
         {
             InitializeComponent();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            MyListViewModel svm = (MyListViewModel)MainWindowModel.CurrentView();
-            svm.Description = "ASdddddddddddddddd";
-        }
-
         private void CreateChannel_Click(object sender, RoutedEventArgs e)
         {
-            MainWindowModel.ChangeModel(new NewChannelViewModel());
+            //NewChannelViewModel.SaveNewChannel(ChannelName.Text)
         }
     }
 }

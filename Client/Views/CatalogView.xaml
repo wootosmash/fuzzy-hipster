@@ -20,13 +20,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="Description" Width="auto" DisplayMemberBinding="{Binding Description}" />
-                    <!--<GridViewColumn Header="Size" Width="auto">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Mail}" TextDecorations="Underline" Foreground="Blue" Cursor="Hand" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>-->
+                
                 </GridView>
             </ListView.View>
         </ListView>

@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="Client.NewChannelView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="700">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="400"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="200"/>
+
+            <RowDefinition Height="200"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Column="1" Grid.Row="1">
+            <StackPanel>
+                <TextBox x:Name="ChannelName" Margin="5"  Height="22" TextWrapping="Wrap" Text="{Binding ChannelName}"   Width="auto" />
+                <TextBox x:Name="ChannelDescription" Margin="5" TextWrapping="Wrap" Text="{Binding ChannelDescription}" AcceptsReturn="True" AcceptsTab="True"  ScrollViewer.CanContentScroll="True" MinHeight="100"/>
+                <Button
+                     Command="{Binding SaveChannel}" CommandParameter="{Binding }"
+                    Padding="5" x:Name="CreateChannel" Click="CreateChannel_Click" Margin="5" Height="27" Content="New Channel" HorizontalContentAlignment="Center" HorizontalAlignment="Right" BorderBrush="{x:Null}" />
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Column="1" Grid.Row="2">
+            <StackPanel>
+                <TextBlock Margin="5"  FontStyle="Italic" FontWeight="Medium">Adding a new Channel</TextBlock>
+                <TextBlock  Margin="5" FontStyle="Italic" TextWrapping="Wrap">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut e</TextBlock>
+            </StackPanel>
+        </Grid>
+
+
+        </Grid>
+</UserControl>

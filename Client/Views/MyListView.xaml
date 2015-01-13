@@ -6,7 +6,47 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <TextBlock Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
-        <Button Margin="0,223,0,37" Click="Button_Click"> asdasd </Button>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="27"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <ToolBarTray Grid.Row="0">
+            <ToolBar HorizontalAlignment="Right" Height="27"
+		     Band="0" BandIndex="0">
+                <Button x:Name="CreateChannel" Click="CreateChannel_Click"  Content="Create Channel" Height="22" VerticalAlignment="Top" Width="auto"/>
+                <Button Content="Button 2" Height="22" VerticalAlignment="Top" Width="75"/>
+            </ToolBar>
+            <ToolBar HorizontalAlignment="Left" Height="27" Band="0" BandIndex="0">
+                <Button Content="Button 3" Height="22" VerticalAlignment="Top" Width="75"/>
+            </ToolBar>
+        </ToolBarTray>
+
+        <ListView Grid.Row="1">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Name" Width="auto" >
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="XXX" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Description" Width="auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="XXX" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <StatusBar Height="20px" VerticalContentAlignment="Bottom" VerticalAlignment="Bottom" Grid.Row="1">
+            <StatusBarItem>
+                <TextBlock Text="XXX" ></TextBlock>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </UserControl>

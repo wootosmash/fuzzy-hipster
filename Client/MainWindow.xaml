@@ -21,6 +21,10 @@
             <local:CatalogView />
         </DataTemplate>
 
+        <DataTemplate DataType="{x:Type local:NewChannelViewModel}">
+            <local:NewChannelView />
+        </DataTemplate>
+
 
     </Window.Resources>
 
