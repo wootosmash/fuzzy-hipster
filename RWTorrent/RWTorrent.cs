@@ -32,30 +32,32 @@ namespace RWTorrent
     
     public RWTorrent( Catalog.Catalog catalog )
     {
+      Singleton = this;
+      Catalog = catalog;
       Settings = Settings.Load("settings.xml");
 
       Me = new Peer();
       
-      Me.IPAddress = IPSniffer.GetPublicIP();
+      Me.IPAddress = IPSniffer.GetPublicIP().ToString();
       Me.Port = Settings.Port;
       
-      Peers = new PeerCollection();
-      Peers.Add(Me);
+      Peers = PeerCollection.Load(Catalog.BasePath);
+      Peers.RefreshPeer(Me);
+      Peers.ResetConnectionAttempts();
 
       Network = new RWNetwork();
       
       Network.PeerConnected += NetworkPeerConnected;
+      Network.PeerConnectFailed += NetworkPeerConnectFailed;
       
       Network.NewPeer += NetworkNewPeer;
-      Network.NewStack += NetworkNewStack;
-      Network.NewWad += NetworkNewWad;
+      //Network.NewStack += NetworkNewStack;
+      //Network.NewWad += NetworkNewWad;
       
       Network.PeersRequested += NetworkPeersRequested;
-      Network.StacksRequested += NetworkStacksRequested;
-      Network.WadsRequested += NetworkWadsRequested;
+      //Network.StacksRequested += NetworkStacksRequested;
+      //Network.WadsRequested += NetworkWadsRequested;
       
-      Singleton = this;
-      Catalog = catalog;
       HeartbeatTimer = new Timer(Settings.HeartbeatInterval);
       HeartbeatTimer.Elapsed +=  HeartbeatElapsed;
       HeartbeatTimer.Start();
@@ -63,7 +65,14 @@ namespace RWTorrent
     
     void NetworkPeerConnected( object sender, GenericEventArgs<Peer> e)
     {
+      e.Value.FailedConnectionAttempts = 0;
       Network.SendMyStatus(e.Value, Me);
+    }
+    
+    void NetworkPeerConnectFailed( object sender, GenericEventArgs<Peer> e)
+    {
+      e.Value.FailedConnectionAttempts++;
+      e.Value.NextConnectionAttempt = DateTime.Now.AddSeconds(Math.Pow(Settings.ConnectAttemptWaitTime, e.Value.FailedConnectionAttempts));
     }
     
     void NetworkPeersRequested( object sender, MessageComposite<RequestPeersNetMessage> e )
@@ -85,6 +94,8 @@ namespace RWTorrent
     {
       if ( Catalog.Stacks[e.Value.StackGuid] == null )
         return;
+      if ( Catalog.Stacks[e.Value.StackGuid].Wads == null )
+        return;
       
       Network.SendWads( e.Peer, Catalog.Stacks[e.Value.StackGuid].Wads.ToArray());
     }
@@ -95,23 +106,24 @@ namespace RWTorrent
       // ignore an update to my own peer record
       if ( e.Value.Guid == Me.Guid )
         return;
+      if ( e.Value.Guid == Guid.Empty )
+        return;
       
       Peers.RefreshPeer(e.Value);
       
-      if ( e.Value.IPAddress != null && e.Value.Port > 0 )
-      {
-        if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
-        {
-          Network.Connect(e.Value);
-        }
-      }
+      if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
+        if ( !Peers[e.Value.Guid].IsConnected )
+          if ( e.Value.IPAddress != null && e.Value.Port > 0 )
+            Network.Connect(e.Value);
     }
     
     void NetworkNewStack( object sender, GenericEventArgs<Stack> e)
     {
       Catalog.Stacks.RefreshStack(e.Value);
       
-      foreach( Peer peer in Network.ActivePeers )
+      Peer[] peers = Network.ActivePeers.ToArray();
+      
+      foreach( Peer peer in peers )
         Network.RequestWads( peer, 0, 30, e.Value.Id);
     }
     
@@ -122,15 +134,26 @@ namespace RWTorrent
     
     void HeartbeatElapsed(object sender, ElapsedEventArgs e)
     {
+      // talk to connected peers and see if they've got anything for us
       foreach( var peer in Network.ActivePeers )
       {
         Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
         Network.RequestStacks(peer, Catalog.LastUpdated, Settings.HeartbeatStackRequestCount);
       }
+      
+      // see if we need some new peers
+      if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
+      {
+        foreach( var peer in Peers.Values ) // for each peer that we're not connected to 
+          if ( !peer.IsConnected ) // we're not connected
+            if ( peer.NextConnectionAttempt < DateTime.Now ) // wait is over
+              Network.Connect(peer);
+      }
     }
     
     public void Start()
     {
+      Console.Write("Starting " + Settings.Port);
       Network.StartListening(Settings.Port);
     }
   }

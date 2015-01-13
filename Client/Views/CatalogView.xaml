@@ -9,7 +9,7 @@
 
     
     <Grid>
-        <ListView ItemsSource="{Binding Wads}">
+        <ListView ItemsSource="{Binding Wads}" BorderBrush="{x:Null}">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Name" Width="auto" DisplayMemberBinding="{Binding Name}">

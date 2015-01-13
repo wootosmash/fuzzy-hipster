@@ -21,7 +21,7 @@ namespace RWTorrent.Tests
     {      
       var catalog = new Catalog.Catalog();
       var torrent = new RWTorrent(catalog);
-      catalog.BasePath = Environment.CurrentDirectory;
+      catalog.BasePath = Environment.CurrentDirectory + @"\Localhost1\";
       catalog.Namespace = "Base Programs";
       catalog.Description = "Test Catalog for Base Programs";
       
@@ -31,10 +31,14 @@ namespace RWTorrent.Tests
         Description = "All fax wangs shit", 
         PublicKey = "..." 
       };
-      FileWad blazingSaddles = new FileWad() { StackId = faxes.Id, BlockSize = 1024, Name = "My Program", Description = "A hilarious Program" };
-      blazingSaddles.BuildFromPath( @".");
+      FileWad myprog = new FileWad() { StackId = faxes.Id, BlockSize = 1024, Name = "My Program", Description = "A hilarious Program" };
+      myprog.BuildFromPath( @".");
       
+<<<<<<< HEAD
       faxes.Wads.Add(blazingSaddles);
+=======
+      faxes.Wads.Add(myprog);      
+>>>>>>> f92e17699cea577eedb791664fcd99fe6e1901ff
 
       catalog.Stacks.Add( faxes );
       catalog.Save();

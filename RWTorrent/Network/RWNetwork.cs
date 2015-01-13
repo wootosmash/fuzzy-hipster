@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -58,6 +59,7 @@ namespace RWTorrent.Network
     public IPEndPoint LocalEndPoint { get; set; }
     public Socket Listener { get; set; }
     public Guid Id { get; set; }
+    public SortedList<Guid, TransferManager> InProgressTransfers { get; set; }
     
     Random random = new Random(DateTime.Now.Millisecond);
     ManualResetEvent allDone = new ManualResetEvent(false);
@@ -76,6 +78,14 @@ namespace RWTorrent.Network
     protected virtual void OnPeerConnected(GenericEventArgs<Peer> e)
     {
       var handler = PeerConnected;
+      if (handler != null)
+        handler(this, e);
+    }
+    
+    public event EventHandler<GenericEventArgs<Peer>> PeerConnectFailed;
+    protected virtual void OnPeerConnectFailed(GenericEventArgs<Peer> e)
+    {
+      var handler = PeerConnectFailed;
       if (handler != null)
         handler(this, e);
     }
@@ -136,6 +146,7 @@ namespace RWTorrent.Network
     {
       ActivePeers = new List<Peer>();
       Id = Guid.NewGuid();
+      InProgressTransfers = new SortedList<Guid, TransferManager>();
     }
 
     public void StartListening( int port )
@@ -182,7 +193,7 @@ namespace RWTorrent.Network
       {
         Guid = Guid.Empty,
         Socket = handler,
-        IPAddress = (handler.RemoteEndPoint as IPEndPoint).Address,
+        IPAddress = (handler.RemoteEndPoint as IPEndPoint).Address.ToString(),
         Port = (handler.RemoteEndPoint as IPEndPoint).Port,
         CatalogRecency = 0,
         PeerCount = 0,
@@ -211,8 +222,6 @@ namespace RWTorrent.Network
         
         if ( bytesRead > 0 )
         {
-          Log("WaitMessage Recev");
-
           NetMessage message = NetMessage.FromBytes(state.Buffer);
           
           ProcessMessage(message, state);
@@ -284,7 +293,25 @@ namespace RWTorrent.Network
             OnNewWad( new GenericEventArgs<FileWad>(wad));
           break;
           
+//        case MessageType.StartFileTransfer:
+//          var startTransfer = msg as StartFileTransferNetMessage;
+//          
+//          var mgr = new TransferManager();
+//          mgr.ExpectedPackets = startTransfer.Packets;
+//          mgr.TransferId = startTransfer.TransferId;
+//          mgr.NextPacket = 0;
+//          
+//          
+//          InProgressTransfers.Add(startTransfer.TransferId, mgr);
           
+//          break;
+//          
+//        case MessageType.FileTransferPacket:
+//          var packet = msg as FileTransferPacketNetMessage;
+//          
+//          InProgressTransfers[packet.TransferId].SavePacket(msg);
+//          
+//          break;
       }
     }
     
@@ -296,7 +323,7 @@ namespace RWTorrent.Network
         peer.Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         state.Peer = peer;
         
-        IPEndPoint remoteEP = new IPEndPoint( peer.IPAddress, peer.Port);
+        IPEndPoint remoteEP = new IPEndPoint( IPAddress.Parse(peer.IPAddress), peer.Port);
         peer.Socket.BeginConnect( remoteEP, ConnectCallback, state);
       }
       catch (Exception)
@@ -304,6 +331,7 @@ namespace RWTorrent.Network
         Log("CONNECT FAILED: {0}", peer);
         peer.Socket.Dispose();
         peer.Socket = null;
+        OnPeerConnectFailed( new GenericEventArgs<Peer>(peer) );
       }
     }
     
@@ -330,6 +358,7 @@ namespace RWTorrent.Network
         connectState.Peer.Socket.Dispose();
         connectState.Peer.Socket = null;
         ActivePeers.Remove(connectState.Peer);
+        OnPeerConnectFailed( new GenericEventArgs<Peer>( connectState.Peer) );
         
       }
     }
@@ -392,7 +421,7 @@ namespace RWTorrent.Network
 
     public void Send( Peer peer, NetMessage msg )
     {
-      Log("SEND: {1} {2}", Id, peer.Socket.RemoteEndPoint, msg);
+      Log("SEND: {0} {1}", Id, msg);
       
       var state = new SendState();
       
@@ -424,5 +453,46 @@ namespace RWTorrent.Network
         Console.WriteLine(e.ToString());
       }
     }
+  }
+  
+  public class StacksTransferManager : TransferManager 
+  {
+    public override void Execute()
+    {
+//      Stack[] stacks = deserialized();
+//      
+//      foreach( Stack stack in stacks )
+//        RWTorrent.Singleton.Network.OnNewStack( stack);
+    }
+  }
+  
+  public abstract class TransferManager
+  {
+    public Guid TransferId { get; set; }
+    public int ExpectedPackets { get; set; }
+    public int NextPacket { get; set; }
+    public int TotalLength { get; set; }
+    
+    public TransferManager()
+    {
+    }
+    
+    public void SavePacket( FileTransferPacketNetMessage msg )
+    {
+      if ( msg.Sequence != NextPacket )
+        throw new Exception("Bad transfer");
+
+      string path = Path.Combine(Path.GetTempPath(), TransferId + ".dat");
+      using ( FileStream stream = new FileStream(path, FileMode.OpenOrCreate))
+      {
+        stream.Write(msg.Data, 0, msg.DataLength);
+      }
+      
+      NextPacket++;
+      if ( NextPacket == ExpectedPackets )
+        Execute();
+    }
+    
+    public abstract void Execute();
   }
 }

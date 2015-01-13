@@ -13,7 +13,7 @@ namespace Client
         {
             get
             {
-                return "Home Page";
+                return "Start Up";
             }
 
         }

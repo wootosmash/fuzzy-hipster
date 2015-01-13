@@ -44,7 +44,9 @@ namespace Client
         {
             get
             {
+                
                 return Wads.Count;
+
             }
         }
 

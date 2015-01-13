@@ -9,19 +9,14 @@ namespace Client
     class MyListViewModel : ObservableObject, IPageViewModel
     {
 
-        string _Name = "";
+     
         public string Name
         {
             get
             {
-                return _Name;
+                return "My Channels";
             }
-            set
-            {
-                _Name = value;
-                OnPropertyChanged("Name");
-                
-            }
+            
         }
 
         string _description;

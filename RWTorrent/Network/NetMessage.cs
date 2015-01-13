@@ -158,9 +158,41 @@ namespace RWTorrent.Network
     
     public override string ToString()
     {
-      return string.Format("[WadsNetMessage Wads={0}]", Wads);
+      if ( Wads == null || Wads.Length == 0 )
+        return "[WadsNetMessage]";
+      else
+        return string.Format("[WadsNetMessage Wads={0}]", Wads);
     }
 
+  }
+  
+  [Serializable()]
+  [StructLayout(LayoutKind.Sequential, Pack=1)]
+  public class StartFileTransferNetMessage : NetMessage 
+  {
+    public Guid TransferId { get; set; }
+    public string Filename { get; set; }
+    public int Packets { get; set; }
+    
+    public StartFileTransferNetMessage()
+    {
+      Type = MessageType.StartFileTransfer;
+    }
+  }
+  
+  [Serializable()]
+  [StructLayout(LayoutKind.Sequential, Pack=1)]
+  public class FileTransferPacketNetMessage : NetMessage 
+  {
+    public Guid TransferId { get; set; }
+    public int Sequence { get; set; }
+    public int DataLength { get; set; }
+    public byte[] Data { get; set; }
+    
+    public FileTransferPacketNetMessage()
+    {
+      Type = MessageType.FileTransferPacket;
+    }
   }
 
   public enum MessageType
@@ -171,14 +203,21 @@ namespace RWTorrent.Network
     PeerStatus = 3,
     
     RequestPeers = 10,
-    Peers = 11,
+    StartPeers = 11,
+    Peers = 12,
     
-    RequestStacks = 18,
-    Stacks = 19,
-    RequestWads = 20,
-    Wads = 21,
+    RequestStacks = 18,    
+    StartStacks = 19,
+    Stacks = 20,
+    
+    RequestWads = 25,
+    StartWads = 26,
+    Wads = 27,
     
     RequestBlock = 30,
-    Block = 31
+    Block = 31,
+    
+    StartFileTransfer = 35,
+    FileTransferPacket = 36
   }
 }

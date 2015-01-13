@@ -8,10 +8,9 @@
  */
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Sockets;
 using System.Threading;
 using RWTorrent.Catalog;
+using RWTorrent.Network;
 
 namespace RWTorrent
 {
@@ -19,30 +18,37 @@ namespace RWTorrent
   {
     public static void Main(string[] args)
     {
+      List<Thread> threads = new List<Thread>();
       
-      var threadOne = new Thread(new ThreadStart(delegate {
-                                                   
-                                                   var catalog = Catalog.Catalog.Load(".");
-                                                   var torrent = new RWTorrent(catalog);
-                                                   torrent.Start();
-                                                   
-                                                 }));
-      threadOne.Start();
+      string port = args.Length > 0 ? args[0] : RWNetwork.RWDefaultPort.ToString();
       
-      var threadTwo = new Thread(new ThreadStart(delegate {
-                                                   
-                                                   string testdir = @"C:\temp\testcatalog";
-                                                   var emptyCatalog = Catalog.Catalog.Load(testdir);
-                                                   var testTorrent = new RWTorrent(emptyCatalog);
-                                                   testTorrent.Settings.Port ++;
-                                                   testTorrent.Start();
-                                                 }));
+      var catalog = Catalog.Catalog.Load(string.Format(@".\Localhost-{0}\", port));
+      var torrent = new RWTorrent(catalog);
       
-      threadTwo.Start();
+      threads.Add(new Thread(new ThreadStart(delegate {
+                                               torrent.Start();
+                                             })));
+      threads[0].Start();
       
-      Console.ReadKey(true);
+      ConsoleKeyInfo key = Console.ReadKey(true);
+      while ( key.Key != ConsoleKey.Q )
+      {
+        key = Console.ReadKey(true);
+        
+        if ( key.Key == ConsoleKey.S )
+        {
+          Console.WriteLine("---------------------------------");
+        }
+        
+        if ( key.Key == ConsoleKey.P )
+        {
+          
+          Console.WriteLine("Peers " + torrent.Me.Guid);
+          foreach( Peer p in torrent.Peers.Values )
+            Console.WriteLine(p);
+        }
+        
+      }
     }
   }
-  
-  
 }

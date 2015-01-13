@@ -7,12 +7,9 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
-using System.IO;
-using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
-using RWTorrent.Network;
 
 namespace RWTorrent
 {
@@ -25,9 +22,14 @@ namespace RWTorrent
     public int PeerCount { get; set; }
     public int CatalogRecency { get; set; }
     public long Uptime { get; set; }
-    public IPAddress IPAddress { get; set; }
+
+    public DateTime NextConnectionAttempt { get; set; }
+    public int FailedConnectionAttempts { get; set; }
+    
+    public string IPAddress { get; set; }
     public int Port { get; set; }
     
+
     public bool IsConnected {
       get {
         if (Socket == null)
@@ -39,6 +41,8 @@ namespace RWTorrent
     [XmlIgnore()]
     [NonSerialized()]
     Socket socket;
+
+    [XmlIgnore()]
     public Socket Socket {
       get {
         return socket;
@@ -51,11 +55,31 @@ namespace RWTorrent
     public Peer()
     {
       Guid = Guid.NewGuid();
+      NextConnectionAttempt = DateTime.MinValue;
+      FailedConnectionAttempts = 0;
+    }
+    
+    public void UpdateFromCopy( Peer peer )
+    {
+      Guid = peer.Guid;
+      Name = peer.Name;
+      PeerCount = peer.PeerCount;
+      CatalogRecency = peer.CatalogRecency;
+      Uptime = peer.Uptime;      
+    }
+    
+    /// <summary>
+    /// Tells the program to attempt to connect to this peer as soon as its ready
+    /// </summary>
+    public void ResetConnectionAttempts()
+    {
+      NextConnectionAttempt = DateTime.MinValue;
+      FailedConnectionAttempts = 0;
     }
     
     public override string ToString()
     {
-      return string.Format("[Peer Guid={0}, Name={1}, PeerCount={2}, CatalogRecency={3}, Uptime={4}, IPAddress={5}, Port={6}]", Guid, Name, PeerCount, CatalogRecency, Uptime, IPAddress, Port);
+      return string.Format("[Peer Socket={0}, Guid={1}, Name={2}, PeerCount={3}, CatalogRecency={4}, Uptime={5}, IPAddress={6}, Port={7}]", socket, Guid, Name, PeerCount, CatalogRecency, Uptime, IPAddress, Port);
     }
   }
 }
