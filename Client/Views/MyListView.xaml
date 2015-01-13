@@ -9,6 +9,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="27"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="7"/>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
         <ToolBarTray Grid.Row="0">
@@ -22,20 +25,20 @@
             </ToolBar>
         </ToolBarTray>
 
-        <ListView Grid.Row="1">
+        <ListView Grid.Row="1" ItemsSource="{Binding Stacks}" Grid.RowSpan="1"  >
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Name" Width="auto" >
+                    <GridViewColumn Header="Name" Width="auto" DisplayMemberBinding="{Binding Name}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="XXX" />
+                                <TextBlock Text="{Binding Name}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Description" Width="auto">
+                    <GridViewColumn Header="Description" Width="auto"  DisplayMemberBinding="{Binding Description}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="XXX" />
+                                <TextBlock Text="{Binding Description}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -43,7 +46,12 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <StatusBar Height="20px" VerticalContentAlignment="Bottom" VerticalAlignment="Bottom" Grid.Row="1">
+
+
+        <GridSplitter Grid.Row="2" Grid.Column="1" Margin="2,2,2,2" Width="auto" Height="3"  Background="#FFF0F0F0" VerticalAlignment="Center" HorizontalAlignment="Stretch" ResizeDirection="Rows" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" />
+
+
+        <StatusBar Height="20px" VerticalContentAlignment="Bottom" VerticalAlignment="Bottom" Grid.Row="4">
             <StatusBarItem>
                 <TextBlock Text="XXX" ></TextBlock>
             </StatusBarItem>

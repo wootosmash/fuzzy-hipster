@@ -51,8 +51,6 @@ namespace Client
             }
         }
 
-
-
         public ICommand SaveChannel
         {
             get

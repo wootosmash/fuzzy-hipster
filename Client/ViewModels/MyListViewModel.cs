@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RWTorrent.Catalog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,16 @@ namespace Client
                 return "My Channels";
             }
             
+        }
+
+        public List<Stack> Stacks
+        {
+            get
+            {
+                StackCollection Stacks = RWTorrent.RWTorrent.Singleton.Catalog.Stacks;
+                return Stacks.ToList<Stack>();
+            }
+
         }
 
         string _description;
