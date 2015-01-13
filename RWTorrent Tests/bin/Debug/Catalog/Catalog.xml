@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <Namespace>Base Programs</Namespace>
-  <Description>Test Catalog for Base Programs</Description>
-  <BasePath>C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent Tests\bin\Debug</BasePath>
-  <LastUpdated>0</LastUpdated>
-</Catalog>

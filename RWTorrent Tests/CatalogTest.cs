@@ -34,7 +34,11 @@ namespace RWTorrent.Tests
       FileWad myprog = new FileWad() { StackId = faxes.Id, BlockSize = 1024, Name = "My Program", Description = "A hilarious Program" };
       myprog.BuildFromPath( @".");
       
+<<<<<<< HEAD
+      faxes.Wads.Add(blazingSaddles);
+=======
       faxes.Wads.Add(myprog);      
+>>>>>>> f92e17699cea577eedb791664fcd99fe6e1901ff
 
       catalog.Stacks.Add( faxes );
       catalog.Save();

@@ -43,6 +43,7 @@ namespace RWTorrent.Catalog
       Stacks = new StackCollection();
     }
 
+
     public static Catalog Load(string basePath)
     {
       string catalogEndPointPath = Path.Combine(basePath, @"Catalog\Catalog.xml");
@@ -58,7 +59,7 @@ namespace RWTorrent.Catalog
         var serialiser = new XmlSerializer(typeof(Catalog));
         using (var reader = new StreamReader( catalogEndPointPath ))
           catalog = (Catalog)serialiser.Deserialize(reader);
-        
+
         catalog.BasePath = basePath;
 
         var serialiserStacks = new XmlSerializer(typeof(Stack));

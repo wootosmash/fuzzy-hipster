@@ -29,9 +29,10 @@ namespace RWTorrent
     public string IPAddress { get; set; }
     public int Port { get; set; }
     
-    [XmlIgnore()]
-    public bool IsConnected { get {
-        if ( Socket == null )
+
+    public bool IsConnected {
+      get {
+        if (Socket == null)
           return false;
         return Socket.Connected;
       }

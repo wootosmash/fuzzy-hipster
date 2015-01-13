@@ -12,6 +12,7 @@ using System.Timers;
 using RWTorrent.Catalog;
 using RWTorrent.Network;
 
+
 namespace RWTorrent
 {
   
@@ -25,6 +26,7 @@ namespace RWTorrent
     public Settings Settings { get; set; }
     public Peer Me { get; set; }
     public PeerCollection Peers { get; set; }
+    public bool IsConnectedToGrid { get { return Network.ActivePeers.Count > 0; } }
 
     Timer HeartbeatTimer = new Timer();
     
