@@ -15,7 +15,7 @@
     </LinearGradientBrush>
 
     <SolidColorBrush x:Key="BorderBrush" Color="#d6dbe9" />
-    <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#d6dbe9" />
+    <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#ffffff" />
 
 
 
@@ -50,19 +50,20 @@
                 <ControlTemplate TargetType="{x:Type local:TitleBar}">
                     <Border Name="TitleBar" DockPanel.Dock="Top" 
                Background="{StaticResource TitleBarBackgroundBrush}"  
-               BorderThickness="0,0,0,1" 
+               BorderThickness="0,0,0,0" 
                BorderBrush="{StaticResource BorderBrush}"
                CornerRadius="0,0,0,0"  >
                         <Grid Height="28" >
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="22"/>
+                                <ColumnDefinition Width="34"/>
                                 <ColumnDefinition />
                                 <ColumnDefinition Width="25"/>
                                 <ColumnDefinition Width="25"/>
                                 <ColumnDefinition Width="25"/>
                             </Grid.ColumnDefinitions>
                             <Image Grid.Column="0" Name="Icon" Source="{Binding Path=Icon, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" 
-                     HorizontalAlignment="Right" Margin="5,0,0,0" Width="16" Height="16" />
+                     HorizontalAlignment="Right" Margin="5,0,0,0" Width="28" Height="28" />
+                     
                             <TextBlock Grid.Column="1" Name="Caption" Foreground="#3969AD"  HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0"
                          FontFamily="Corbel" FontSize="14" Text="{Binding Path=Title, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" />
 

@@ -23,9 +23,10 @@ namespace Client
             MainWindow app = new MainWindow();
             MainWindowModel context = new MainWindowModel();
             app.DataContext = context;
-            app.Show();
+
             var catalog = Catalog.Load(".");
             var torrent = new RWTorrent.RWTorrent(catalog);
+            app.Show();
             
         
         }

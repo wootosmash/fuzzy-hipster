@@ -143,7 +143,18 @@
       <Name>RWTorrent</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Assets\logo-128.png" />
+    <Resource Include="Assets\logo-24.png" />
+    <Resource Include="Assets\logo-32.png" />
+    <Resource Include="Assets\logo-48.png" />
+    <Resource Include="Assets\logo-512.png" />
+    <Resource Include="Assets\logo-light-128.png" />
+    <Resource Include="Assets\logo-light-24.png" />
+    <Resource Include="Assets\logo-light-32.png" />
+    <Resource Include="Assets\logo-light-48.png" />
+    <Resource Include="Assets\logo-light-512.png" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\close-128.png" />
     <Resource Include="Assets\close-32.png" />
