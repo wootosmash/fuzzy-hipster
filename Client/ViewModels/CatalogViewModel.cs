@@ -10,6 +10,7 @@ namespace Client
 {
     class CatalogViewModel : ObservableObject, IPageViewModel
     {
+        //
         public string Name
         {
             get
@@ -22,9 +23,10 @@ namespace Client
         private List<FileWad> _wads = null;
         public List<FileWad> Wads
         {
-            get 
-            {   
-                if(_wads != null){
+            get
+            {
+                if (_wads != null)
+                {
                     return _wads;
                 }
                 StackCollection Stacks = RWTorrent.RWTorrent.Singleton.Catalog.Stacks;
@@ -35,23 +37,21 @@ namespace Client
                     _wads.AddRange(s.Wads);
                 }
 
-                return _wads; 
+                return _wads;
             }
-                         
+
         }
 
         public int WadCount
         {
             get
             {
-                
                 return Wads.Count;
-
             }
         }
 
 
-        
+
 
 
     }

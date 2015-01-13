@@ -9,7 +9,7 @@ namespace Client
     class MyListViewModel : ObservableObject, IPageViewModel
     {
 
-     
+        
         public string Name
         {
             get
