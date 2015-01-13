@@ -1,9 +1,0 @@
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent Tests\bin\Debug\RWTorrent Tests.dll
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent Tests\bin\Debug\RWTorrent Tests.pdb
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent Tests\bin\Debug\nunit.framework.dll
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent Tests\bin\Debug\RWTorrent.exe
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent Tests\bin\Debug\RWTorrent.pdb
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent Tests\bin\Debug\nunit.framework.xml
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent Tests\obj\Debug\RWTorrent Tests.csprojResolveAssemblyReference.cache
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent Tests\obj\Debug\RWTorrent Tests.dll
-C:\Users\Al\Documents\SharpDevelop Projects\fuzzy-hipster\RWTorrent Tests\obj\Debug\RWTorrent Tests.pdb

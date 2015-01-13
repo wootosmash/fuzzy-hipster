@@ -24,6 +24,8 @@ namespace RWTorrent
       
       var catalog = Catalog.Catalog.Load(string.Format(@".\Localhost-{0}\", port));
       var torrent = new RWTorrent(catalog);
+      torrent.Settings.Port = int.Parse(port);
+      torrent.Me.Port = torrent.Settings.Port;
       
       threads.Add(new Thread(new ThreadStart(delegate {
                                                torrent.Start();
