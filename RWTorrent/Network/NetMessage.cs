@@ -10,9 +10,9 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
-using RWTorrent.Catalog;
+using FuzzyHipster.Catalog;
 
-namespace RWTorrent.Network
+namespace FuzzyHipster.Network
 {
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack=1)]

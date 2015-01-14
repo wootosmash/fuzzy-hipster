@@ -8,7 +8,7 @@
  */
 using System;
 
-namespace RWTorrent.Crypto
+namespace FuzzyHipster.Crypto
 {
   /// <summary>
   /// Description of Key.

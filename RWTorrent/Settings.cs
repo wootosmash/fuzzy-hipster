@@ -9,9 +9,9 @@
 using System;
 using System.IO;
 using System.Xml.Serialization;
-using RWTorrent.Network;
+using FuzzyHipster.Network;
 
-namespace RWTorrent
+namespace FuzzyHipster
 {
 	public class Settings
 	{

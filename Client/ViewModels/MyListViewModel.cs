@@ -1,4 +1,4 @@
-﻿using RWTorrent.Catalog;
+﻿using FuzzyHipster.Catalog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +24,7 @@ namespace Client
         {
             get
             {
-                StackCollection Stacks = RWTorrent.RWTorrent.Singleton.Catalog.Stacks;
+                StackCollection Stacks = FuzzyHipster.RWTorrent.Singleton.Catalog.Stacks;
                 return Stacks.ToList<Stack>();
             }
 

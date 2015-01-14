@@ -9,9 +9,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
-using RWTorrent.Catalog;
+using FuzzyHipster.Catalog;
 
-namespace RWTorrent.Network
+namespace FuzzyHipster.Network
 {
   // State object for reading client data asynchronously
   public class ReceiveStateObject

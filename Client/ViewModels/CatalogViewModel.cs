@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RWTorrent.Catalog;
+using FuzzyHipster.Catalog;
 
 
 namespace Client
@@ -29,7 +29,7 @@ namespace Client
                 {
                     return _wads;
                 }
-                StackCollection Stacks = RWTorrent.RWTorrent.Singleton.Catalog.Stacks;
+                StackCollection Stacks = FuzzyHipster.RWTorrent.Singleton.Catalog.Stacks;
                 _wads = new List<FileWad>();
 
                 foreach (Stack s in Stacks)

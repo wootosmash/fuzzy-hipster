@@ -9,11 +9,11 @@
 using System;
 using System.Collections.Generic;
 using System.Timers;
-using RWTorrent.Catalog;
-using RWTorrent.Network;
+using FuzzyHipster.Catalog;
+using FuzzyHipster.Network;
 
 
-namespace RWTorrent
+namespace FuzzyHipster
 {
   
   
@@ -38,7 +38,14 @@ namespace RWTorrent
 
       Me = new Peer();
       
-      Me.IPAddress = IPSniffer.GetPublicIP().ToString();
+      try {
+        Me.IPAddress = IPSniffer.GetPublicIP().ToString();        
+      }
+      catch( Exception )
+      {
+        // do nothing
+      }
+        
       Me.Port = Settings.Port;
       
       Peers = PeerCollection.Load(Catalog.BasePath);

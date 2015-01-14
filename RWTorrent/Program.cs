@@ -9,10 +9,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using RWTorrent.Catalog;
-using RWTorrent.Network;
+using FuzzyHipster.Catalog;
+using FuzzyHipster.Network;
 
-namespace RWTorrent
+namespace FuzzyHipster
 {
   class Program
   {

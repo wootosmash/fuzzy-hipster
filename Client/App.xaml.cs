@@ -1,62 +1,67 @@
-﻿using RWTorrent.Catalog;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using RWTorrent.Catalog;
-using System.Threading;
+
+using FuzzyHipster.Catalog;
+using FuzzyHipster.Catalog;
+using FuzzyHipster;
+
 
 namespace Client
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
-    public partial class App : Application
+  /// <summary>
+  /// Interaction logic for App.xaml
+  /// </summary>
+  public partial class App : Application
+  {
+    public event EventHandler RWTorrentLoaded;
+
+    protected virtual void OnRWTorrentLoaded(EventArgs e)
     {
-        public delegate void EventHandler(object Sender);
-        public event EventHandler RWTorrentLoaded;
+      var handler = RWTorrentLoaded;
+      if (handler != null)
+        handler(this, e);
+    }
 
+    protected override void OnStartup(StartupEventArgs e)
+    {
 
-        protected override void OnStartup(StartupEventArgs e)
-        {
-            base.OnStartup(e);
+      base.OnStartup(e);
 
-            RWTorrentLoaded += App_RWTorrentLoaded;
-
-            MainWindow app = new MainWindow();
-            MainWindowModel context = new MainWindowModel();
-            app.DataContext = context;
-            app.Show();
-
-
-           Thread th = new Thread(new ThreadStart(delegate
-            {
-                var catalog = Catalog.Load(".");
-                var rwt = new RWTorrent.RWTorrent(catalog);
-                
-
-                rwt.Start();
-
-                RWTorrentLoaded(rwt);
-            }));
-
-           th.Start();
+      MainWindow app = new MainWindow();
+      MainWindowModel context = new MainWindowModel();
+      app.DataContext = context;
+      app.Show();
+      
             
-        
-        }
 
-        void App_RWTorrentLoaded(object Sender)
-        {
+      RWTorrentLoaded += delegate {
+        Dispatcher.BeginInvoke((Action)(() => {
             MainWindowModel.ChangeModel(new CatalogViewModel());
-        }
-
-    
-
-
+        }));
+      };
+      
+      //TaskOfTResult_MethodAsync();
+      
+      var thread = new Thread( 
+          new ThreadStart( 
+              delegate {
+                var catalog = Catalog.Load(".");
+                var rwt = new FuzzyHipster.RWTorrent(catalog);
+                OnRWTorrentLoaded(new EventArgs());
+                rwt.Start();
+            }
+         )
+     );
+      thread.Start();
 
 
     }
+
+  }
 }

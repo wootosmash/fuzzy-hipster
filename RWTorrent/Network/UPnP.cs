@@ -6,7 +6,7 @@ using System.Net;
 using System.Xml;
 using System.IO;
 
-namespace RWTorrent.Network
+namespace FuzzyHipster.Network
 {
   public class UPnP
   {
