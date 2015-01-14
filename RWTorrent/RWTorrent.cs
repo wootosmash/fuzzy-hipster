@@ -38,7 +38,14 @@ namespace RWTorrent
 
       Me = new Peer();
       
-      Me.IPAddress = IPSniffer.GetPublicIP().ToString();
+      try {
+        Me.IPAddress = IPSniffer.GetPublicIP().ToString();        
+      }
+      catch( Exception )
+      {
+        // do nothing
+      }
+        
       Me.Port = Settings.Port;
       
       Peers = PeerCollection.Load(Catalog.BasePath);
