@@ -63,6 +63,14 @@ namespace Client
             }
         }
 
+        public ICommand Cancel
+        {
+            get
+            {
+                return new RelayCommand( p => { MainWindowModel.ChangeModel(new MyListViewModel()); });
+            }
+        }
+
       
 
         public void SaveNewChannel(){

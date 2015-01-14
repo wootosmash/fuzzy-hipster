@@ -13,7 +13,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="200"/>
+            <RowDefinition Height="240"/>
 
             <RowDefinition Height="200"/>
             <RowDefinition Height="*"/>
@@ -21,11 +21,18 @@
 
         <Grid Grid.Column="1" Grid.Row="1">
             <StackPanel>
+                <Label>Name</Label>
                 <TextBox x:Name="ChannelName" Margin="5"  Height="22" TextWrapping="Wrap" Text="{Binding ChannelName}"   Width="auto" />
+                <Label>Description</Label>
                 <TextBox x:Name="ChannelDescription" Margin="5" TextWrapping="Wrap" Text="{Binding ChannelDescription}" AcceptsReturn="True" AcceptsTab="True"  ScrollViewer.CanContentScroll="True" MinHeight="100"/>
+                <WrapPanel HorizontalAlignment="Right">
                 <Button
                      Command="{Binding SaveChannel}" CommandParameter="{Binding }"
-                    Padding="5" x:Name="CreateChannel" Click="CreateChannel_Click" Margin="5" Height="27" Content="New Channel" HorizontalContentAlignment="Center" HorizontalAlignment="Right" BorderBrush="{x:Null}" />
+                    Padding="5" x:Name="CreateChannel"  Margin="5" Height="27" Content="New Channel" HorizontalContentAlignment="Center" HorizontalAlignment="Right" BorderBrush="{x:Null}" />
+                <Button
+                     Command="{Binding Cancel}" CommandParameter="{Binding }"
+                    Padding="5" x:Name="CancelCreateChannel"  Margin="5" Height="27" Content="Cancel" HorizontalContentAlignment="Center" HorizontalAlignment="Right" BorderBrush="{x:Null}" />
+                </WrapPanel>
             </StackPanel>
         </Grid>
 
