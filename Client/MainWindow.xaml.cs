@@ -1,4 +1,4 @@
-﻿using RWTorrent.Catalog;
+﻿using FuzzyHipster.Catalog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

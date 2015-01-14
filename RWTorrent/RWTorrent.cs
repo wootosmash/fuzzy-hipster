@@ -9,11 +9,11 @@
 using System;
 using System.Collections.Generic;
 using System.Timers;
-using RWTorrent.Catalog;
-using RWTorrent.Network;
+using FuzzyHipster.Catalog;
+using FuzzyHipster.Network;
 
 
-namespace RWTorrent
+namespace FuzzyHipster
 {
   
   

@@ -9,7 +9,7 @@
 using System;
 using System.Net;
 
-namespace RWTorrent.Network
+namespace FuzzyHipster.Network
 {
   /// <summary>
   /// Class for determining your public IP Address - useful when behind NAT

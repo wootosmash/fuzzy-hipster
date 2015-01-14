@@ -1,10 +1,7 @@
-﻿using RWTorrent.Catalog;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
+using FuzzyHipster.Catalog;
 
 namespace Client
 {
@@ -73,7 +70,7 @@ namespace Client
 
             //TODO: VALIDATION?
 
-            Catalog catalog = RWTorrent.RWTorrent.Singleton.Catalog;
+            Catalog catalog = FuzzyHipster.RWTorrent.Singleton.Catalog;
             Stack newStack = new Stack()
             {
                 Id = Guid.NewGuid(),

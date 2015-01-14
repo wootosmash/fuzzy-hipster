@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Xml.Serialization;
 using System.Linq;
 
-namespace RWTorrent
+namespace FuzzyHipster
 {
   public class PeerCollection : SortedList<Guid, Peer>
   {

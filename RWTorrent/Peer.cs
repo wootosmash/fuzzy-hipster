@@ -11,7 +11,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
 
-namespace RWTorrent
+namespace FuzzyHipster
 {
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack = 1)]

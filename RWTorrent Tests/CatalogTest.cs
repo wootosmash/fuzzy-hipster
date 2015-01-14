@@ -8,9 +8,9 @@
  */
 using System;
 using NUnit.Framework;
-using RWTorrent.Catalog;
+using FuzzyHipster.Catalog;
 
-namespace RWTorrent.Tests
+namespace FuzzyHipster.Tests
 {
 
   [TestFixture]

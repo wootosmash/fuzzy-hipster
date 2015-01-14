@@ -9,7 +9,7 @@
 using System;
 using System.IO;
 
-namespace RWTorrent.Catalog
+namespace FuzzyHipster.Catalog
 {
 	public class Block
 	{

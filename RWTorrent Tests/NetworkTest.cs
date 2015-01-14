@@ -11,10 +11,10 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading;
 using NUnit.Framework;
-using RWTorrent.Catalog;
-using RWTorrent.Network;
+using FuzzyHipster.Catalog;
+using FuzzyHipster.Network;
 
-namespace RWTorrent.Tests
+namespace FuzzyHipster.Tests
 {
   [TestFixture]
   public class NetworkTest
