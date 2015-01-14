@@ -168,30 +168,69 @@ namespace FuzzyHipster.Network
   
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack=1)]
-  public class StartFileTransferNetMessage : NetMessage 
+  public class RequestBlockNetMessage : NetMessage 
+  {
+    public Guid FileWadId { get; set; }
+    public int Block { get; set; }
+    
+    public RequestBlockNetMessage()
+    {
+      Type = MessageType.RequestBlock;
+    }
+    
+  }
+  
+  [Serializable()]
+  [StructLayout(LayoutKind.Sequential, Pack=1)]
+  public class StartBlockTransferNetMessage : NetMessage 
   {
     public Guid TransferId { get; set; }
-    public string Filename { get; set; }
-    public int Packets { get; set; }
+    public Guid FileWadId { get; set; }
+    public int Block { get; set; }
+    public int TotalPackets { get; set; }
+    public int BlockSize { get; set; }
     
-    public StartFileTransferNetMessage()
+    public StartBlockTransferNetMessage()
     {
-      Type = MessageType.StartFileTransfer;
+      Type = MessageType.StartBlockTransfer;
     }
   }
   
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack=1)]
-  public class FileTransferPacketNetMessage : NetMessage 
+  public class BlockPacketNetMessage : NetMessage 
   {
     public Guid TransferId { get; set; }
-    public int Sequence { get; set; }
     public int DataLength { get; set; }
     public byte[] Data { get; set; }
     
-    public FileTransferPacketNetMessage()
+    public BlockPacketNetMessage()
     {
-      Type = MessageType.FileTransferPacket;
+      Type = MessageType.BlockTransferPacket;
+    }
+  }
+  
+  [Serializable()]
+  [StructLayout(LayoutKind.Sequential, Pack=1)]
+  public class RequestBlocksAvailableNetMessage : NetMessage 
+  {
+    public Guid FileWadId { get; set; }
+    public RequestBlocksAvailableNetMessage()
+    {
+      Type = MessageType.RequestBlocksAvailable;
+    }    
+  }
+  
+  [Serializable()]
+  [StructLayout(LayoutKind.Sequential, Pack=1)]
+  public class BlocksAvailableNetMessage : NetMessage
+  {
+    public Guid FileWadId { get; set; }
+    public bool[] BlocksAvailable { get; set; }
+    
+    public BlocksAvailableNetMessage()
+    {
+      Type = MessageType.BlocksAvailable;
     }
   }
 
@@ -217,7 +256,10 @@ namespace FuzzyHipster.Network
     RequestBlock = 30,
     Block = 31,
     
-    StartFileTransfer = 35,
-    FileTransferPacket = 36
+    RequestBlocksAvailable = 32,
+    BlocksAvailable = 33,
+    
+    StartBlockTransfer = 35,
+    BlockTransferPacket = 36
   }
 }

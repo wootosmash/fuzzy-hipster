@@ -27,25 +27,18 @@ namespace FuzzyHipster
     public Peer Me { get; set; }
     public PeerCollection Peers { get; set; }
     public bool IsConnectedToGrid { get { return Network.ActivePeers.Count > 0; } }
+    public Random Random { get; set; }
 
     Timer HeartbeatTimer = new Timer();
     
     public RWTorrent( Catalog.Catalog catalog )
     {
       Singleton = this;
+      Random = new Random(DateTime.Now.Millisecond);
       Catalog = catalog;
       Settings = Settings.Load("settings.xml");
 
       Me = new Peer();
-      
-      try {
-        Me.IPAddress = IPSniffer.GetPublicIP().ToString();        
-      }
-      catch( Exception )
-      {
-        // do nothing
-      }
-        
       Me.Port = Settings.Port;
       
       Peers = PeerCollection.Load(Catalog.BasePath);
@@ -58,16 +51,52 @@ namespace FuzzyHipster
       Network.PeerConnectFailed += NetworkPeerConnectFailed;
       
       Network.NewPeer += NetworkNewPeer;
-      //Network.NewStack += NetworkNewStack;
-      //Network.NewWad += NetworkNewWad;
+      Network.NewStack += NetworkNewStack;
+      Network.NewWad += NetworkNewWad;
       
       Network.PeersRequested += NetworkPeersRequested;
-      //Network.StacksRequested += NetworkStacksRequested;
-      //Network.WadsRequested += NetworkWadsRequested;
+      Network.StacksRequested += NetworkStacksRequested;
+      Network.WadsRequested += NetworkWadsRequested;
+      
+      Network.BlocksAvailableReceived += NetworkBlocksAvailableReceived;
+      Network.BlocksAvailableRequested += NetworkBlocksAvailableRequested;
+      
+      Network.BlockRequested += NetworkBlockRequested;
+      Network.BlockReceived += NetworkBlockReceived;
       
       HeartbeatTimer = new Timer(Settings.HeartbeatInterval);
       HeartbeatTimer.Elapsed +=  HeartbeatElapsed;
       HeartbeatTimer.Start();
+    }
+    
+    void NetworkBlocksAvailableReceived( object sender, MessageComposite<BlocksAvailableNetMessage> e)
+    {
+      var wad = RWTorrent.Singleton.Catalog.GetFileWad(e.Value.FileWadId);
+      
+      var list = new List<int>();
+      
+      for( int i=0;i<e.Value.BlocksAvailable.Length;i++)
+        if ( e.Value.BlocksAvailable[i] )
+          list.Add(i);
+      
+      int index = list[RWTorrent.Singleton.Random.Next(0,list.Count)];
+      
+      Network.RequestBlock(e.Peer, wad, index);
+    }
+    
+    void NetworkBlocksAvailableRequested( object sender, MessageComposite<RequestBlocksAvailableNetMessage> e)
+    {
+      Network.SendBlocksAvailable( e.Peer, Catalog.GetFileWad(e.Value.FileWadId) );
+    }    
+    
+    void NetworkBlockRequested( object sender, BlockRequestedEventArgs e)
+    {
+      Network.SendBlock( e.Peer, Catalog.GetFileWad(e.FileWadId), e.Block );
+    }
+    
+    void NetworkBlockReceived( object sender, BlockReceivedEventArgs e)
+    {
+      // do nothing
     }
     
     void NetworkPeerConnected( object sender, GenericEventArgs<Peer> e)

@@ -42,24 +42,31 @@ namespace FuzzyHipster.Catalog
 			LastUpdate = DateTime.Now.ToFileTimeUtc();
 		}
 
-		public bool VerifyBlock(Block block)
+		public void CatalogBlock( int block, string tempFile )
 		{
-			if (block.Sequence >= BlockIndex.Count)
-				return false;
-			// sequence wrong
-			if (block.Sequence <= -1)
-				return false;
-			// sequence wrong
-			BlockIndexItem item = BlockIndex[block.Sequence];
-			if (block.Length != item.Length)
-				return false;
-			// block length doesn't match expected length
-			if (block.Hash != item.Hash)
-				return false;
-			// hashes dont match
-			if (block.Data.Length != BlockSize)
-				return false;
-			// length of data buffer doesn't match block size
+		  string path = string.Format(@"{0}\Catalog\{1}\{2}\", RWTorrent.Singleton.Catalog.BasePath, this.StackId, Id);
+		  if ( Directory.Exists( path ))
+		    Directory.CreateDirectory(path);
+		}
+		
+		public bool VerifyBlock(string tempFile )
+		{
+//			if (block.Sequence >= BlockIndex.Count)
+//				return false;
+//			// sequence wrong
+//			if (block.Sequence <= -1)
+//				return false;
+//			// sequence wrong
+//			BlockIndexItem item = BlockIndex[block.Sequence];
+//			if (block.Length != item.Length)
+//				return false;
+//			// block length doesn't match expected length
+//			if (block.Hash != item.Hash)
+//				return false;
+//			// hashes dont match
+//			if (block.Data.Length != BlockSize)
+//				return false;
+//			// length of data buffer doesn't match block size
 			return true;
 		}
 

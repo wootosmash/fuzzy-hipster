@@ -16,6 +16,15 @@ namespace FuzzyHipster
       return Values.FirstOrDefault(x => x.Socket == socket);
     }
     
+    public Peer GetRandom()
+    {
+      if ( Values.Count == 0 )
+        return null;
+      
+      int index = RWTorrent.Singleton.Random.Next(0, Values.Count);
+      return Values[index];
+    }
+    
     public void RefreshPeer(Peer peer)
     {
       Peer myPeer = null;
