@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using RWTorrent.Catalog;
+using System.Threading;
 
 namespace Client
 {
@@ -23,30 +24,37 @@ namespace Client
         {
             base.OnStartup(e);
 
-            //RWTorrentLoaded += App_RWTorrentLoaded;
+            RWTorrentLoaded += App_RWTorrentLoaded;
 
             MainWindow app = new MainWindow();
             MainWindowModel context = new MainWindowModel();
             app.DataContext = context;
             app.Show();
 
-            TaskOfTResult_MethodAsync();
-            
+
+           Thread th = new Thread(new ThreadStart(delegate
+            {
+                var catalog = Catalog.Load(".");
+                var rwt = new RWTorrent.RWTorrent(catalog);
+                
+
+                rwt.Start();
+
+                RWTorrentLoaded(rwt);
+            }));
+
+           th.Start();
             
         
         }
 
+        void App_RWTorrentLoaded(object Sender)
+        {
+            MainWindowModel.ChangeModel(new CatalogViewModel());
+        }
+
     
 
-        async Task<RWTorrent.RWTorrent> TaskOfTResult_MethodAsync()
-        {
-            var catalog = Catalog.Load(".");
-            var rwt = new RWTorrent.RWTorrent(catalog);
-
-            //RWTorrentLoaded(null);
-            MainWindowModel.ChangeModel(new CatalogViewModel());
-            return rwt;
-        }
 
 
 
