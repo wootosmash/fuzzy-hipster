@@ -74,12 +74,14 @@
     <Compile Include="Helpers\IPageViewModel.cs" />
     <Compile Include="Helpers\ObservableObject.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
+    <Compile Include="Helpers\Switcher.cs" />
     <Compile Include="Helpers\TitleBar.cs" />
     <Compile Include="LongToMBConverter.cs" />
     <Compile Include="MainWindowModel.cs" />
     <Compile Include="Themes\OfficeStyleWindow.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
     <Compile Include="ViewModels\NewChannelViewModel.cs" />
+    <Compile Include="ViewModels\SplashViewModel.cs" />
     <Compile Include="Views\CatalogView.xaml.cs">
       <DependentUpon>CatalogView.xaml</DependentUpon>
     </Compile>
@@ -90,12 +92,19 @@
     <Compile Include="Views\NewChannelView.xaml.cs">
       <DependentUpon>NewChannelView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\SplashView.xaml.cs">
+      <DependentUpon>SplashView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\StartUpView.xaml.cs">
       <DependentUpon>StartUpView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\StartUpViewModel.cs" />
     <Compile Include="Helpers\UserSettings.cs" />
     <Compile Include="Helpers\Utils.cs" />
+    <Page Include="Layouts\LeftRight.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -121,6 +130,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\NewChannelView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SplashView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -198,6 +211,14 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\logo-h-128.png" />
+    <Resource Include="Assets\logo-h-24.png" />
+    <Resource Include="Assets\logo-h-32.png" />
+    <Resource Include="Assets\logo-h-48.png" />
+    <Resource Include="Assets\logo-h-512.png" />
+    <Resource Include="Assets\splash1000-600.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

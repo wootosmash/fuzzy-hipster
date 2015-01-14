@@ -15,20 +15,37 @@ namespace Client
     /// </summary>
     public partial class App : Application
     {
-        
+        public delegate void EventHandler(object Sender);
+        public event EventHandler RWTorrentLoaded;
+
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
+            //RWTorrentLoaded += App_RWTorrentLoaded;
+
             MainWindow app = new MainWindow();
             MainWindowModel context = new MainWindowModel();
             app.DataContext = context;
-
-            var catalog = Catalog.Load(".");
-            var torrent = new RWTorrent.RWTorrent(catalog);
             app.Show();
+
+            TaskOfTResult_MethodAsync();
+            
             
         
+        }
+
+    
+
+        async Task<RWTorrent.RWTorrent> TaskOfTResult_MethodAsync()
+        {
+            var catalog = Catalog.Load(".");
+            var rwt = new RWTorrent.RWTorrent(catalog);
+
+            //RWTorrentLoaded(null);
+            MainWindowModel.ChangeModel(new CatalogViewModel());
+            return rwt;
         }
 
 

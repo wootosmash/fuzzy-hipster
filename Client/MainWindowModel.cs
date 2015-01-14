@@ -32,7 +32,7 @@ namespace Client
            
 
             // Set starting page
-            CurrentPageViewModel = PageViewModels[2];
+            CurrentPageViewModel = new SplashViewModel();
 
         }
 

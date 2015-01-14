@@ -2,13 +2,18 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:Client"
-        Title="RWTorrent" Icon="/Assets/logo-48.png" Height="700" Width="1000" AllowsTransparency="True" WindowStyle="None" Style="{StaticResource OfficeStyle}">
+        Title="RWTorrent" Icon="/Assets/logo-h-48.png" Height="700" Width="1000" AllowsTransparency="True" WindowStyle="None" Style="{StaticResource OfficeStyle}">
 
 
 
 
 
     <Window.Resources>
+        
+        <DataTemplate DataType="{x:Type local:SplashViewModel}">
+            <local:SplashView />
+        </DataTemplate>
+        
         <DataTemplate DataType="{x:Type local:StartUpViewModel}">
             <local:StartUpView />
         </DataTemplate>
@@ -52,7 +57,7 @@
         </Menu>
 
 
-        <Grid Background="White" Margin="5"  Grid.Row="1" Grid.RowSpan="1">
+        <!--<Grid Background="White" Margin="5"  Grid.Row="1" Grid.RowSpan="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="auto" MinWidth="2" />
@@ -77,11 +82,11 @@
                 </ItemsControl>
             </Border>
 
-            <GridSplitter Grid.Row="0" Grid.Column="1" Margin="2,0,2,0" Width="1" Background="#FFF0F0F0" VerticalAlignment="Stretch" HorizontalAlignment="Center" />
-            <ContentControl Grid.Column="2"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Content="{Binding CurrentPageViewModel}" />
+            <GridSplitter Grid.Row="0" Grid.Column="1" Margin="2,0,2,0" Width="1" Background="#FFF0F0F0" VerticalAlignment="Stretch" HorizontalAlignment="Center" />-->
+            <ContentControl  Grid.Row="2"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Content="{Binding CurrentPageViewModel}" />
             
-        </Grid>
-
+        
+        
     </Grid>
 
 </Window>
