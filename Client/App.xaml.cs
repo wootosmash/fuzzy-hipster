@@ -33,11 +33,30 @@ namespace Client
 
       base.OnStartup(e);
 
+      var thread = new Thread(
+        new ThreadStart(
+            delegate
+            {
+                var catalog = Catalog.Load(".");
+                var rwt = new FuzzyHipster.RWTorrent(catalog);
+                OnRWTorrentLoaded(new EventArgs());
+                rwt.Start();
+            }
+       )
+   );
+
+
+      thread.IsBackground = true;
+      thread.Start();
+      Thread.Sleep(10000);
+
+
+
       MainWindow app = new MainWindow();
       MainWindowModel context = new MainWindowModel();
       app.DataContext = context;
       app.Show();
-      
+      MainWindowModel.ChangeModel(new CatalogViewModel());
             
 
       RWTorrentLoaded += delegate {
@@ -48,18 +67,7 @@ namespace Client
       
       //TaskOfTResult_MethodAsync();
       
-      var thread = new Thread( 
-          new ThreadStart( 
-              delegate {
-                var catalog = Catalog.Load(".");
-                var rwt = new FuzzyHipster.RWTorrent(catalog);
-                OnRWTorrentLoaded(new EventArgs());
-                rwt.Start();
-            }
-         )
-     );
-      thread.IsBackground = true;
-      thread.Start();
+      
 
 
     }

@@ -14,14 +14,14 @@ namespace Client
 
         public MyListViewModel()
         {
-            RWTorrent.Singleton.Network.NewWad += Network_NewWad;
+            RWTorrent.Singleton.Network.NewStack += Network_NewStack;
         }
 
-        void Network_NewWad(object sender, FuzzyHipster.Network.GenericEventArgs<FileWad> e)
+        void Network_NewStack(object sender, FuzzyHipster.Network.GenericEventArgs<Stack> e)
         {
             OnPropertyChanged("Stacks");
-          
-        } 
+        }
+
         
         public string Name
         {
