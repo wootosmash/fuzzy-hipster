@@ -105,27 +105,7 @@ namespace FuzzyHipster.Network
     }
   }
   
-  [Serializable()]
-  [StructLayout(LayoutKind.Sequential, Pack=1)]
-  public class StacksNetMessage : NetMessage
-  {
-    public Stack [] Stacks { get; set; }
-    
-    public StacksNetMessage()
-    {
-      Type = MessageType.Stacks;
-      Stacks = new Stack[0];
-    }
-    
-    public override string ToString()
-    {
-      if ( Stacks.Length == 0 )
-        return "[StacksNetMessage Stacks.Count=0]";
-      else
-        return string.Format("[StacksNetMessage Stacks={0}]", Stacks);
-    }
-
-  }
+  
   
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack=1)]

@@ -12,89 +12,7 @@ using System.Threading;
 using FuzzyHipster.Catalog;
 
 namespace FuzzyHipster.Network
-{
-  // State object for reading client data asynchronously
-  public class ReceiveStateObject
-  {
-    public const int BufferSize = 65536*4;
-
-    public Peer Peer = null;
-    public bool WaitingLengthFrame = true;
-    public int ExpectedLength = 4;
-
-    public byte[] Buffer = new byte[BufferSize];
-  }
-  
-  public class SendState
-  {
-    public NetMessage Message;
-    public Peer Peer;
-  }
-  
-  public class GenericEventArgs<T> : EventArgs
-  {
-    public T Value { get; set; }
-    
-    public GenericEventArgs(T value)
-    {
-      Value = value;
-    }
-  }
-
-  public class MessageComposite<T> : EventArgs
-  {
-    public Peer Peer { get; set; }
-    public T Value { get; set; }
-    
-    public MessageComposite( Peer peer, T value )
-    {
-      Peer = peer;
-      Value = value;
-    }
-  }
-  
-  public class BlockReceivedEventArgs : EventArgs
-  {
-    public int Block { get; set; }
-    public Guid FileWadId { get; set; }
-    public Peer Peer { get; set; }
-    
-    public BlockReceivedEventArgs( Peer peer, Guid fileWadId, int block )
-    {
-      this.Peer = peer;
-      this.Block = block;
-      this.FileWadId = fileWadId;
-    }
-  }
-  
-  public class BlockRequestedEventArgs : EventArgs
-  {
-    public int Block { get; set; }
-    public Guid FileWadId { get; set; }
-    public Peer Peer { get; set; }
-    
-    public BlockRequestedEventArgs( Peer peer, Guid fileWadId, int block )
-    {
-      this.Peer = peer;
-      this.Block = block;
-      this.FileWadId = fileWadId;
-    }
-  }
-  
-  public class BlockTransferStartedEventArgs : EventArgs
-  {
-    public int Block { get; set; }
-    public Guid FileWadId { get; set; }
-    public Peer Peer { get; set; }
-    
-    public BlockTransferStartedEventArgs( Peer peer, Guid fileWadId, int block )
-    {
-      this.Peer = peer;
-      this.Block = block;
-      this.FileWadId = fileWadId;
-    }
-  }
-  
+{  
   public class RWNetwork
   {
     public const int RWDefaultPort = 7892;
@@ -104,6 +22,9 @@ namespace FuzzyHipster.Network
     public Socket Listener { get; set; }
     public Guid Id { get; set; }
     public SortedList<Guid, TransferManager> InProgressTransfers { get; set; }
+    
+    public long BytesReceived { get; set; }
+    public long BytesSent { get; set; }
     
     Random random = new Random(DateTime.Now.Millisecond);
     ManualResetEvent allDone = new ManualResetEvent(false);
@@ -298,6 +219,9 @@ namespace FuzzyHipster.Network
     /// <param name="port"></param>
     public void StartListening( int port )
     {
+      BytesReceived = 0;
+      BytesSent = 0;
+      
       // Data buffer for incoming data.
       byte[] bytes = new Byte[1024];
 
@@ -338,7 +262,7 @@ namespace FuzzyHipster.Network
       
       var peer = new Peer()
       {
-        Id = Guid.Empty,
+        Id = Guid.NewGuid(),
         Socket = handler,
         IPAddress = (handler.RemoteEndPoint as IPEndPoint).Address.ToString(),
         Port = (handler.RemoteEndPoint as IPEndPoint).Port,
@@ -349,6 +273,8 @@ namespace FuzzyHipster.Network
       };
       
       ActivePeers.Add(peer);
+      
+      OnPeerConnected( new GenericEventArgs<Peer>(peer));
       
       // Create the state object.
       var state = new ReceiveStateObject();
@@ -368,12 +294,13 @@ namespace FuzzyHipster.Network
       {
 
         int bytesRead = peer.Socket.EndReceive(ar);
+        peer.BytesReceived += bytesRead;
+        BytesReceived += bytesRead;
         
         if ( bytesRead == state.ExpectedLength )
         {
           if ( state.WaitingLengthFrame )
           {
-            Console.WriteLine("Received Length Frame");
             state.ExpectedLength = BitConverter.ToInt32(state.Buffer, 0);
             if ( state.ExpectedLength < state.Buffer.Length )
               peer.Socket.BeginReceive( state.Buffer, 0, state.ExpectedLength, 0,
@@ -382,7 +309,6 @@ namespace FuzzyHipster.Network
           }
           else
           {
-            Console.WriteLine("Received Message Frame");
             NetMessage message = NetMessage.FromBytes(state.Buffer);
             
             ProcessMessage(message, state);
@@ -402,7 +328,6 @@ namespace FuzzyHipster.Network
       catch( Exception ex )
       {
         Disconnect(peer);
-        
         Console.WriteLine(ex);
       }
     }
@@ -439,6 +364,7 @@ namespace FuzzyHipster.Network
           state.Peer.Name = status.Peers[0].Name;
           state.Peer.PeerCount = status.Peers[0].PeerCount;
           state.Peer.Uptime = status.Peers[0].Uptime;
+          state.Peer.IPAddress = (state.Peer.Socket.RemoteEndPoint as IPEndPoint).Address.ToString();
           
           break;
           
@@ -556,6 +482,18 @@ namespace FuzzyHipster.Network
       }
     }
     
+    public void Disconnect( Peer peer )
+    {
+      if ( peer.Socket != null )
+      {
+        peer.Socket.Dispose();
+        peer.Socket = null;
+      }
+      ActivePeers.Remove(peer);
+    }
+    
+    
+    
     public void RequestStacks( Peer peer, long recency, int count )
     {
       var msg = new RequestStacksNetMessage();
@@ -592,11 +530,11 @@ namespace FuzzyHipster.Network
 
     }
     
-    public void SendPeerList(Peer peer, Peer[] peers )
+    public void SendPeerList(Peer to, Peer[] peers )
     {
       var msg = new PeerListNetMessage();
       msg.Peers = peers;
-      Send(msg, peer);
+      Send(msg, to);
 
     }
 
@@ -691,22 +629,6 @@ namespace FuzzyHipster.Network
         }
       }
     }
-    
-    public void Disconnect( Peer peer )
-    {
-      if ( peer.Socket != null )
-      {
-        peer.Socket.Dispose();
-        peer.Socket = null;
-      }
-      ActivePeers.Remove(peer);
-    }
-    
-    void Log( string format, params object [] args )
-    {
-      string str = string.Format(format, args );
-      Console.WriteLine("{0} {1}", Id, str);
-    }
 
     void EndSendCallback(IAsyncResult ar)
     {
@@ -716,6 +638,8 @@ namespace FuzzyHipster.Network
         if ( state.Peer.IsConnected )
         {
           int bytesSent = state.Peer.Socket.EndSend(ar);
+          state.Peer.BytesSent += bytesSent;
+          BytesSent += bytesSent;
           Log("SENT: {0} {1} bytes to client.", state.Message, bytesSent);
         }
       }
@@ -724,6 +648,12 @@ namespace FuzzyHipster.Network
         Disconnect(state.Peer);
         Console.WriteLine(e.ToString());
       }
+    }
+    
+    void Log( string format, params object [] args )
+    {
+      string str = string.Format(format, args );
+      Console.WriteLine("{0} {1}", Id, str);
     }
   }
   

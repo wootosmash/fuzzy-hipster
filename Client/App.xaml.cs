@@ -30,7 +30,7 @@ namespace Client
 
     protected override void OnStartup(StartupEventArgs e)
     {
-
+      
       base.OnStartup(e);
 
       var thread = new Thread(
@@ -56,18 +56,9 @@ namespace Client
       MainWindowModel context = new MainWindowModel();
       app.DataContext = context;
       app.Show();
-      MainWindowModel.ChangeModel(new CatalogViewModel());
-            
 
-      RWTorrentLoaded += delegate {
-        Dispatcher.BeginInvoke((Action)(() => {
-            MainWindowModel.ChangeModel(new CatalogViewModel());
-        }));
-      };
-      
-      //TaskOfTResult_MethodAsync();
-      
-      
+      MainWindowModel.ChangeModel(new CatalogViewModel());
+
 
 
     }

@@ -50,6 +50,7 @@ namespace FuzzyHipster.Catalog
       {
         catalog = new Catalog();
         catalog.BasePath = basePath;
+        catalog.Save(); // cleans up the bogus directory
       }
       else
       {

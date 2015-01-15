@@ -20,9 +20,7 @@ namespace FuzzyHipster
     public Guid Id { get; set; }
     public string Name { get; set; }
 
-    public DateTime NextConnectionAttempt { get; set; }
-    public int FailedConnectionAttempts { get; set; }
-
+    // network properties
     public string IPAddress { get; set; }
     public int Port { get; set; }
 
@@ -50,6 +48,8 @@ namespace FuzzyHipster
 
 
     // network statistics
+    public DateTime NextConnectionAttempt { get; set; }
+    public int FailedConnectionAttempts { get; set; }
     public int PeerCount { get; set; }
     public long Uptime { get; set; }
     public int MaxBlockPacketSize { get; set; }
@@ -112,8 +112,9 @@ namespace FuzzyHipster
     
     public override string ToString()
     {
-      return string.Format("[Peer Socket={0}, Id={1}, Name={2}, PeerCount={3}, CatalogRecency={4}, Uptime={5}, IPAddress={6}, Port={7}]", socket, Id, Name, PeerCount, CatalogRecency, Uptime, IPAddress, Port);
+      return string.Format("[Peer Socket={0}, BytesSent={1}, BytesReceived={2}, Id={3}, Name={4}, IPAddress={5}, Port={6}, NextConnectionAttempt={7}, FailedConnectionAttempts={8}, PeerCount={9}, Uptime={10}, MaxBlockPacketSize={11}, EstimatedBandwidth={12}, CatalogRecency={13}]", socket, bytesSent, bytesReceived, Id, Name, IPAddress, Port, NextConnectionAttempt, FailedConnectionAttempts, PeerCount, Uptime, MaxBlockPacketSize, EstimatedBandwidth, CatalogRecency);
     }
+
     
     #region IEquatable implementation
     public bool Equals(Peer other)
