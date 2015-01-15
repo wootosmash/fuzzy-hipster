@@ -41,6 +41,7 @@ namespace FuzzyHipster
       Me = new Peer();
       Me.Port = Settings.Port;
       Me.Id = catalog.Guid;
+      Me.Name = Environment.MachineName;
       
       Peers = PeerCollection.Load(Catalog.BasePath);
       Peers.RefreshPeer(Me);
@@ -102,6 +103,7 @@ namespace FuzzyHipster
     
     void NetworkPeerConnected( object sender, GenericEventArgs<Peer> e)
     {
+      Peers.RefreshPeer(e.Value);
       e.Value.FailedConnectionAttempts = 0;
       Network.SendMyStatus(e.Value, Me);
     }
