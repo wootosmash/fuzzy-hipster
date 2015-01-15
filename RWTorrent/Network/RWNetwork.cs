@@ -12,7 +12,7 @@ using System.Threading;
 using FuzzyHipster.Catalog;
 
 namespace FuzzyHipster.Network
-{  
+{
   public class RWNetwork
   {
     public const int RWDefaultPort = 7892;
@@ -365,6 +365,13 @@ namespace FuzzyHipster.Network
           state.Peer.PeerCount = status.Peers[0].PeerCount;
           state.Peer.Uptime = status.Peers[0].Uptime;
           state.Peer.IPAddress = (state.Peer.Socket.RemoteEndPoint as IPEndPoint).Address.ToString();
+          state.Peer.Port = status.Peers[0].Port;
+          
+          if ( !ActivePeers.Contains(state.Peer))
+            ActivePeers.Add(state.Peer);
+            
+          OnNewPeer(new GenericEventArgs<Peer>(state.Peer));
+          
           
           break;
           
@@ -372,7 +379,8 @@ namespace FuzzyHipster.Network
           var peerList = msg as PeerListNetMessage;
           
           foreach( var peer in peerList.Peers )
-            OnNewPeer(new GenericEventArgs<Peer>(peer));
+            if ( !String.IsNullOrWhiteSpace(peer.IPAddress))
+              OnNewPeer(new GenericEventArgs<Peer>(peer));
           break;
           
         case MessageType.Stacks:

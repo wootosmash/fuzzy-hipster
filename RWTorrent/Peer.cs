@@ -98,7 +98,8 @@ namespace FuzzyHipster
       Uptime = peer.Uptime;
       EstimatedBandwidth = peer.EstimatedBandwidth;
       MaxBlockPacketSize = peer.MaxBlockPacketSize;
-      
+      IPAddress = peer.IPAddress;
+      Port = peer.Port;      
     }
     
     /// <summary>

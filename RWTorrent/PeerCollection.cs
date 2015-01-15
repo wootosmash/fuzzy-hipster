@@ -33,6 +33,8 @@ namespace FuzzyHipster
         myPeer = FindBySocket(peer.Socket);
         if ( myPeer != null )
           myPeer.UpdateFromCopy(peer);
+        else
+          Add(peer.Id, peer);
       }
       else if (ContainsKey(peer.Id))
       {
