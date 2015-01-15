@@ -4,15 +4,7 @@
                        xmlns:ctl="clr-namespace:Client.Controls" xmlns:Client="clr-namespace:Client" 
     x:Class="Client.WindowStyle.OfficeStyleWindow"
     >
-    <LinearGradientBrush x:Key="TitleBarBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
-        <LinearGradientBrush.GradientStops>
-            <GradientStopCollection>
-                <GradientStop Color="#E7EBF7" Offset="0.0"/>
-                <GradientStop Color="#CEE3FF" Offset="0.5"/>
-                <GradientStop Color="#DEF7FF" Offset="1.0"/>
-            </GradientStopCollection>
-        </LinearGradientBrush.GradientStops>
-    </LinearGradientBrush>
+    
 
     <Style TargetType="{x:Type Border}" x:Key = "MainBorder">
         <Setter Property="Background" Value="#a2a2a2" />
@@ -45,6 +37,8 @@
             </GradientStopCollection>
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#f9f9f9" />
 
     <SolidColorBrush x:Key="BorderBrush" Color="#6593CF" />
     <SolidColorBrush x:Key="TabTextBrush" Color="#4971A3" />

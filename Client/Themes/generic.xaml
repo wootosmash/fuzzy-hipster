@@ -15,7 +15,8 @@
     </LinearGradientBrush>
 
     <SolidColorBrush x:Key="BorderBrush" Color="#d6dbe9" />
-    <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#ffffff" />
+
+    <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#dee7ef" />
 
 
 

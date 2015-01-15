@@ -79,9 +79,13 @@
     <Compile Include="LongToMBConverter.cs" />
     <Compile Include="MainWindowModel.cs" />
     <Compile Include="Themes\OfficeStyleWindow.cs" />
+    <Compile Include="ViewModels\AddFilesViewModel.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
     <Compile Include="ViewModels\NewChannelViewModel.cs" />
     <Compile Include="ViewModels\SplashViewModel.cs" />
+    <Compile Include="Views\AddFilesView.xaml.cs">
+      <DependentUpon>AddFilesView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\CatalogView.xaml.cs">
       <DependentUpon>CatalogView.xaml</DependentUpon>
     </Compile>
@@ -101,6 +105,10 @@
     <Compile Include="ViewModels\StartUpViewModel.cs" />
     <Compile Include="Helpers\UserSettings.cs" />
     <Compile Include="Helpers\Utils.cs" />
+    <Page Include="Layouts\CentralSingle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Layouts\LeftRight.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -118,6 +126,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Themes\generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AddFilesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
