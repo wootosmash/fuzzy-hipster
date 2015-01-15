@@ -12,100 +12,119 @@ using System.Xml.Serialization;
 namespace FuzzyHipster.Catalog
 {
   [Serializable()]
-	public class FileWad
-	{
-	  public Guid Id { get; set; }
-	  
-	  public Guid StackId { get; set; }
+  public class FileWad
+  {
+    public Guid Id { get; set; }
+    
+    public Guid StackId { get; set; }
 
-	  public string Name { get; set; }
+    public string Name { get; set; }
 
-	  public string Description { get; set; }
+    public string Description { get; set; }
 
-	  public long BlockSize { get; set; }
+    public long BlockSize { get; set; }
 
-	  public int TotalBlocks { get; set; }
-	  
-	  public long TotalSize { get; set; }
-	  
-	  public long LastUpdate { get; set; }	    
+    public int TotalBlocks { get; set; }
+    
+    public long TotalSize { get; set; }
+    
+    public long LastUpdate { get; set; }
 
-		public FileDescriptorCollection Files { get; set; }	    
+    public FileDescriptorCollection Files { get; set; }
 
-		public BlockIndexItemCollection BlockIndex { get; set; }
+    public BlockIndexItemCollection BlockIndex { get; set; }
 
-		public FileWad()
-		{
-      Id = Guid.NewGuid();		  
-			Files = new FileDescriptorCollection();
-			BlockIndex = new BlockIndexItemCollection();
-			LastUpdate = DateTime.Now.ToFileTimeUtc();
-		}
+    public FileWad()
+    {
+      Id = Guid.NewGuid();
+      Files = new FileDescriptorCollection();
+      BlockIndex = new BlockIndexItemCollection();
+      LastUpdate = DateTime.Now.ToFileTimeUtc();
+    }
 
-		public bool VerifyBlock(Block block)
-		{
-			if (block.Sequence >= BlockIndex.Count)
-				return false;
-			// sequence wrong
-			if (block.Sequence <= -1)
-				return false;
-			// sequence wrong
-			BlockIndexItem item = BlockIndex[block.Sequence];
-			if (block.Length != item.Length)
-				return false;
-			// block length doesn't match expected length
-			if (block.Hash != item.Hash)
-				return false;
-			// hashes dont match
-			if (block.Data.Length != BlockSize)
-				return false;
-			// length of data buffer doesn't match block size
-			return true;
-		}
+    public void CatalogBlock( int block, string tempFile )
+    {
+      string path = string.Format(@"{0}\Catalog\{1}\{2}\", RWTorrent.Singleton.Catalog.BasePath, this.StackId, Id);
+      if ( Directory.Exists( path ))
+        Directory.CreateDirectory(path);
+    }
+    
+    public bool VerifyBlock(string tempFile )
+    {
+//			if (block.Sequence >= BlockIndex.Count)
+//				return false;
+//			// sequence wrong
+//			if (block.Sequence <= -1)
+//				return false;
+//			// sequence wrong
+//			BlockIndexItem item = BlockIndex[block.Sequence];
+//			if (block.Length != item.Length)
+//				return false;
+//			// block length doesn't match expected length
+//			if (block.Hash != item.Hash)
+//				return false;
+//			// hashes dont match
+//			if (block.Data.Length != BlockSize)
+//				return false;
+//			// length of data buffer doesn't match block size
+      return true;
+    }
 
-		public void BuildFromPath(string path)
-		{
-			if (!Directory.Exists(path))
-			  throw new Exception(string.Format("Path {0} doesn't exist", path));
-			
-			long totalLength = RecursiveBuildFiles(path, path);
-			
-			TotalBlocks = (int)Math.Ceiling((double)totalLength / (double)BlockSize);
-			
-			for (int i = 0; i < TotalBlocks; i++) 
-			{
-				var block = new BlockIndexItem();
-				block.Length = BlockSize;
-				block.Downloaded = true;
+    /// <summary>
+    /// Build a FileWad from either a File Path or Directory Path
+    /// </summary>
+    /// <param name="path"></param>
+    public void BuildFromPath(string path)
+    {
+      bool isFile = File.Exists(path);
+      long totalLength = 0;
+      
+      if ( isFile )
+        totalLength = AddFile(Path.GetDirectoryName(path), path);
+      else
+      {
+        if (!Directory.Exists(path))
+          throw new Exception(string.Format("Path {0} doesn't exist", path));
+        
+        totalLength = RecursiveBuildFiles(path, path);
+      }
+      
+      TotalBlocks = (int)Math.Ceiling((double)totalLength / (double)BlockSize);
+      
+      for (int i = 0; i < TotalBlocks; i++)
+      {
+        var block = new BlockIndexItem();
+        block.Length = BlockSize;
+        block.Downloaded = true;
 //				block.Hash = GetHash();
-				BlockIndex.Add(block);
-			}
-			
-			if (totalLength % BlockSize > 0)
-				BlockIndex[BlockIndex.Count - 1].Length = totalLength % BlockSize;
-			
-			int lastBlock = 0;
-			long lastOffset = 0;
-			
-			foreach (FileDescriptor file in Files) 
-			{
-				file.StartBlock = lastBlock;
-				lastBlock += (int)Math.Floor((double)file.Length / (double)BlockSize);
-				
-				if (lastOffset == 0)
-					lastBlock++;
-				
-				file.EndBlock = lastBlock;
-				file.StartOffset = lastOffset;
-				
-				if (file.StartBlock == file.EndBlock)
-					lastOffset += (long)file.Length % BlockSize;
-				else
-					lastOffset = (long)file.Length % BlockSize;
-				
-				file.EndOffset = lastOffset;
-			}
-		}
+        BlockIndex.Add(block);
+      }
+      
+      if (totalLength % BlockSize > 0)
+        BlockIndex[BlockIndex.Count - 1].Length = totalLength % BlockSize;
+      
+      int lastBlock = 0;
+      long lastOffset = 0;
+      
+      foreach (FileDescriptor file in Files)
+      {
+        file.StartBlock = lastBlock;
+        lastBlock += (int)Math.Floor((double)file.Length / (double)BlockSize);
+        
+        if (lastOffset == 0)
+          lastBlock++;
+        
+        file.EndBlock = lastBlock;
+        file.StartOffset = lastOffset;
+        
+        if (file.StartBlock == file.EndBlock)
+          lastOffset += (long)file.Length % BlockSize;
+        else
+          lastOffset = (long)file.Length % BlockSize;
+        
+        file.EndOffset = lastOffset;
+      }
+    }
 
     public void Save()
     {
@@ -121,44 +140,48 @@ namespace FuzzyHipster.Catalog
     }
     
     public static FileWad Load( string filePath )
-    {     
+    {
       if ( !File.Exists(filePath))
         return null;
       
       var serialiser = new XmlSerializer(typeof(FileWad));
       using (var reader = new StreamReader(filePath))
-        return serialiser.Deserialize(reader) as FileWad;      
+        return serialiser.Deserialize(reader) as FileWad;
     }
-		
-		private long RecursiveBuildFiles(string basePath, string path)
-		{
-			string[] files = Directory.GetFiles(path);
-			long totalLength = 0;
-			
-			foreach (string file in files) 
-			{
-				var info = new FileInfo(file);
-				var descriptor = new FileDescriptor() 
-				{
-					CatalogFilepath = file.Substring(basePath.Length),
-					LocalFilepath = file,
-					IsAllocated = true,
-					Length = info.Length
-				};
-				
-				Files.Add(descriptor);
-				totalLength += info.Length;
-				
-				Console.WriteLine(descriptor.ToString());
-			}
-			
-			foreach (string dir in Directory.GetDirectories(path)) 
-			{
-				totalLength += RecursiveBuildFiles(basePath, dir);
-			}
-			return totalLength;
-		}
-	}
+    
+    private long AddFile(string basePath, string file)
+    {
+      var info = new FileInfo(file);
+      var descriptor = new FileDescriptor()
+      {
+        CatalogFilepath = file.Substring(basePath.Length),
+        LocalFilepath = file,
+        IsAllocated = true,
+        Length = info.Length
+      };
+      
+      Console.WriteLine(descriptor.ToString());
+      Files.Add(descriptor);
+      return info.Length;
+    }
+    
+    private long RecursiveBuildFiles(string basePath, string path)
+    {
+      string[] files = Directory.GetFiles(path);
+      long totalLength = 0;
+      
+      foreach (string file in files)
+      {
+        totalLength += AddFile(basePath, file);
+      }
+      
+      foreach (string dir in Directory.GetDirectories(path))
+      {
+        totalLength += RecursiveBuildFiles(basePath, dir);
+      }
+      return totalLength;
+    }
+  }
 }
 
 

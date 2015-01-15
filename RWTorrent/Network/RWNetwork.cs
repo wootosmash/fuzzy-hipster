@@ -16,9 +16,10 @@ namespace FuzzyHipster.Network
   // State object for reading client data asynchronously
   public class ReceiveStateObject
   {
-    public const int BufferSize = 2048;
+    public const int BufferSize = 65536;
 
     public Peer Peer = null;
+    public bool WaitingFrame = true;
 
     public byte[] Buffer = new byte[BufferSize];
   }
@@ -51,6 +52,48 @@ namespace FuzzyHipster.Network
     }
   }
   
+  public class BlockReceivedEventArgs : EventArgs
+  {
+    public int Block { get; set; }
+    public Guid FileWadId { get; set; }
+    public Peer Peer { get; set; }
+    
+    public BlockReceivedEventArgs( Peer peer, Guid fileWadId, int block )
+    {
+      this.Peer = peer;
+      this.Block = block;
+      this.FileWadId = fileWadId;
+    }
+  }
+  
+  public class BlockRequestedEventArgs : EventArgs
+  {
+    public int Block { get; set; }
+    public Guid FileWadId { get; set; }
+    public Peer Peer { get; set; }
+    
+    public BlockRequestedEventArgs( Peer peer, Guid fileWadId, int block )
+    {
+      this.Peer = peer;
+      this.Block = block;
+      this.FileWadId = fileWadId;
+    }
+  }
+  
+  public class BlockTransferStartedEventArgs : EventArgs 
+  {
+    public int Block { get; set; }
+    public Guid FileWadId { get; set; }
+    public Peer Peer { get; set; }
+    
+    public BlockTransferStartedEventArgs( Peer peer, Guid fileWadId, int block )
+    {
+      this.Peer = peer;
+      this.Block = block;
+      this.FileWadId = fileWadId;
+    }
+  }
+  
   public class RWNetwork
   {
     public const int RWDefaultPort = 7892;
@@ -66,6 +109,9 @@ namespace FuzzyHipster.Network
     
     #region events
     
+    /// <summary>
+    /// Fires when a peer disconnects
+    /// </summary>
     public event EventHandler<GenericEventArgs<Peer>> PeerDisconnected;
     protected virtual void OnPeerDisconnected(GenericEventArgs<Peer> e)
     {
@@ -74,6 +120,9 @@ namespace FuzzyHipster.Network
         handler(this, e);
     }
     
+    /// <summary>
+    /// Fires when a peer connects
+    /// </summary>
     public event EventHandler<GenericEventArgs<Peer>> PeerConnected;
     protected virtual void OnPeerConnected(GenericEventArgs<Peer> e)
     {
@@ -82,6 +131,9 @@ namespace FuzzyHipster.Network
         handler(this, e);
     }
     
+    /// <summary>
+    /// Fire when we fail to connect to a peer
+    /// </summary>
     public event EventHandler<GenericEventArgs<Peer>> PeerConnectFailed;
     protected virtual void OnPeerConnectFailed(GenericEventArgs<Peer> e)
     {
@@ -90,6 +142,9 @@ namespace FuzzyHipster.Network
         handler(this, e);
     }
     
+    /// <summary>
+    /// Fires when there's a new stack
+    /// </summary>
     public event EventHandler<GenericEventArgs<Stack>> NewStack;
     protected virtual void OnNewStack(GenericEventArgs<Stack> e)
     {
@@ -98,6 +153,9 @@ namespace FuzzyHipster.Network
         handler(this, e);
     }
 
+    /// <summary>
+    /// Fires when there's a new WAD
+    /// </summary>
     public event EventHandler<GenericEventArgs<FileWad>> NewWad;
     protected virtual void OnNewWad(GenericEventArgs<FileWad> e)
     {
@@ -106,6 +164,9 @@ namespace FuzzyHipster.Network
         handler(this, e);
     }
 
+    /// <summary>
+    /// Fires when we hear about a new Peer
+    /// </summary>
     public event EventHandler<GenericEventArgs<Peer>> NewPeer;
     protected virtual void OnNewPeer(GenericEventArgs<Peer> e)
     {
@@ -114,6 +175,9 @@ namespace FuzzyHipster.Network
         handler(this, e);
     }
 
+    /// <summary>
+    /// Fires when a request for peers is received
+    /// </summary>
     public event EventHandler<MessageComposite<RequestPeersNetMessage>> PeersRequested;
     protected virtual void OnPeersRequested(MessageComposite<RequestPeersNetMessage> e)
     {
@@ -122,6 +186,9 @@ namespace FuzzyHipster.Network
         handler(this, e);
     }
 
+    /// <summary>
+    /// Fires when we received a request for stacks
+    /// </summary>
     public event EventHandler<MessageComposite<RequestStacksNetMessage>> StacksRequested;
 
     protected virtual void OnStacksRequested(MessageComposite<RequestStacksNetMessage> e)
@@ -131,11 +198,86 @@ namespace FuzzyHipster.Network
         handler(this, e);
     }
 
+    /// <summary>
+    /// Fires when we receive a request for Wads
+    /// </summary>
     public event EventHandler<MessageComposite<RequestWadsNetMessage>> WadsRequested;
 
     protected virtual void OnWadsRequested(MessageComposite<RequestWadsNetMessage> e)
     {
       var handler = WadsRequested;
+      if (handler != null)
+        handler(this, e);
+    }
+    
+    /// <summary>
+    /// Fires when we receive a request for the blocks we have available
+    /// </summary>
+    public event EventHandler<MessageComposite<RequestBlocksAvailableNetMessage>> BlocksAvailableRequested;
+
+    protected virtual void OnBlocksAvailableRequested(MessageComposite<RequestBlocksAvailableNetMessage> e)
+    {
+      var handler = BlocksAvailableRequested;
+      if (handler != null)
+        handler(this, e);
+    }
+
+    /// <summary>
+    /// Fires when we receive a list of blocks available for a peer
+    /// </summary>
+    public event EventHandler<MessageComposite<BlocksAvailableNetMessage>> BlocksAvailableReceived;
+
+    protected virtual void OnBlocksAvailableReceived(MessageComposite<BlocksAvailableNetMessage> e)
+    {
+      var handler = BlocksAvailableReceived;
+      if (handler != null)
+        handler(this, e);
+    }
+    
+    /// <summary>
+    /// Fires when we receive a request to transfer a block
+    /// </summary>
+    public event EventHandler<BlockRequestedEventArgs> BlockRequested;
+
+    protected virtual void OnBlockRequested(BlockRequestedEventArgs e)
+    {
+      var handler = BlockRequested;
+      if (handler != null)
+        handler(this, e);
+    }
+    
+    /// <summary>
+    /// Fires when we start receiving a block
+    /// </summary>
+    public event EventHandler<BlockTransferStartedEventArgs> BlockTransferStarted;
+
+    protected virtual void OnBlockTransferStarted(BlockTransferStartedEventArgs e)
+    {
+      var handler = BlockTransferStarted;
+      if (handler != null)
+        handler(this, e);
+    }
+
+    /// <summary>
+    /// Fires when a block has completing transfering to us
+    /// </summary>
+    public event EventHandler<BlockReceivedEventArgs> BlockReceived;
+
+    protected virtual void OnBlockReceived(BlockReceivedEventArgs e)
+    {
+      var handler = BlockReceived;
+      if (handler != null)
+        handler(this, e);
+    }
+    
+    /// <summary>
+    /// Fires when we receive a raw net message -- usually dont need to use this
+    /// </summary>
+    public event EventHandler<GenericEventArgs<NetMessage>> NetMessageReceived;
+
+    protected virtual void OnNetMessageReceived(GenericEventArgs<NetMessage> e)
+    {
+      var handler = NetMessageReceived;
       if (handler != null)
         handler(this, e);
     }
@@ -149,6 +291,10 @@ namespace FuzzyHipster.Network
       InProgressTransfers = new SortedList<Guid, TransferManager>();
     }
 
+    /// <summary>
+    /// Starts the Network listening for incoming connections
+    /// </summary>
+    /// <param name="port"></param>
     public void StartListening( int port )
     {
       // Data buffer for incoming data.
@@ -206,8 +352,8 @@ namespace FuzzyHipster.Network
       // Create the state object.
       var state = new ReceiveStateObject();
       state.Peer = peer;
-      handler.BeginReceive( state.Buffer, 0, state.Buffer.Length, 0,
-                           new AsyncCallback(WaitMessageCallback), state);
+      handler.BeginReceive( state.Buffer, 0, sizeof(int), 0,
+                           new AsyncCallback(WaitMessageCallback), state); // get the message size first
     }
 
     void WaitMessageCallback(IAsyncResult ar)
@@ -222,18 +368,32 @@ namespace FuzzyHipster.Network
         
         if ( bytesRead > 0 )
         {
-          NetMessage message = NetMessage.FromBytes(state.Buffer);
-          
-          ProcessMessage(message, state);
+          if ( state.WaitingFrame )
+          {
+            int length = BitConverter.ToInt32(state.Buffer, 0);
+            if ( length < state.Buffer.Length )
+              peer.Socket.BeginReceive( state.Buffer, 0, length, 0,
+                                       new AsyncCallback(WaitMessageCallback), state);
+            state.WaitingFrame = false;
+          }
+          else
+          {
+            NetMessage message = NetMessage.FromBytes(state.Buffer);
+            
+            ProcessMessage(message, state);
+            OnNetMessageReceived(new GenericEventArgs<NetMessage>(message));
+            peer.Socket.BeginReceive( state.Buffer, 0, sizeof(int), 0,
+                                     new AsyncCallback(WaitMessageCallback), state); // read the message size first
+            state.WaitingFrame = true; // waiting for the message size
+          }
         }
 
-        peer.Socket.BeginReceive( state.Buffer, 0, state.Buffer.Length, 0,
-                                 new AsyncCallback(WaitMessageCallback), state);
       }
       catch( Exception ex )
       {
         ActivePeers.Remove(peer);
         peer.Socket.Dispose();
+        OnPeerDisconnected( new GenericEventArgs<Peer>(peer));
         
         Console.WriteLine(ex);
       }
@@ -293,25 +453,42 @@ namespace FuzzyHipster.Network
             OnNewWad( new GenericEventArgs<FileWad>(wad));
           break;
           
-//        case MessageType.StartFileTransfer:
-//          var startTransfer = msg as StartFileTransferNetMessage;
-//          
-//          var mgr = new TransferManager();
-//          mgr.ExpectedPackets = startTransfer.Packets;
-//          mgr.TransferId = startTransfer.TransferId;
-//          mgr.NextPacket = 0;
-//          
-//          
-//          InProgressTransfers.Add(startTransfer.TransferId, mgr);
+        case MessageType.RequestBlocksAvailable:
+          var requestBlockAvailability = msg as RequestBlocksAvailableNetMessage;
+          OnBlocksAvailableRequested(new MessageComposite<RequestBlocksAvailableNetMessage>(state.Peer, requestBlockAvailability));
+          break;
           
-//          break;
-//          
-//        case MessageType.FileTransferPacket:
-//          var packet = msg as FileTransferPacketNetMessage;
-//          
-//          InProgressTransfers[packet.TransferId].SavePacket(msg);
-//          
-//          break;
+        case MessageType.BlocksAvailable:
+          var blockAvailablity = msg as BlocksAvailableNetMessage;
+          OnBlocksAvailableReceived( new MessageComposite<BlocksAvailableNetMessage>(state.Peer, blockAvailablity));
+          break;
+          
+        case MessageType.StartBlockTransfer:
+          
+          var startTransfer = msg as StartBlockTransferNetMessage;
+
+          var mgr = new BlockTransferManager();
+          mgr.ExpectedPackets = startTransfer.TotalPackets;
+          mgr.TransferId = startTransfer.TransferId;
+          mgr.FileWadId = startTransfer.FileWadId;
+          mgr.TotalLength = startTransfer.BlockSize;
+
+          InProgressTransfers.Add(startTransfer.TransferId, mgr);
+          
+          break;
+
+        case MessageType.BlockTransferPacket:
+          var packet = msg as BlockPacketNetMessage;
+          var transferManager = InProgressTransfers[packet.TransferId];
+          transferManager.SavePacket(packet);
+          if ( transferManager.IsCompleted )
+          {
+            InProgressTransfers.Remove(transferManager.TransferId);
+            
+            OnBlockReceived( new BlockReceivedEventArgs( state.Peer, transferManager.FileWadId, transferManager.Block ));
+          }
+
+          break;
       }
     }
     
@@ -418,6 +595,34 @@ namespace FuzzyHipster.Network
       msg.Wads = wads;
       Send(peer, msg);
     }
+    
+    public void SendBlock( Peer peer, FileWad fileWad, int block )
+    {
+      var msg = new StartBlockTransferNetMessage();
+      msg.Block = block;
+      msg.BlockSize = (int)fileWad.BlockIndex[block].Length;
+      msg.TotalPackets = (int)Math.Ceiling((decimal)fileWad.BlockIndex[block].Length / 40000);
+      msg.TransferId = Guid.NewGuid();
+      Send(peer, msg);
+    }
+    
+    public void RequestBlock( Peer peer, FileWad fileWad, int block )
+    {
+      var msg = new RequestBlockNetMessage();
+      msg.Block = block;
+      msg.FileWadId = fileWad.Id;
+      Send(peer, msg);
+    }
+    
+    public void SendBlocksAvailable( Peer peer, FileWad fileWad )
+    {
+      var msg = new BlocksAvailableNetMessage();
+      msg.BlocksAvailable = new bool[fileWad.BlockIndex.Count];
+      for(int i=0;i<fileWad.BlockIndex.Count;i++)
+        msg.BlocksAvailable[i] = fileWad.BlockIndex[i].Downloaded;
+      msg.FileWadId = fileWad.Id;
+      Send(peer, msg);
+    }
 
     public void Send( Peer peer, NetMessage msg )
     {
@@ -429,7 +634,9 @@ namespace FuzzyHipster.Network
       state.Peer = peer;
       
       byte[] buffer = msg.ToBytes();
+      byte[] lengthBuffer = BitConverter.GetBytes(buffer.Length);
       
+      peer.Socket.Send(lengthBuffer);
       peer.Socket.BeginSend(buffer, 0, buffer.Length, 0, EndSendCallback, state);
     }
     
@@ -455,41 +662,46 @@ namespace FuzzyHipster.Network
     }
   }
   
-  public class StacksTransferManager : TransferManager 
+  public class BlockTransferManager : TransferManager
   {
     public override void Execute()
     {
-//      Stack[] stacks = deserialized();
-//      
-//      foreach( Stack stack in stacks )
-//        RWTorrent.Singleton.Network.OnNewStack( stack);
+      var fileWad = RWTorrent.Singleton.Catalog.GetFileWad(FileWadId);
+      
+      fileWad.VerifyBlock(TempFile);
+      fileWad.CatalogBlock(Block, TempFile);
+      fileWad.BlockIndex[Block].Downloaded = true;
     }
   }
   
   public abstract class TransferManager
   {
     public Guid TransferId { get; set; }
+    public Guid FileWadId { get; set; }
+    public int Block { get; set; }
     public int ExpectedPackets { get; set; }
-    public int NextPacket { get; set; }
     public int TotalLength { get; set; }
+    public int NextPacket { get; set; }
+    public bool IsCompleted { get { return ExpectedPackets <= NextPacket; } }
+    public string TempFile { get; set; }
     
     public TransferManager()
     {
+      NextPacket = 0;
     }
     
-    public void SavePacket( FileTransferPacketNetMessage msg )
+    public void SavePacket( BlockPacketNetMessage msg )
     {
-      if ( msg.Sequence != NextPacket )
-        throw new Exception("Bad transfer");
-
-      string path = Path.Combine(Path.GetTempPath(), TransferId + ".dat");
-      using ( FileStream stream = new FileStream(path, FileMode.OpenOrCreate))
+      if ( String.IsNullOrWhiteSpace(TempFile))
+        TempFile = Path.Combine(Path.GetTempPath(), TransferId + ".dat");
+      
+      using ( FileStream stream = new FileStream(TempFile, FileMode.OpenOrCreate))
       {
         stream.Write(msg.Data, 0, msg.DataLength);
       }
       
       NextPacket++;
-      if ( NextPacket == ExpectedPackets )
+      if ( IsCompleted )
         Execute();
     }
     
