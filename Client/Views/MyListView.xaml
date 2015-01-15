@@ -24,7 +24,7 @@
 
         </ToolBarTray>
 
-        <ListView Grid.Row="1" ItemsSource="{Binding Stacks}" Grid.RowSpan="1" SelectedItem="{Binding SelectedStack}" >
+        <ListView Grid.Row="1" ItemsSource="{Binding Stacks, UpdateSourceTrigger=PropertyChanged}" Grid.RowSpan="1" SelectedItem="{Binding SelectedStack}" >
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Name" Width="auto" DisplayMemberBinding="{Binding Name}">

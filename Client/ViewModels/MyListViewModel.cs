@@ -1,4 +1,5 @@
-﻿using FuzzyHipster.Catalog;
+﻿using FuzzyHipster;
+using FuzzyHipster.Catalog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,16 @@ namespace Client
     class MyListViewModel : ObservableObject, IPageViewModel
     {
 
+        public MyListViewModel()
+        {
+            RWTorrent.Singleton.Network.NewWad += Network_NewWad;
+        }
+
+        void Network_NewWad(object sender, FuzzyHipster.Network.GenericEventArgs<FileWad> e)
+        {
+            OnPropertyChanged("Stacks");
+          
+        } 
         
         public string Name
         {
