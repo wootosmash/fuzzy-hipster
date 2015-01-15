@@ -628,7 +628,7 @@ namespace FuzzyHipster.Network
     
     public void SendBlock( Peer peer, FileWad fileWad, int block )
     {
-      int totalPackets = (int)Math.Ceiling((decimal)fileWad.BlockIndex[block].Length / MaxBlockPacketSize);
+      int totalPackets = (int)Math.Ceiling((decimal)fileWad.BlockIndex[block].Length / peer.MaxBlockPacketSize);
       
       var msg = new StartBlockTransferNetMessage();
       msg.Block = block;

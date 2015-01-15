@@ -53,11 +53,29 @@ namespace FuzzyHipster
     public int PeerCount { get; set; }
     public long Uptime { get; set; }
     public int MaxBlockPacketSize { get; set; }
+    public int EstimatedBandwidth { get; set; }
+    
     [NonSerialized()]
-    public long BytesSent { get; set; }
+    long bytesSent;
+    public long BytesSent {
+      get {
+        return bytesSent;
+      }
+      set {
+        bytesSent = value;
+      }
+    }
+    
     [NonSerialized()]
-    public long BytesReceived { get; set; }
-    public int EstimatedBandwidth { get; set; } 
+    long bytesReceived;
+    public long BytesReceived {
+      get {
+        return bytesReceived;
+      }
+      set {
+        bytesReceived = value;
+      }
+    }
     
     // catalog statistics
     public int CatalogRecency { get; set; }
@@ -77,7 +95,7 @@ namespace FuzzyHipster
       Name = peer.Name;
       PeerCount = peer.PeerCount;
       CatalogRecency = peer.CatalogRecency;
-      Uptime = peer.Uptime;      
+      Uptime = peer.Uptime;
       EstimatedBandwidth = peer.EstimatedBandwidth;
       MaxBlockPacketSize = peer.MaxBlockPacketSize;
       
