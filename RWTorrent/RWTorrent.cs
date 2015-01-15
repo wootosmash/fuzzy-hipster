@@ -40,6 +40,7 @@ namespace FuzzyHipster
 
       Me = new Peer();
       Me.Port = Settings.Port;
+      Me.Id = catalog.Guid;
       
       Peers = PeerCollection.Load(Catalog.BasePath);
       Peers.RefreshPeer(Me);
@@ -87,7 +88,7 @@ namespace FuzzyHipster
     void NetworkBlocksAvailableRequested( object sender, MessageComposite<RequestBlocksAvailableNetMessage> e)
     {
       Network.SendBlocksAvailable( e.Peer, Catalog.GetFileWad(e.Value.FileWadId) );
-    }    
+    }
     
     void NetworkBlockRequested( object sender, BlockRequestedEventArgs e)
     {
@@ -140,15 +141,15 @@ namespace FuzzyHipster
     void NetworkNewPeer( object sender, GenericEventArgs<Peer> e)
     {
       // ignore an update to my own peer record
-      if ( e.Value.Guid == Me.Guid )
+      if ( e.Value.Id == Me.Id )
         return;
-      if ( e.Value.Guid == Guid.Empty )
+      if ( e.Value.Id == Guid.Empty )
         return;
       
       Peers.RefreshPeer(e.Value);
       
       if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
-        if ( !Peers[e.Value.Guid].IsConnected )
+        if ( !Peers[e.Value.Id].IsConnected )
           if ( e.Value.IPAddress != null && e.Value.Port > 0 )
             Network.Connect(e.Value);
     }
@@ -166,24 +167,40 @@ namespace FuzzyHipster
     void NetworkNewWad( object sender, GenericEventArgs<FileWad> e)
     {
       Catalog.Stacks[e.Value.StackId].RefreshWad(e.Value);
+      
+      foreach( var peer in Network.ActivePeers )
+        Network.RequestBlocksAvailable( peer, e.Value );
     }
     
     void HeartbeatElapsed(object sender, ElapsedEventArgs e)
     {
-      // talk to connected peers and see if they've got anything for us
-      foreach( var peer in Network.ActivePeers )
+      Think();
+    }
+    
+    public void Think()
+    {
+      try
       {
-        Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
-        Network.RequestStacks(peer, Catalog.LastUpdated, Settings.HeartbeatStackRequestCount);
+        // talk to connected peers and see if they've got anything for us
+        var peers = Network.ActivePeers.ToArray();
+        foreach( var peer in peers )
+        {
+          Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
+          Network.RequestStacks(peer, Catalog.LastUpdated, Settings.HeartbeatStackRequestCount);
+        }
+        
+        // see if we need some new peers
+        if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
+        {
+          foreach( var peer in Peers.Values ) // for each peer that we're not connected to
+            if ( !peer.IsConnected ) // we're not connected
+              if ( peer.NextConnectionAttempt < DateTime.Now ) // wait is over
+                Network.Connect(peer);
+        }
       }
-      
-      // see if we need some new peers
-      if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
+      catch( Exception ex )
       {
-        foreach( var peer in Peers.Values ) // for each peer that we're not connected to 
-          if ( !peer.IsConnected ) // we're not connected
-            if ( peer.NextConnectionAttempt < DateTime.Now ) // wait is over
-              Network.Connect(peer);
+        Console.WriteLine(ex);
       }
     }
     

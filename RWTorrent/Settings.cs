@@ -26,16 +26,18 @@ namespace FuzzyHipster
 		public int HeartbeatInterval {get; set; }
 		public int Port { get; set; }		
 		public int MaxActiveBlockTransfers { get; set; }
+		public int DefaultMaxBlockPacketSize { get; set; }
 
 		public Settings()
 		{
-			MaxActivePeers = 30;
+			MaxActivePeers = 1;
 			HeartbeatPeerRequestCount = 30;
 			HeartbeatStackRequestCount = 3;
 			HeartbeatInterval = 60000;
 			Port = RWNetwork.RWDefaultPort;
 			ConnectAttemptWaitTime = 60;
 			MaxActiveBlockTransfers = 10;
+			DefaultMaxBlockPacketSize = 40000;
 		}
 		
 		public static Settings Load(string path)

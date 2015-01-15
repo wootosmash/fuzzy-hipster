@@ -7,12 +7,12 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading;
-using NUnit.Framework;
+using FuzzyHipster;
 using FuzzyHipster.Catalog;
 using FuzzyHipster.Network;
+using NUnit.Framework;
 
 namespace FuzzyHipster.Tests
 {
@@ -49,9 +49,7 @@ namespace FuzzyHipster.Tests
       msg.Type = MessageType.Hello;
       msg.Length = Marshal.SizeOf(msg);
       
-      client.Send( localHostPeer, msg );
-      //      client.Disconnect();
-      
+      client.Send( msg, localHostPeer );
     }
     
     [Test]
@@ -59,25 +57,11 @@ namespace FuzzyHipster.Tests
     {
       var network = new RWNetwork();
       
-      for ( int i=1;i<=10;i++)
-      {
-        network.Connect(localHostPeer);
-        
-        var peer = new Peer()
-        {
-          CatalogRecency = 0,
-          Guid = Guid.NewGuid(),
-          PeerCount = 0,
-          Uptime = 1234,
-          Name = "AND BINGO WAS HIS NAMEO",
-          IPAddress = "127.0.0.1",
-          Port = RWNetwork.RWDefaultPort + i
-        };
-        
-        network.SendPeerList(localHostPeer, new Peer[]{peer});
-        
-        //network.Disconnect();
-      }
+      network.Connect(localHostPeer);
+      
+      network.SendPeerList(localHostPeer, new Peer[]{localHostPeer2});
+      
+      //network.Disconnect();
       Thread.Sleep(20000);
     }
     

@@ -18,7 +18,7 @@ namespace FuzzyHipster
   {
     public static void Main(string[] args)
     {
-      List<Thread> threads = new List<Thread>();
+      var threads = new List<Thread>();
       
       string port = args.Length > 0 ? args[0] : RWNetwork.RWDefaultPort.ToString();
       
@@ -37,6 +37,14 @@ namespace FuzzyHipster
       {
         key = Console.ReadKey(true);
         
+        if ( key.Key == ConsoleKey.T )
+          torrent.Think();
+        
+        if ( key.Key == ConsoleKey.C )
+        {
+          Console.WriteLine(catalog.ToString());
+        }
+        
         if ( key.Key == ConsoleKey.S )
         {
           Console.WriteLine("---------------------------------");
@@ -45,7 +53,7 @@ namespace FuzzyHipster
         if ( key.Key == ConsoleKey.P )
         {
           
-          Console.WriteLine("Peers " + torrent.Me.Guid);
+          Console.WriteLine("Peers " + torrent.Me.Id);
           foreach( Peer p in torrent.Peers.Values )
             Console.WriteLine(p);
         }

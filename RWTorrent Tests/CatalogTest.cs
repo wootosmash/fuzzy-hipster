@@ -20,7 +20,6 @@ namespace FuzzyHipster.Tests
     public void SaveTest()
     {      
       var catalog = new Catalog.Catalog();
-      var torrent = new RWTorrent(catalog);
       catalog.BasePath = Environment.CurrentDirectory + @"\Localhost1\";
       catalog.Namespace = "Base Programs";
       catalog.Description = "Test Catalog for Base Programs";
@@ -37,6 +36,8 @@ namespace FuzzyHipster.Tests
       faxes.Wads.Add(myprog);      
 
       catalog.Stacks.Add( faxes );
+      
+      var torrent = new RWTorrent(catalog);
       catalog.Save();
       
       

@@ -15,7 +15,7 @@ using System.Xml.Serialization;
 namespace FuzzyHipster.Catalog
 {
   [Serializable()]
-  public class Stack
+  public class Stack : IEquatable<Stack>
   {
     public Guid Id {
       get;
@@ -80,9 +80,8 @@ namespace FuzzyHipster.Catalog
     
     public void RefreshWad( FileWad wad )
     {
-      if ( Wads.Contains(wad))
-        Wads.Remove(wad);
-      Wads.Add(wad);
+      if ( Wads.Find(x => x.Id == wad.Id) == null )
+        Wads.Add(wad);
       wad.Save();
     }
     
@@ -102,12 +101,18 @@ namespace FuzzyHipster.Catalog
         foreach( var wad in Wads)
           wad.Save();
     }
-    
 
     public override string ToString()
     {
       return string.Format("[Stack Wads={0}, Id={1}, Name={2}, Description={3}, PublicKey={4}]", _wads, Id, Name, Description, PublicKey);
     }
+
+    #region IEquatable implementation
+    public bool Equals(Stack other)
+    {
+      return other.Id == Id;
+    }
+    #endregion
 
     
   }

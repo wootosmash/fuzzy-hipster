@@ -11,7 +11,7 @@ using System.IO;
 
 namespace FuzzyHipster.Catalog
 {
-	public class Block
+  public class Block : IEquatable<Block>
 	{
 		public Guid FileWadId {
 			get;
@@ -74,6 +74,14 @@ namespace FuzzyHipster.Catalog
 		{
 		  return null;
 		}
+		
+    #region IEquatable implementation
+    public bool Equals(Block other)
+    {
+      return other.FileWadId == FileWadId && other.Sequence == Sequence;
+    }
+    #endregion
+		
 	}
 }
 

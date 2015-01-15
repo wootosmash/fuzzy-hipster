@@ -18,15 +18,11 @@ namespace FuzzyHipster.Catalog
   
   public class Catalog
   {
-    public string Namespace {
-      get;
-      set;
-    }
+    public Guid Guid { get; set; }
+    
+    public string Namespace { get; set; }
 
-    public string Description {
-      get;
-      set;
-    }
+    public string Description { get; set; }
 
     public string BasePath { get; set; }
     
@@ -40,6 +36,7 @@ namespace FuzzyHipster.Catalog
 
     public Catalog()
     {
+      Guid = Guid.NewGuid();
       Stacks = new StackCollection();
     }
 
@@ -61,10 +58,16 @@ namespace FuzzyHipster.Catalog
           catalog = (Catalog)serialiser.Deserialize(reader);
 
         catalog.BasePath = basePath;
+        
+        string stacksPath = Path.Combine(basePath, @"Catalog\Stacks");
+        
+        if ( !Directory.Exists(stacksPath ))
+          Directory.CreateDirectory(stacksPath);
 
         var serialiserStacks = new XmlSerializer(typeof(Stack));
-        foreach (string dir in Directory.GetDirectories(Path.Combine(basePath, @"Catalog\Stacks")))
+        foreach (string dir in Directory.GetDirectories(stacksPath))
         {
+          Console.WriteLine(dir);
           Stack stack = null;
           using (var reader = new StreamReader(string.Format(@"{0}\Index.xml", dir)))
           {
@@ -108,6 +111,13 @@ namespace FuzzyHipster.Catalog
       
       return null;
     }
+    
+    public override string ToString()
+    {
+      return string.Format("[Catalog Namespace={0}, Description={1}, BasePath={2}, LastUpdated={3}, Stacks.Count={4}]", 
+                           Namespace, Description, BasePath, LastUpdated, Stacks.Count);
+    }
+
   }
 }
 

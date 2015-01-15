@@ -14,6 +14,7 @@ using System.Threading;
 using System.Xml.Serialization;
 namespace FuzzyHipster
 {
+  [Serializable()]
 	public class BlockIndexItem
 	{
 		public string Hash {
