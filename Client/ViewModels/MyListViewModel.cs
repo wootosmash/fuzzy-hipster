@@ -31,7 +31,35 @@ namespace Client
 
         }
 
-        public Stack SelectedStack{ get; set; }
+        Stack _selectedStack;
+        public Stack SelectedStack
+        {
+            get { return _selectedStack; }
+            set
+            {
+                if (value != _selectedStack)
+                {
+                    _selectedStack = value;
+                    OnPropertyChanged("SelectedStack");
+                    OnPropertyChanged("IsChannelSelected");
+                }
+            }
+        }
+
+        public Boolean IsChannelSelected
+        {
+            get
+            {
+                if (SelectedStack == null)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+
 
         string _description;
         public string Description

@@ -20,20 +20,22 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="80"/>
                 </Grid.ColumnDefinitions>
-                <TextBox Height="27" x:Name="Folder"  Margin="0,5,0,0" Text="{Binding WadPath}"/>
+                <TextBox TextBlock.LineHeight="27" 
+    TextBlock.LineStackingStrategy="BlockLineHeight"   Height="27" x:Name="Folder"  Margin="0,5,0,0" Text="{Binding WadPath}" VerticalAlignment="Center"/>
                 <Button Width="80"  Margin="0,5,0,0"  Height="27" Content="Folder" BorderBrush="{x:Null}" HorizontalAlignment="Right" Grid.Column="1"></Button>
             </Grid>
-      
 
-            <TextBlock Margin="0,20,0,0" Text="Upload Meta" FontSize="24" />
+
+            <TextBlock  TextBlock.LineHeight="27" 
+    TextBlock.LineStackingStrategy="BlockLineHeight"   Height="27" Margin="0,20,0,0" Text="Upload Meta" FontSize="24" />
             <Label>Name</Label>
-            <TextBox x:Name="ChannelName" Margin="5"  Height="22" TextWrapping="Wrap" Text="{Binding WadName}"   Width="auto" />
+            <TextBox x:Name="ChannelName" Margin="5"  Height="22" TextWrapping="Wrap" Text="{Binding WadName ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   Width="auto" />
             <Label>Description</Label>
-            <TextBox x:Name="ChannelDescription" Margin="5" TextWrapping="Wrap" Text="{Binding WadDescription}" AcceptsReturn="True" AcceptsTab="True"  ScrollViewer.CanContentScroll="True" MinHeight="100"/>
+            <TextBox x:Name="ChannelDescription" Margin="5" TextWrapping="Wrap" Text="{Binding WadDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True"  ScrollViewer.CanContentScroll="True" MinHeight="100"/>
             <WrapPanel HorizontalAlignment="Right">
                 <Button
                      Command="{Binding CreateFolder}" CommandParameter="{Binding }"
-                    Padding="5" x:Name="CreateFolder"  Margin="5" Height="27" Content="Add Folder" HorizontalContentAlignment="Center" HorizontalAlignment="Right" BorderBrush="{x:Null}" />
+                    Padding="5" x:Name="CreateFolder"  Margin="5" Height="27" Content="Add Content" HorizontalContentAlignment="Center" HorizontalAlignment="Right" BorderBrush="{x:Null}" />
                 <Button
                      Command="{Binding Cancel}" CommandParameter="{Binding }"
                     Padding="5" x:Name="CancelCreate"  Margin="5" Height="27" Content="Cancel" HorizontalContentAlignment="Center" HorizontalAlignment="Right" BorderBrush="{x:Null}" />

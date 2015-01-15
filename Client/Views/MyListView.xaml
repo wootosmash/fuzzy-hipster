@@ -19,7 +19,7 @@
 		     Band="0" Width="auto" BandIndex="0" Background="{StaticResource TitleBarBackgroundBrush}">
                 <Button x:Name="CreateChannel" Click="CreateChannel_Click"  Content="Create Channel" Height="22" VerticalAlignment="Top" Width="auto"/>
                 <Separator></Separator>
-                <Button Command="{Binding AddFiles}" CommandParameter="{Binding }" Content="Add Files to Channel" Height="22" VerticalAlignment="Top"    Background="{StaticResource TitleBarBackgroundBrush}"/>
+                <Button Command="{Binding AddFiles}" IsEnabled="{Binding IsChannelSelected, UpdateSourceTrigger=PropertyChanged}" CommandParameter="{Binding }" Content="Add Files to Channel" Height="22" VerticalAlignment="Top"    Background="{StaticResource TitleBarBackgroundBrush}"/>
             </ToolBar>
 
         </ToolBarTray>

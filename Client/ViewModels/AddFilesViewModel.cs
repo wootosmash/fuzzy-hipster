@@ -49,6 +49,8 @@ namespace Client
             }
         }
 
+        
+
         private string _wadName;
         public string WadName
         {
@@ -107,9 +109,9 @@ namespace Client
             FileWad myprog = new FileWad() { StackId = _channel.Id, BlockSize = 1024, Name = this._wadName, Description = _wadDescription };
             myprog.BuildFromPath(@WadPath);
             _channel.Wads.Add(myprog);
-            Catalog catalog = RWTorrent.Singleton.Catalog;
-            catalog.Stacks.Add(_channel);
-            catalog.Save();
+            myprog.Save();
+
+            
 
             MainWindowModel.ChangeModel(new MyListViewModel());
         }
