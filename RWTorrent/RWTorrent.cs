@@ -40,7 +40,7 @@ namespace FuzzyHipster
 
       Me = new Peer();
       Me.Port = Settings.Port;
-      Me.Guid = catalog.Guid;
+      Me.Id = catalog.Guid;
       
       Peers = PeerCollection.Load(Catalog.BasePath);
       Peers.RefreshPeer(Me);
@@ -141,15 +141,15 @@ namespace FuzzyHipster
     void NetworkNewPeer( object sender, GenericEventArgs<Peer> e)
     {
       // ignore an update to my own peer record
-      if ( e.Value.Guid == Me.Guid )
+      if ( e.Value.Id == Me.Id )
         return;
-      if ( e.Value.Guid == Guid.Empty )
+      if ( e.Value.Id == Guid.Empty )
         return;
       
       Peers.RefreshPeer(e.Value);
       
       if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
-        if ( !Peers[e.Value.Guid].IsConnected )
+        if ( !Peers[e.Value.Id].IsConnected )
           if ( e.Value.IPAddress != null && e.Value.Port > 0 )
             Network.Connect(e.Value);
     }

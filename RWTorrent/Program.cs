@@ -53,7 +53,7 @@ namespace FuzzyHipster
         if ( key.Key == ConsoleKey.P )
         {
           
-          Console.WriteLine("Peers " + torrent.Me.Guid);
+          Console.WriteLine("Peers " + torrent.Me.Id);
           foreach( Peer p in torrent.Peers.Values )
             Console.WriteLine(p);
         }

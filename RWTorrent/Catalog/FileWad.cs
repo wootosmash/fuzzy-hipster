@@ -12,7 +12,7 @@ using System.Xml.Serialization;
 namespace FuzzyHipster.Catalog
 {
   [Serializable()]
-  public class FileWad
+  public class FileWad : IEquatable<FileWad>
   {
     public Guid Id { get; set; }
     
@@ -184,6 +184,13 @@ namespace FuzzyHipster.Catalog
       }
       return totalLength;
     }
+
+    #region IEquatable implementation
+    public bool Equals(FileWad other)
+    {
+      return other.Id == Id;
+    }
+    #endregion
     
     public override string ToString()
     {

@@ -33,20 +33,20 @@ namespace FuzzyHipster
         myPeer = FindBySocket(peer.Socket);
         myPeer.UpdateFromCopy(peer);
       }
-      else if (ContainsKey(peer.Guid))
+      else if (ContainsKey(peer.Id))
       {
-        myPeer = this[peer.Guid];
+        myPeer = this[peer.Id];
         myPeer.UpdateFromCopy(peer);
       }
       else
-        Add(peer.Guid, peer);
+        Add(peer.Id, peer);
       
       Save();
     }
 
     public void Add(Peer peer)
     {
-      Add(peer.Guid, peer);
+      Add(peer.Id, peer);
     }
     
     public static PeerCollection Load( string basePath )
@@ -64,7 +64,7 @@ namespace FuzzyHipster
         {
           var list = serialiser.Deserialize(reader) as List<Peer>;
           foreach( var peer in list )
-            if ( !col.ContainsKey(peer.Guid))
+            if ( !col.ContainsKey(peer.Id))
               col.Add(peer);
         }
       }

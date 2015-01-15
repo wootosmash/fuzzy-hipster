@@ -338,7 +338,7 @@ namespace FuzzyHipster.Network
       
       var peer = new Peer()
       {
-        Guid = Guid.Empty,
+        Id = Guid.Empty,
         Socket = handler,
         IPAddress = (handler.RemoteEndPoint as IPEndPoint).Address.ToString(),
         Port = (handler.RemoteEndPoint as IPEndPoint).Port,
@@ -435,7 +435,7 @@ namespace FuzzyHipster.Network
           var status = msg as PeerListNetMessage;
           
           state.Peer.CatalogRecency = status.Peers[0].CatalogRecency;
-          state.Peer.Guid = status.Peers[0].Guid;
+          state.Peer.Id = status.Peers[0].Id;
           state.Peer.Name = status.Peers[0].Name;
           state.Peer.PeerCount = status.Peers[0].PeerCount;
           state.Peer.Uptime = status.Peers[0].Uptime;
@@ -628,7 +628,6 @@ namespace FuzzyHipster.Network
     
     public void SendBlock( Peer peer, FileWad fileWad, int block )
     {
-      const int MaxBlockPacketSize = 40000;
       int totalPackets = (int)Math.Ceiling((decimal)fileWad.BlockIndex[block].Length / MaxBlockPacketSize);
       
       var msg = new StartBlockTransferNetMessage();

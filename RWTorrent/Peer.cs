@@ -15,17 +15,14 @@ namespace FuzzyHipster
 {
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack = 1)]
-  public class Peer
+  public class Peer : IEquatable<Peer>
   {
-    public Guid Guid { get; set; }
+    public Guid Id { get; set; }
     public string Name { get; set; }
-    public int PeerCount { get; set; }
-    public int CatalogRecency { get; set; }
-    public long Uptime { get; set; }
 
     public DateTime NextConnectionAttempt { get; set; }
     public int FailedConnectionAttempts { get; set; }
-    
+
     public string IPAddress { get; set; }
     public int Port { get; set; }
 
@@ -36,7 +33,7 @@ namespace FuzzyHipster
         return Socket.Connected;
       }
     }
-    
+
     [XmlIgnore()]
     [NonSerialized()]
     Socket socket;
@@ -51,20 +48,39 @@ namespace FuzzyHipster
       }
     }
 
+
+    // network statistics
+    public int PeerCount { get; set; }
+    public long Uptime { get; set; }
+    public int MaxBlockPacketSize { get; set; }
+    [NonSerialized()]
+    public long BytesSent { get; set; }
+    [NonSerialized()]
+    public long BytesReceived { get; set; }
+    public int EstimatedBandwidth { get; set; } 
+    
+    // catalog statistics
+    public int CatalogRecency { get; set; }
+    
+    
     public Peer()
     {
-      Guid = Guid.NewGuid();
+      Id = Guid.NewGuid();
       NextConnectionAttempt = DateTime.MinValue;
       FailedConnectionAttempts = 0;
+      MaxBlockPacketSize = RWTorrent.Singleton.Settings.DefaultMaxBlockPacketSize;
     }
     
     public void UpdateFromCopy( Peer peer )
     {
-      Guid = peer.Guid;
+      Id = peer.Id;
       Name = peer.Name;
       PeerCount = peer.PeerCount;
       CatalogRecency = peer.CatalogRecency;
       Uptime = peer.Uptime;      
+      EstimatedBandwidth = peer.EstimatedBandwidth;
+      MaxBlockPacketSize = peer.MaxBlockPacketSize;
+      
     }
     
     /// <summary>
@@ -78,8 +94,16 @@ namespace FuzzyHipster
     
     public override string ToString()
     {
-      return string.Format("[Peer Socket={0}, Guid={1}, Name={2}, PeerCount={3}, CatalogRecency={4}, Uptime={5}, IPAddress={6}, Port={7}]", socket, Guid, Name, PeerCount, CatalogRecency, Uptime, IPAddress, Port);
+      return string.Format("[Peer Socket={0}, Id={1}, Name={2}, PeerCount={3}, CatalogRecency={4}, Uptime={5}, IPAddress={6}, Port={7}]", socket, Id, Name, PeerCount, CatalogRecency, Uptime, IPAddress, Port);
     }
+    
+    #region IEquatable implementation
+    public bool Equals(Peer other)
+    {
+      return other.Id == Id;
+    }
+    #endregion
+    
   }
 }
 
