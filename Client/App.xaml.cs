@@ -58,6 +58,7 @@ namespace Client
             }
          )
      );
+      thread.IsBackground = true;
       thread.Start();
 
 
