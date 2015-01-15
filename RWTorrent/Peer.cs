@@ -86,7 +86,7 @@ namespace FuzzyHipster
       Id = Guid.NewGuid();
       NextConnectionAttempt = DateTime.MinValue;
       FailedConnectionAttempts = 0;
-      MaxBlockPacketSize = RWTorrent.Singleton.Settings.DefaultMaxBlockPacketSize;
+      //MaxBlockPacketSize = RWTorrent.Singleton.Settings.DefaultMaxBlockPacketSize;
     }
     
     public void UpdateFromCopy( Peer peer )

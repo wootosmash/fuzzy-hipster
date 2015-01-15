@@ -36,7 +36,7 @@
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="nunit.framework">
-      <HintPath>..\..\..\..\..\..\Program Files %28x86%29\NUnit 2.6.4\bin\framework\nunit.framework.dll</HintPath>
+      <HintPath>C:\Program Files %28x86%29\NUnit 2.6.4\bin\framework\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">

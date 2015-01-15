@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FuzzyHipster.Catalog;
+using FuzzyHipster;
 
 
 namespace Client
@@ -19,6 +20,14 @@ namespace Client
             }
 
         }
+
+       
+
+        void Network_NewWad(object sender, FuzzyHipster.Network.GenericEventArgs<FileWad> e)
+        {
+            OnPropertyChanged("Stacks");
+
+        } 
 
         private List<FileWad> _wads = null;
         public List<FileWad> Wads
