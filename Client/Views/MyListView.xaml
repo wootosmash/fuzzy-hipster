@@ -14,18 +14,17 @@
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
-        <ToolBarTray Grid.Row="0" Background="#FFFFD9D0">
+        <ToolBarTray Grid.Row="0" Width="auto" HorizontalAlignment="Stretch" Background="{StaticResource TitleBarBackgroundBrush}">
             <ToolBar HorizontalAlignment="Right" Height="27"
-		     Band="0" BandIndex="0" Background="#FFFFD9D0">
+		     Band="0" Width="auto" BandIndex="0" Background="{StaticResource TitleBarBackgroundBrush}">
                 <Button x:Name="CreateChannel" Click="CreateChannel_Click"  Content="Create Channel" Height="22" VerticalAlignment="Top" Width="auto"/>
-                <Button Content="Button 2" Height="22" VerticalAlignment="Top" Width="75" Background="#FFFFD9D0"/>
+                <Separator></Separator>
+                <Button Command="{Binding AddFiles}" IsEnabled="{Binding IsChannelSelected, UpdateSourceTrigger=PropertyChanged}" CommandParameter="{Binding }" Content="Add Files to Channel" Height="22" VerticalAlignment="Top"    Background="{StaticResource TitleBarBackgroundBrush}"/>
             </ToolBar>
-            <ToolBar HorizontalAlignment="Left" Height="27" Band="0" BandIndex="0" Background="#FFFFD9D0">
-                <Button Content="Button 3" Height="22" VerticalAlignment="Top" Width="75"/>
-            </ToolBar>
+
         </ToolBarTray>
 
-        <ListView Grid.Row="1" ItemsSource="{Binding Stacks}" Grid.RowSpan="1"  >
+        <ListView Grid.Row="1" ItemsSource="{Binding Stacks}" Grid.RowSpan="1" SelectedItem="{Binding SelectedStack}" >
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Name" Width="auto" DisplayMemberBinding="{Binding Name}">
@@ -48,13 +47,9 @@
         </ListView>
 
 
-        <GridSplitter Grid.Row="2" Grid.Column="1" Margin="2,2,2,2" Width="auto" Height="3"  Background="#FFF0F0F0" VerticalAlignment="Center" HorizontalAlignment="Stretch" ResizeDirection="Rows" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" />
+        <GridSplitter Grid.Row="2" Grid.Column="1" Margin="2,2,2,2" Width="auto" Height="3"  Background="{StaticResource TitleBarBackgroundBrush}" VerticalAlignment="Center" HorizontalAlignment="Stretch" ResizeDirection="Rows" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" />
 
 
-        <StatusBar Height="20px" VerticalContentAlignment="Bottom" VerticalAlignment="Bottom" Grid.Row="4">
-            <StatusBarItem>
-                <TextBlock Text="XXX" ></TextBlock>
-            </StatusBarItem>
-        </StatusBar>
+  
     </Grid>
 </UserControl>

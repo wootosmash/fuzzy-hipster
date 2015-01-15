@@ -30,6 +30,9 @@
             <local:NewChannelView />
         </DataTemplate>
 
+        <DataTemplate DataType="{x:Type local:AddFilesViewModel}">
+            <local:AddFilesView />
+        </DataTemplate>
 
     </Window.Resources>
 

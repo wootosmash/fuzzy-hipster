@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Client
 {
@@ -30,6 +31,36 @@ namespace Client
 
         }
 
+        Stack _selectedStack;
+        public Stack SelectedStack
+        {
+            get { return _selectedStack; }
+            set
+            {
+                if (value != _selectedStack)
+                {
+                    _selectedStack = value;
+                    OnPropertyChanged("SelectedStack");
+                    OnPropertyChanged("IsChannelSelected");
+                }
+            }
+        }
+
+        public Boolean IsChannelSelected
+        {
+            get
+            {
+                if (SelectedStack == null)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+
+
         string _description;
         public string Description
         {
@@ -41,6 +72,18 @@ namespace Client
                     _description = value;
                     OnPropertyChanged("Description");
                 }
+            }
+        }
+
+        public ICommand AddFiles
+        {
+            get
+            {
+
+                ICommand _changePageCommand = new RelayCommand(
+                        p => MainWindowModel.ChangeModel(new AddFilesViewModel(SelectedStack)),
+                        p => true);
+                return _changePageCommand;
             }
         }
         
