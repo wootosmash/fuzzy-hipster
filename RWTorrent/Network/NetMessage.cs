@@ -114,12 +114,13 @@ namespace FuzzyHipster.Network
     public StacksNetMessage()
     {
       Type = MessageType.Stacks;
+      Stacks = new Stack[0];
     }
     
     public override string ToString()
     {
       if ( Stacks.Length == 0 )
-        return "[StacksNetMessage]";
+        return "[StacksNetMessage Stacks.Count=0]";
       else
         return string.Format("[StacksNetMessage Stacks={0}]", Stacks);
     }

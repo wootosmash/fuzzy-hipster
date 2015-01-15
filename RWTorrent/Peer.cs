@@ -28,7 +28,6 @@ namespace FuzzyHipster
     
     public string IPAddress { get; set; }
     public int Port { get; set; }
-    
 
     public bool IsConnected {
       get {

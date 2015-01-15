@@ -64,7 +64,8 @@ namespace FuzzyHipster
         {
           var list = serialiser.Deserialize(reader) as List<Peer>;
           foreach( var peer in list )
-            col.Add(peer);
+            if ( !col.ContainsKey(peer.Guid))
+              col.Add(peer);
         }
       }
 

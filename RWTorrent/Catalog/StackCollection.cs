@@ -25,9 +25,8 @@ namespace FuzzyHipster.Catalog
 
 		public void RefreshStack(Stack stack)
 		{
-			if (Contains(stack))
-				Remove(stack);
-			Add(stack);
+		  if ( Find( x => x.Id == stack.Id) == null )
+  			Add(stack);
 			stack.Save();
 		}
 	}

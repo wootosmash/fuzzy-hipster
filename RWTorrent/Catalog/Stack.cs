@@ -80,9 +80,8 @@ namespace FuzzyHipster.Catalog
     
     public void RefreshWad( FileWad wad )
     {
-      if ( Wads.Contains(wad))
-        Wads.Remove(wad);
-      Wads.Add(wad);
+      if ( Wads.Find(x => x.Id == wad.Id) == null )
+        Wads.Add(wad);
       wad.Save();
     }
     

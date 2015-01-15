@@ -126,17 +126,20 @@ namespace FuzzyHipster.Catalog
       }
     }
 
+    object locker = new object();
     public void Save()
     {
-      string basePath = RWTorrent.Singleton.Catalog.BasePath;
-      string stackPath = Path.Combine(basePath, string.Format(@"Catalog\Stacks\{0}\", StackId));
-      
-      if ( !Directory.Exists(stackPath))
-        Directory.CreateDirectory(stackPath);
-      
-      var serialiserStacks = new XmlSerializer(typeof(FileWad));
-      using (var writer = new StreamWriter(string.Format("{0}{1}.xml", stackPath, Id)))
-        serialiserStacks.Serialize(writer, this);
+      lock (locker) {
+        string basePath = RWTorrent.Singleton.Catalog.BasePath;
+        string stackPath = Path.Combine(basePath, string.Format(@"Catalog\Stacks\{0}\", StackId));
+        
+        if (!Directory.Exists(stackPath))
+          Directory.CreateDirectory(stackPath);
+        
+        var serialiserStacks = new XmlSerializer(typeof(FileWad));
+        using (var writer = new StreamWriter(string.Format("{0}{1}.xml", stackPath, Id)))
+          serialiserStacks.Serialize(writer, this);
+      }
     }
     
     public static FileWad Load( string filePath )
@@ -181,6 +184,12 @@ namespace FuzzyHipster.Catalog
       }
       return totalLength;
     }
+    
+    public override string ToString()
+    {
+      return string.Format("[FileWad Locker={0}, Id={1}, StackId={2}, Name={3}, Description={4}, BlockSize={5}, TotalBlocks={6}, TotalSize={7}, LastUpdate={8}, Files={9}, BlockIndex={10}]", locker, Id, StackId, Name, Description, BlockSize, TotalBlocks, TotalSize, LastUpdate, Files, BlockIndex);
+    }
+
   }
 }
 

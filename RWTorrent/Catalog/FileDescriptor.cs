@@ -14,6 +14,7 @@ using System.Threading;
 using System.Xml.Serialization;
 namespace FuzzyHipster.Catalog
 {
+  [Serializable()]
   public class FileDescriptor
   {
     public string CatalogFilepath {
@@ -21,9 +22,15 @@ namespace FuzzyHipster.Catalog
       set;
     }
 
+    [NonSerialized()]
+    string localFilepath;
     public string LocalFilepath {
-      get;
-      set;
+      get {
+        return localFilepath;
+      }
+      set {
+        localFilepath = value;
+      }
     }
 
     public int StartBlock {
@@ -56,9 +63,15 @@ namespace FuzzyHipster.Catalog
       set;
     }
 
+    [NonSerialized()]
+    bool isAllocated;
     public bool IsAllocated {
-      get;
-      set;
+      get {
+        return isAllocated;
+      }
+      set {
+        isAllocated = value;
+      }
     }
 
     public void AllocateFile()

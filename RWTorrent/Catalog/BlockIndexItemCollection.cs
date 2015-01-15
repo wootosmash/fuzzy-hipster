@@ -14,6 +14,7 @@ using System.Threading;
 using System.Xml.Serialization;
 namespace FuzzyHipster.Catalog
 {
+  [Serializable()]
 	public class BlockIndexItemCollection : List<BlockIndexItem>
 	{
 	}
