@@ -105,13 +105,12 @@ namespace Client
 
         public void AddWad()
         {
-
-            FileWad myprog = new FileWad() { StackId = _channel.Id, BlockSize = 1024, Name = this._wadName, Description = _wadDescription };
+            
+            FileWad myprog = new FileWad() { StackId = _channel.Id, Name = this._wadName, Description = _wadDescription };
+            
             myprog.BuildFromPath(@WadPath);
             _channel.Wads.Add(myprog);
             myprog.Save();
-
-            
 
             MainWindowModel.ChangeModel(new MyListViewModel());
         }
