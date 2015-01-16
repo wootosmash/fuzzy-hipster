@@ -14,7 +14,7 @@ namespace FuzzyHipster.Network
 {
   public class ReceiveStateObject
   {
-    public const int BufferSize = 65536 * 4;
+    public const int BufferSize = 65536 * 32;
 
     public Peer Peer = null;
 
