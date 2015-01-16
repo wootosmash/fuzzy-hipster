@@ -28,6 +28,8 @@ namespace Client
         handler(this, e);
     }
 
+    
+
     protected override void OnStartup(StartupEventArgs e)
     {
       
@@ -35,6 +37,7 @@ namespace Client
 
       var thread = new Thread(
         new ThreadStart(
+<<<<<<< HEAD
           delegate
           {
             var catalog = Catalog.Load(".");
@@ -45,10 +48,23 @@ namespace Client
          )
        );
       
+=======
+            delegate
+            {
+                var catalog = Catalog.Load(".");
+                var rwt = new FuzzyHipster.MoustacheLayer(catalog);
+                OnMoustacheLayerLoaded(new EventArgs());
+                rwt.Start();
 
-      thread.IsBackground = true;
-      thread.Start();
-      Thread.Sleep(10000);
+                
+            }
+       )
+   );
+
+      MoustacheLayerLoaded += App_MoustacheLayerLoaded;
+     
+>>>>>>> 927064472a4d04d85a96c08052835753e98aba24
+
 
 
 
@@ -57,11 +73,27 @@ namespace Client
       app.DataContext = context;
       app.Show();
 
-      MainWindowModel.ChangeModel(new CatalogViewModel());
+      thread.IsBackground = true;
+      thread.Start();
 
+      
+
+    }
+
+    void App_MoustacheLayerLoaded(object sender, EventArgs e)
+    {
+        Dispatcher.Invoke(new Action(delegate()
+        {
+            MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
+            mw.Setup();
+            MainWindowModel.ChangeModel(new CatalogViewModel());
+
+        }));
 
 
     }
+
+     
 
   }
 }
