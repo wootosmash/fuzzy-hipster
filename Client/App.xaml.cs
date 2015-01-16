@@ -28,8 +28,6 @@ namespace Client
         handler(this, e);
     }
 
-    
-
     protected override void OnStartup(StartupEventArgs e)
     {
       
@@ -45,14 +43,10 @@ namespace Client
             rwt.Start();
           }
          )
-       );
-      
+       );     
 
 
       MoustacheLayerLoaded += App_MoustacheLayerLoaded;
-
-
-
 
       MainWindow app = new MainWindow();
       MainWindowModel context = new MainWindowModel();
@@ -61,9 +55,6 @@ namespace Client
 
       thread.IsBackground = true;
       thread.Start();
-
-      
-
     }
 
     void App_MoustacheLayerLoaded(object sender, EventArgs e)
@@ -74,11 +65,7 @@ namespace Client
             mw.Setup();
             MainWindowModel.ChangeModel(new CatalogViewModel());
         }));
-
-
-    }
-
-     
+    }  
 
   }
 }

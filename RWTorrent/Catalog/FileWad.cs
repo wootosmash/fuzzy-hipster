@@ -196,7 +196,37 @@ namespace FuzzyHipster.Catalog
     {
       return string.Format("[FileWad Locker={0}, Id={1}, StackId={2}, Name={3}, Description={4}, BlockSize={5}, TotalBlocks={6}, TotalSize={7}, LastUpdate={8}, Files={9}, BlockIndex={10}]", locker, Id, StackId, Name, Description, BlockSize, TotalBlocks, TotalSize, LastUpdate, Files, BlockIndex);
     }
-
+    
+    public static long CalculatePathSize( string path )
+    {
+      long size = 0;
+      
+      if ( !Directory.Exists(path))
+        return 0;
+      
+      foreach( string dir in Directory.GetDirectories(path))
+      {
+        size += CalculatePathSize(dir);
+        foreach( string file in Directory.GetFiles(dir))
+        {
+          var info = new FileInfo(file);
+          size += info.Length;
+        }
+      }
+      
+      return size;
+    }
+    
+    public static long EstimateBlockSize( int quantityDesired, long totalBytes )
+    {
+      long blockSize = totalBytes / quantityDesired;
+      int p = (int)Math.Pow(2, Math.Ceiling(Math.Log(blockSize)/Math.Log(2)));
+      
+      if ( p < 1024 )
+        p = 1024;
+      
+      return p;
+    }
   }
 }
 
