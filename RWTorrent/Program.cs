@@ -23,7 +23,7 @@ namespace FuzzyHipster
       string port = args.Length > 0 ? args[0] : RWNetwork.RWDefaultPort.ToString();
       
       var catalog = Catalog.Catalog.Load(string.Format(@".\Localhost-{0}\", port));
-      var torrent = new RWTorrent(catalog);
+      var torrent = new MoustacheLayer(catalog);
       torrent.Settings.Port = int.Parse(port);
       torrent.Me.Port = torrent.Settings.Port;
       

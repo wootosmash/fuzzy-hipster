@@ -725,7 +725,7 @@ namespace FuzzyHipster.Network
   {
     public override void Execute()
     {
-      var fileWad = RWTorrent.Singleton.Catalog.GetFileWad(FileWadId);
+      var fileWad = MoustacheLayer.Singleton.Catalog.GetFileWad(FileWadId);
       
       fileWad.VerifyBlock(TempFile);
       fileWad.CatalogBlock(Block, TempFile);

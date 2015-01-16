@@ -38,7 +38,7 @@ namespace Client
             delegate
             {
                 var catalog = Catalog.Load(".");
-                var rwt = new FuzzyHipster.RWTorrent(catalog);
+                var rwt = new FuzzyHipster.MoustacheLayer(catalog);
                 OnRWTorrentLoaded(new EventArgs());
                 rwt.Start();
             }

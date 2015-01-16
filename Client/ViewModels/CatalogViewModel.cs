@@ -38,7 +38,7 @@ namespace Client
                 {
                     return _wads;
                 }
-                StackCollection Stacks = FuzzyHipster.RWTorrent.Singleton.Catalog.Stacks;
+                StackCollection Stacks = FuzzyHipster.MoustacheLayer.Singleton.Catalog.Stacks;
                 _wads = new List<FileWad>();
 
                 foreach (Stack s in Stacks)

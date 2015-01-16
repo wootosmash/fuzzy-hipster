@@ -40,7 +40,7 @@ namespace FuzzyHipster.Catalog
 
 		public void Save()
 		{
-			FileWad wad = RWTorrent.Singleton.Catalog.GetFileWad(FileWadId);
+			FileWad wad = MoustacheLayer.Singleton.Catalog.GetFileWad(FileWadId);
 			FileDescriptor[] descriptors = wad.Files.GetDescriptorsByBlock(this);
 			foreach (var descriptor in descriptors) 
 			{

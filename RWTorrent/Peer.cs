@@ -98,7 +98,7 @@ namespace FuzzyHipster
       NextConnectionAttempt = DateTime.MinValue;
       FailedConnectionAttempts = 0;
       OkToSend = false;
-      MaxBlockPacketSize = RWTorrent.Singleton.Settings.DefaultMaxBlockPacketSize;
+      MaxBlockPacketSize = MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
     }
     
     public void UpdateFromCopy( Peer peer )

@@ -14,7 +14,7 @@ namespace Client
 
         public MyListViewModel()
         {
-            RWTorrent.Singleton.Network.NewStack += Network_NewStack;
+            MoustacheLayer.Singleton.Network.NewStack += Network_NewStack;
         }
 
         void Network_NewStack(object sender, FuzzyHipster.Network.GenericEventArgs<Stack> e)
@@ -36,7 +36,7 @@ namespace Client
         {
             get
             {
-                StackCollection Stacks = FuzzyHipster.RWTorrent.Singleton.Catalog.Stacks;
+                StackCollection Stacks = FuzzyHipster.MoustacheLayer.Singleton.Catalog.Stacks;
                 return Stacks.ToList<Stack>();
             }
 

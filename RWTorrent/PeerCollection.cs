@@ -21,7 +21,7 @@ namespace FuzzyHipster
       if ( Count == 0 )
         return null;
       
-      int index = RWTorrent.Singleton.Random.Next(0, Count);
+      int index = MoustacheLayer.Singleton.Random.Next(0, Count);
       return this[index];
     }
     
@@ -45,11 +45,6 @@ namespace FuzzyHipster
         Add(peer);
       
       Save();
-    }
-
-    public void Add(Peer peer)
-    {
-      Add(peer);
     }
     
     public static PeerCollection Load( string basePath )
@@ -80,7 +75,7 @@ namespace FuzzyHipster
     {
       lock( this)
       {
-        string basePath = RWTorrent.Singleton.Catalog.BasePath;
+        string basePath = MoustacheLayer.Singleton.Catalog.BasePath;
         string peersPath = Path.Combine(basePath, @"Catalog\");
         
         if ( !Directory.Exists(peersPath))
