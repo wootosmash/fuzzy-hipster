@@ -28,6 +28,8 @@ namespace Client
         handler(this, e);
     }
 
+    
+
     protected override void OnStartup(StartupEventArgs e)
     {
       
@@ -41,14 +43,15 @@ namespace Client
                 var rwt = new FuzzyHipster.MoustacheLayer(catalog);
                 OnMoustacheLayerLoaded(new EventArgs());
                 rwt.Start();
+
+                
             }
        )
    );
 
+      MoustacheLayerLoaded += App_MoustacheLayerLoaded;
+     
 
-      thread.IsBackground = true;
-      thread.Start();
-      Thread.Sleep(10000);
 
 
 
@@ -57,11 +60,27 @@ namespace Client
       app.DataContext = context;
       app.Show();
 
-      MainWindowModel.ChangeModel(new CatalogViewModel());
+      thread.IsBackground = true;
+      thread.Start();
 
+      
+
+    }
+
+    void App_MoustacheLayerLoaded(object sender, EventArgs e)
+    {
+        Dispatcher.Invoke(new Action(delegate()
+        {
+            MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
+            mw.Setup();
+            MainWindowModel.ChangeModel(new CatalogViewModel());
+
+        }));
 
 
     }
+
+     
 
   }
 }

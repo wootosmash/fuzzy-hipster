@@ -25,14 +25,21 @@ namespace Client
         public MainWindowModel()
         {
             // Add available pages
-            PageViewModels.Add(new StartUpViewModel());
-            PageViewModels.Add(new MyListViewModel());
-            PageViewModels.Add(new CatalogViewModel());
-            PageViewModels.Add(new PeerListViewModel());
+
            
 
             // Set starting page
             CurrentPageViewModel = new SplashViewModel();
+
+        }
+
+        public void Setup()
+        {
+
+            PageViewModels.Add(new StartUpViewModel());
+            PageViewModels.Add(new MyListViewModel());
+            PageViewModels.Add(new CatalogViewModel());
+            PageViewModels.Add(new PeerListViewModel());
 
         }
 
