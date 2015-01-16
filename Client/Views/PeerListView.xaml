@@ -21,7 +21,7 @@
                     </GridViewColumn>
 
 
-                    <GridViewColumn Header="Name" Width="130" TextBlock.TextAlignment="Left" DisplayMemberBinding="{Binding Name}">
+                    <GridViewColumn Header="Name" Width="80" TextBlock.TextAlignment="Left" DisplayMemberBinding="{Binding Name}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Name}" HorizontalAlignment="Left" />
@@ -30,13 +30,47 @@
                     </GridViewColumn>
 
 
-                    <GridViewColumn Width="230" Header="IPAddress" TextBlock.TextAlignment="Left"  DisplayMemberBinding="{Binding IPAddress}">
+                    <GridViewColumn Width="130" Header="IPAddress" TextBlock.TextAlignment="Left"  DisplayMemberBinding="{Binding IPAddress}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding IPAddress}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+
+                    <GridViewColumn Header="Port" Width="40"  DisplayMemberBinding="{Binding Port}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Port}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Header="Failed" Width="40"  DisplayMemberBinding="{Binding FailedConnectionAttempts}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding FailedConnectionAttempts}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Header="PeerCount" Width="40"  DisplayMemberBinding="{Binding PeerCount}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding PeerCount}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Header="Bandwidth" Width="40"  DisplayMemberBinding="{Binding EstimatedBandwidth}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding EstimatedBandwidth}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    
 
 
                     <GridViewColumn Header="IsConnected" Width="80"  DisplayMemberBinding="{Binding IsConnected}">
@@ -46,6 +80,8 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    
+
 
 
                 </GridView>

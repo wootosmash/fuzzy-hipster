@@ -28,6 +28,15 @@ namespace FuzzyHipster
     public Random Random { get; set; }
 
     Timer HeartbeatTimer = new Timer();
+
+    public Timer HeartBeat
+    {
+        get
+        {
+            return HeartbeatTimer;
+        }
+        
+    }
     
     public MoustacheLayer( Catalog.Catalog catalog )
     {

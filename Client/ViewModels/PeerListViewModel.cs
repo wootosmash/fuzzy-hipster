@@ -23,16 +23,24 @@ namespace Client
         public PeerListViewModel()
         {
             
-            MoustacheLayer.Singleton.Network.PeerConnected += Network_PeerConnected;
+           MoustacheLayer.Singleton.Network.PeerConnected += Network_PeerConnected;
 
-            MoustacheLayer.Singleton.Network.PeerConnectFailed += Network_PeerConnected;
+           MoustacheLayer.Singleton.Network.PeerConnectFailed += Network_PeerConnected;
 
-            MoustacheLayer.Singleton.Network.PeerDisconnected += Network_PeerConnected;
+           MoustacheLayer.Singleton.Network.PeerDisconnected += Network_PeerConnected;
 
-            MoustacheLayer.Singleton.Network.NewPeer += Network_PeerConnected;
+           MoustacheLayer.Singleton.Network.NewPeer += Network_PeerConnected;
 
-           // MoustacheLayer.Singleton.Network. += Network_PeerConnected;
+           //// MoustacheLayer.Singleton.Network. += Network_PeerConnected;
 
+
+            FuzzyHipster.MoustacheLayer.Singleton.HeartBeat.Elapsed += HeartBeat_Elapsed;
+
+        }
+
+        void HeartBeat_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            OnPropertyChanged("Peers");
         }
 
         void Network_PeerConnected(object sender, FuzzyHipster.Network.GenericEventArgs<Peer> e)
