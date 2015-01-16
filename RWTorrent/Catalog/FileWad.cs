@@ -44,7 +44,7 @@ namespace FuzzyHipster.Catalog
 
     public void CatalogBlock( int block, string tempFile )
     {
-      string path = string.Format(@"{0}\Catalog\{1}\{2}\", RWTorrent.Singleton.Catalog.BasePath, this.StackId, Id);
+      string path = string.Format(@"{0}\Catalog\{1}\{2}\", MoustacheLayer.Singleton.Catalog.BasePath, this.StackId, Id);
       if ( Directory.Exists( path ))
         Directory.CreateDirectory(path);
     }
@@ -130,7 +130,7 @@ namespace FuzzyHipster.Catalog
     public void Save()
     {
       lock (locker) {
-        string basePath = RWTorrent.Singleton.Catalog.BasePath;
+        string basePath = MoustacheLayer.Singleton.Catalog.BasePath;
         string stackPath = Path.Combine(basePath, string.Format(@"Catalog\Stacks\{0}\", StackId));
         
         if (!Directory.Exists(stackPath))

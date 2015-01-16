@@ -87,7 +87,7 @@ namespace FuzzyHipster.Catalog
     
     public void Save()
     {
-      string basePath = RWTorrent.Singleton.Catalog.BasePath;
+      string basePath = MoustacheLayer.Singleton.Catalog.BasePath;
       string stackPath = Path.Combine(basePath, string.Format(@"Catalog\Stacks\{0}\", Id));
       
       if ( !Directory.Exists(stackPath))

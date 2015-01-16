@@ -78,7 +78,7 @@ namespace Client
 
             //TODO: VALIDATION?
 
-            Catalog catalog = FuzzyHipster.RWTorrent.Singleton.Catalog;
+            Catalog catalog = FuzzyHipster.MoustacheLayer.Singleton.Catalog;
             Stack newStack = new Stack()
             {
                 Id = Guid.NewGuid(),

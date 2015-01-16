@@ -37,7 +37,7 @@ namespace FuzzyHipster.Tests
 
       catalog.Stacks.Add( faxes );
       
-      var torrent = new RWTorrent(catalog);
+      var torrent = new MoustacheLayer(catalog);
       catalog.Save();
       
       

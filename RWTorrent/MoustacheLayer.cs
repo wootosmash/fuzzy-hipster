@@ -15,11 +15,9 @@ using FuzzyHipster.Network;
 
 namespace FuzzyHipster
 {
-  
-  
-  public class RWTorrent
+  public class MoustacheLayer
   {
-    public static RWTorrent Singleton { get; protected set; }
+    public static MoustacheLayer Singleton { get; protected set; }
     
     public RWNetwork Network { get; set; }
     public Catalog.Catalog Catalog { get; set; }
@@ -31,7 +29,7 @@ namespace FuzzyHipster
 
     Timer HeartbeatTimer = new Timer();
     
-    public RWTorrent( Catalog.Catalog catalog )
+    public MoustacheLayer( Catalog.Catalog catalog )
     {
       Singleton = this;
       Random = new Random(DateTime.Now.Millisecond);
@@ -48,22 +46,22 @@ namespace FuzzyHipster
 
       Network = new RWNetwork(Me);
       
-      Network.PeerConnected += NetworkPeerConnected;
-      Network.PeerConnectFailed += NetworkPeerConnectFailed;
+//      Network.PeerConnected += NetworkPeerConnected;
+//      Network.PeerConnectFailed += NetworkPeerConnectFailed;
       
-      Network.NewPeer += NetworkNewPeer;
-      Network.NewStack += NetworkNewStack;
-      Network.NewWad += NetworkNewWad;
-      
-      Network.PeersRequested += NetworkPeersRequested;
-      Network.StacksRequested += NetworkStacksRequested;
-      Network.WadsRequested += NetworkWadsRequested;
-      
-      Network.BlocksAvailableReceived += NetworkBlocksAvailableReceived;
-      Network.BlocksAvailableRequested += NetworkBlocksAvailableRequested;
-      
-      Network.BlockRequested += NetworkBlockRequested;
-      Network.BlockReceived += NetworkBlockReceived;
+//      Network.NewPeer += NetworkNewPeer;
+//      Network.NewStack += NetworkNewStack;
+//      Network.NewWad += NetworkNewWad;
+//      
+//      Network.PeersRequested += NetworkPeersRequested;
+//      Network.StacksRequested += NetworkStacksRequested;
+//      Network.WadsRequested += NetworkWadsRequested;
+//      
+//      Network.BlocksAvailableReceived += NetworkBlocksAvailableReceived;
+//      Network.BlocksAvailableRequested += NetworkBlocksAvailableRequested;
+//      
+//      Network.BlockRequested += NetworkBlockRequested;
+//      Network.BlockReceived += NetworkBlockReceived;
       
       HeartbeatTimer = new Timer(Settings.HeartbeatInterval);
       HeartbeatTimer.Elapsed +=  HeartbeatElapsed;
@@ -72,7 +70,7 @@ namespace FuzzyHipster
     
     void NetworkBlocksAvailableReceived( object sender, MessageComposite<BlocksAvailableNetMessage> e)
     {
-      var wad = RWTorrent.Singleton.Catalog.GetFileWad(e.Value.FileWadId);
+      var wad = MoustacheLayer.Singleton.Catalog.GetFileWad(e.Value.FileWadId);
       
       var list = new List<int>();
       
@@ -80,7 +78,7 @@ namespace FuzzyHipster
         if ( e.Value.BlocksAvailable[i] )
           list.Add(i);
       
-      int index = list[RWTorrent.Singleton.Random.Next(0,list.Count)];
+      int index = list[MoustacheLayer.Singleton.Random.Next(0,list.Count)];
       
       Network.RequestBlock(e.Peer, wad, index);
     }
