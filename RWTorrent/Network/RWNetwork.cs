@@ -38,7 +38,8 @@ namespace FuzzyHipster.Network
     public long BytesSent { get; set; }
     
     Random random = new Random(DateTime.Now.Millisecond);
-    ManualResetEvent allDone = new ManualResetEvent(false);
+    ManualResetEvent acceptSemaphore = new ManualResetEvent(false);
+    ManualResetEvent receiveSemaphore = new ManualResetEvent(false);
     
     #region events
 
@@ -255,14 +256,14 @@ namespace FuzzyHipster.Network
         while (true)
         {
           // Set the event to nonsignaled state.
-          allDone.Reset();
+          acceptSemaphore.Reset();
 
           Listener.BeginAccept(
             new AsyncCallback(AcceptCallback),
             Listener );
 
           // Wait until a connection is made before continuing.
-          allDone.WaitOne();
+          acceptSemaphore.WaitOne();
         }
 
       } catch (Exception e) {
@@ -273,7 +274,7 @@ namespace FuzzyHipster.Network
     void AcceptCallback(IAsyncResult ar)
     {
       // Signal the main thread to continue.
-      allDone.Set();
+      acceptSemaphore.Set();
 
       // Get the socket that handles the client request.
       Socket listener = ar.AsyncState as Socket;
@@ -288,7 +289,7 @@ namespace FuzzyHipster.Network
         handler.Dispose();
       }
       else
-      {        
+      {
         var peer = new Peer()
         {
           Id = Guid.Empty,
@@ -309,6 +310,7 @@ namespace FuzzyHipster.Network
         state.ExpectedMessage = MessageType.PeerStatus;
         try
         {
+          //receiveSemaphore.Reset();
           handler.BeginReceive( state.Buffer.GetBuffer(), 0, state.ExpectedLength, 0,
                                new AsyncCallback(WaitMessageCallback), state); // get the message size first
           
@@ -330,6 +332,7 @@ namespace FuzzyHipster.Network
       {
 
         int bytesRead = peer.Socket.EndReceive(ar);
+        //receiveSemaphore.Set();
         peer.BytesReceived += bytesRead;
         BytesReceived += bytesRead;
         
@@ -353,6 +356,7 @@ namespace FuzzyHipster.Network
             state.WaitingLengthFrame = false;
             if ( state.ExpectedLength < state.Buffer.Capacity )
             {
+              //receiveSemaphore.Reset();
               peer.Socket.BeginReceive( state.Buffer.GetBuffer(), 0, state.ExpectedLength, 0,
                                        new AsyncCallback(WaitMessageCallback), state);
             }
@@ -371,7 +375,8 @@ namespace FuzzyHipster.Network
               state.WaitingLengthFrame = true; // waiting for the message size
               
               OnNetMessageReceived(new GenericEventArgs<NetMessage>(message));
-              ProcessMessage(message, state);              
+              ProcessMessage(message, state);
+              //receiveSemaphore.Reset();
               peer.Socket.BeginReceive( state.Buffer.GetBuffer(), 0, state.ExpectedLength, 0,
                                        new AsyncCallback(WaitMessageCallback), state); // read the message size first
             }
@@ -540,6 +545,8 @@ namespace FuzzyHipster.Network
         recvState.ExpectedLength = sizeof(int);
         recvState.ExpectedMessage = MessageType.PeerStatus;
         recvState.WaitingLengthFrame = true;
+
+        //receiveSemaphore.Reset();
         recvState.Peer.Socket.BeginReceive( recvState.Buffer.GetBuffer(), 0, recvState.ExpectedLength, 0,
                                            new AsyncCallback(WaitMessageCallback), recvState);
       }

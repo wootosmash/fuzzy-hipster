@@ -35,16 +35,16 @@ namespace Client
 
       var thread = new Thread(
         new ThreadStart(
-            delegate
-            {
-                var catalog = Catalog.Load(".");
-                var rwt = new FuzzyHipster.MoustacheLayer(catalog);
-                OnMoustacheLayerLoaded(new EventArgs());
-                rwt.Start();
-            }
-       )
-   );
-
+          delegate
+          {
+            var catalog = Catalog.Load(".");
+            var rwt = new FuzzyHipster.MoustacheLayer(catalog);
+            OnMoustacheLayerLoaded(new EventArgs());
+            rwt.Start();
+          }
+         )
+       );
+      
 
       thread.IsBackground = true;
       thread.Start();
