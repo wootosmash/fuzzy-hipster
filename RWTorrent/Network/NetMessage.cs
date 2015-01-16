@@ -83,7 +83,7 @@ namespace FuzzyHipster.Network
     
     public override string ToString()
     {
-      return string.Format("[PeerListNetMessage Peers={0}]", Peers);
+      return string.Format("[PeerListNetMessage Type={0} Peers={1}]", Type, Peers);
     }
   }
   

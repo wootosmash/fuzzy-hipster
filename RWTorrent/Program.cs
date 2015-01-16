@@ -54,7 +54,7 @@ namespace FuzzyHipster
         {
           
           Console.WriteLine("Peers " + torrent.Me.Id);
-          foreach( Peer p in torrent.Peers.Values )
+          foreach( Peer p in torrent.Network.ActivePeers )
             Console.WriteLine(p);
         }
         
