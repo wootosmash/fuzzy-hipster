@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -735,6 +736,7 @@ namespace FuzzyHipster.Network
     {
       string str = string.Format(format, args );
       Console.WriteLine("{0} {1}", Me.Id, str);
+      Debug.Print("{0} {1}", Me.Id, str);
     }
   }
   

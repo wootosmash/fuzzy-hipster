@@ -54,6 +54,7 @@ namespace FuzzyHipster
     public long Uptime { get; set; }
     public int MaxBlockPacketSize { get; set; }
     public int EstimatedBandwidth { get; set; }
+    public DateTime LastConnection { get; set; }
     
     [NonSerialized()]
     DateTime okToSend;
@@ -114,6 +115,7 @@ namespace FuzzyHipster
       IPAddress = peer.IPAddress;
       Port = peer.Port;
       OkToSendAt = peer.OkToSendAt;
+      LastConnection = peer.LastConnection;
     }
     
     /// <summary>

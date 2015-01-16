@@ -87,9 +87,12 @@ namespace FuzzyHipster
         if ( e.Value.BlocksAvailable[i] )
           list.Add(i);
       
-      int index = list[MoustacheLayer.Singleton.Random.Next(0,list.Count)];
+      int index = -1;
+      if ( list.Count > 0 )
+        index = list[MoustacheLayer.Singleton.Random.Next(0,list.Count)];
       
-      Network.RequestBlock(e.Peer, wad, index);
+      if ( index >= 0)
+        Network.RequestBlock(e.Peer, wad, index);
     }
     
     void NetworkBlocksAvailableRequested( object sender, MessageComposite<RequestBlocksAvailableNetMessage> e)
@@ -139,7 +142,7 @@ namespace FuzzyHipster
         return;
       if ( Catalog.Stacks[e.Value.StackGuid].Wads == null )
         Network.SendWads( e.Peer, null);
-      else        
+      else
         Network.SendWads( e.Peer, Catalog.Stacks[e.Value.StackGuid].Wads.ToArray());
     }
 
