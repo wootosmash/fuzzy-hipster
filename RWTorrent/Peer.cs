@@ -56,8 +56,9 @@ namespace FuzzyHipster
     public int EstimatedBandwidth { get; set; }
     
     [NonSerialized()]
-    bool okToSend;
-    public bool OkToSend {
+    DateTime okToSend;
+    [XmlIgnore()]
+    public DateTime OkToSendAt {
       get {
         return okToSend;
       }
@@ -97,7 +98,7 @@ namespace FuzzyHipster
       Id = Guid.NewGuid();
       NextConnectionAttempt = DateTime.MinValue;
       FailedConnectionAttempts = 0;
-      OkToSend = false;
+      OkToSendAt = DateTime.MaxValue;
       MaxBlockPacketSize = MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
     }
     
@@ -112,6 +113,7 @@ namespace FuzzyHipster
       MaxBlockPacketSize = peer.MaxBlockPacketSize;
       IPAddress = peer.IPAddress;
       Port = peer.Port;
+      OkToSendAt = peer.OkToSendAt;
     }
     
     /// <summary>

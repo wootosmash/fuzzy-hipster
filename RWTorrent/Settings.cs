@@ -27,6 +27,7 @@ namespace FuzzyHipster
 		public int Port { get; set; }		
 		public int MaxActiveBlockTransfers { get; set; }
 		public int DefaultMaxBlockPacketSize { get; set; }
+		public int ThinkTimeGraceMilliseconds { get; set; }
 
 		public Settings()
 		{
@@ -38,6 +39,7 @@ namespace FuzzyHipster
 			ConnectAttemptWaitTime = 60;
 			MaxActiveBlockTransfers = 10;
 			DefaultMaxBlockPacketSize = 40000;
+			ThinkTimeGraceMilliseconds = 3000;
 		}
 		
 		public static Settings Load(string path)
