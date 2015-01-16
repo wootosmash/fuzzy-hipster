@@ -82,6 +82,7 @@
     <Compile Include="ViewModels\AddFilesViewModel.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
     <Compile Include="ViewModels\NewChannelViewModel.cs" />
+    <Compile Include="ViewModels\PeerListViewModel.cs" />
     <Compile Include="ViewModels\SplashViewModel.cs" />
     <Compile Include="Views\AddFilesView.xaml.cs">
       <DependentUpon>AddFilesView.xaml</DependentUpon>
@@ -95,6 +96,9 @@
     <Compile Include="ViewModels\MyListViewModel.cs" />
     <Compile Include="Views\NewChannelView.xaml.cs">
       <DependentUpon>NewChannelView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PeerListView.xaml.cs">
+      <DependentUpon>PeerListView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SplashView.xaml.cs">
       <DependentUpon>SplashView.xaml</DependentUpon>
@@ -142,6 +146,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\NewChannelView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PeerListView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

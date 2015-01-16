@@ -30,7 +30,7 @@ namespace Client
         {
             return null;
             /*var catalog = new Catalog.Catalog();
-            var torrent = new RWTorrent(catalog);
+            var torrent = new MoustacheLayer(catalog);
             catalog.BasePath = Environment.CurrentDirectory;
             catalog.Namespace = "Base Programs";
             catalog.Description = "Test Catalog for Base Programs";

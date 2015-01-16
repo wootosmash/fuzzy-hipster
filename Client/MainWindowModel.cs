@@ -28,7 +28,7 @@ namespace Client
             PageViewModels.Add(new StartUpViewModel());
             PageViewModels.Add(new MyListViewModel());
             PageViewModels.Add(new CatalogViewModel());
-
+            PageViewModels.Add(new PeerListViewModel());
            
 
             // Set starting page

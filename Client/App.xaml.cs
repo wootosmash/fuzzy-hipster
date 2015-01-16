@@ -19,11 +19,11 @@ namespace Client
   /// </summary>
   public partial class App : Application
   {
-    public event EventHandler RWTorrentLoaded;
+    public event EventHandler MoustacheLayerLoaded;
 
-    protected virtual void OnRWTorrentLoaded(EventArgs e)
+    protected virtual void OnMoustacheLayerLoaded(EventArgs e)
     {
-      var handler = RWTorrentLoaded;
+      var handler = MoustacheLayerLoaded;
       if (handler != null)
         handler(this, e);
     }
@@ -39,7 +39,7 @@ namespace Client
             {
                 var catalog = Catalog.Load(".");
                 var rwt = new FuzzyHipster.MoustacheLayer(catalog);
-                OnRWTorrentLoaded(new EventArgs());
+                OnMoustacheLayerLoaded(new EventArgs());
                 rwt.Start();
             }
        )
