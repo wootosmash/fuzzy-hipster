@@ -29,7 +29,7 @@ namespace FuzzyHipster.Catalog
     public long LastUpdated { get; set; }
 
     [XmlIgnore()]
-    public StackCollection Stacks {
+    public ChannelCollection Channels {
       get;
       set;
     }
@@ -37,7 +37,7 @@ namespace FuzzyHipster.Catalog
     public Catalog()
     {
       Guid = Guid.NewGuid();
-      Stacks = new StackCollection();
+      Channels = new ChannelCollection();
     }
 
 
@@ -60,25 +60,25 @@ namespace FuzzyHipster.Catalog
 
         catalog.BasePath = basePath;
         
-        string stacksPath = Path.Combine(basePath, @"Catalog\Stacks");
+        string channelsPath = Path.Combine(basePath, @"Catalog\Channels");
         
-        if ( !Directory.Exists(stacksPath ))
-          Directory.CreateDirectory(stacksPath);
+        if ( !Directory.Exists(channelsPath ))
+          Directory.CreateDirectory(channelsPath);
 
-        var serialiserStacks = new XmlSerializer(typeof(Stack));
-        foreach (string dir in Directory.GetDirectories(stacksPath))
+        var serialiserChannels = new XmlSerializer(typeof(Channel));
+        foreach (string dir in Directory.GetDirectories(channelsPath))
         {
           Console.WriteLine(dir);
-          Stack stack = null;
+          Channel channel = null;
           using (var reader = new StreamReader(string.Format(@"{0}\Index.xml", dir)))
           {
-            stack = (Stack)serialiserStacks.Deserialize(reader);
-            catalog.Stacks.Add(stack);
+            channel = (Channel)serialiserChannels.Deserialize(reader);
+            catalog.Channels.Add(channel);
           }
           
-          foreach( string file in Directory.GetFiles(Path.Combine(basePath, string.Format(@"Catalog\Stacks\{0}\",stack.Id))))
+          foreach( string file in Directory.GetFiles(Path.Combine(basePath, string.Format(@"Catalog\Channels\{0}\",channel.Id))))
             if ( !file.EndsWith("Index.xml"))
-              stack.Wads.Add(FileWad.Load(file));
+              channel.Wads.Add(FileWad.Load(file));
         }
       }
       
@@ -92,21 +92,37 @@ namespace FuzzyHipster.Catalog
       if ( !Directory.Exists(Path.Combine(BasePath, @"Catalog")))
         Directory.CreateDirectory(Path.Combine(BasePath, @"Catalog"));
       
-      if ( !Directory.Exists(Path.Combine(BasePath, @"Catalog\Stacks\")))
-        Directory.CreateDirectory(Path.Combine(BasePath, @"Catalog\Stacks\"));
+      if ( !Directory.Exists(Path.Combine(BasePath, @"Catalog\Channels\")))
+        Directory.CreateDirectory(Path.Combine(BasePath, @"Catalog\Channels\"));
       
       var serialiser = new XmlSerializer(typeof(Catalog));
       using (var writer = new StreamWriter(catalogEndPointPath))
         serialiser.Serialize(writer, this);
       
-      foreach (var stack in Stacks)
-        stack.Save();
+      foreach (var channel in Channels)
+        channel.Save();
+    }
+    
+    public FileWad[] GetFileWadsByFileHash( string hash )
+    {
+      var wads = new List<FileWad>();
+      foreach( var s in Channels )
+        foreach( var wad in s.Wads )
+          foreach( var file in wad.Files )
+            if ( file.Hash == hash )
+              wads.Add( wad );
+      return wads.ToArray();
+    }
+    
+    public FileWad[] GetFileWads( string searchText )
+    {
+      return null;
     }
 
     public FileWad GetFileWad(Guid id)
     {
-      foreach (var stack in Stacks)
-        foreach (var wad in stack.Wads)
+      foreach (var channel in Channels)
+        foreach (var wad in channel.Wads)
           if (wad.Id == id)
             return wad;
       
@@ -115,8 +131,8 @@ namespace FuzzyHipster.Catalog
     
     public override string ToString()
     {
-      return string.Format("[Catalog Namespace={0}, Description={1}, BasePath={2}, LastUpdated={3}, Stacks.Count={4}]", 
-                           Namespace, Description, BasePath, LastUpdated, Stacks.Count);
+      return string.Format("[Catalog Namespace={0}, Description={1}, BasePath={2}, LastUpdated={3}, Channels.Count={4}]", 
+                           Namespace, Description, BasePath, LastUpdated, Channels.Count);
     }
 
   }

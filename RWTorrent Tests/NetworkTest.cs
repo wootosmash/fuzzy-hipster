@@ -70,7 +70,7 @@ namespace FuzzyHipster.Tests
     {
       var network = new RWNetwork(localHostPeer2);
       
-      network.NewStack += delegate(object sender, GenericEventArgs<Stack> e) {
+      network.NewChannel += delegate(object sender, GenericEventArgs<Channel> e) {
         Console.WriteLine(e.Value);
       };
       
@@ -78,7 +78,7 @@ namespace FuzzyHipster.Tests
       Thread.Sleep(10000);
       
       foreach( var peer in network.ActivePeers )
-        network.RequestStacks( peer, 0, 10);
+        network.RequestChannels( peer, 0, 10);
       
       Thread.Sleep(10000);
       //network.Disconnect();

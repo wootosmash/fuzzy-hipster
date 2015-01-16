@@ -79,14 +79,14 @@ namespace Client
             //TODO: VALIDATION?
 
             Catalog catalog = FuzzyHipster.MoustacheLayer.Singleton.Catalog;
-            Stack newStack = new Stack()
+            Channel newChannel = new Channel()
             {
                 Id = Guid.NewGuid(),
                 Name = this.ChannelName,
                 Description = this.ChannelDescription,
                 PublicKey = "..."
             };
-            catalog.Stacks.Add(newStack);
+            catalog.Channels.Add(newChannel);
             catalog.Save();
 
             MainWindowModel.ChangeModel(new MyListViewModel());

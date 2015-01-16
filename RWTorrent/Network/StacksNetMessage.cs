@@ -15,25 +15,25 @@ namespace FuzzyHipster.Network
 {
 	[Serializable()]
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
-	public class StacksNetMessage : NetMessage
+	public class ChannelsNetMessage : NetMessage
 	{
-		public Stack[] Stacks {
+		public Channel[] Channels {
 			get;
 			set;
 		}
 
-		public StacksNetMessage()
+		public ChannelsNetMessage()
 		{
-			Type = MessageType.Stacks;
-			Stacks = new Stack[0];
+			Type = MessageType.Channels;
+			Channels = new Channel[0];
 		}
 
 		public override string ToString()
 		{
-			if (Stacks.Length == 0)
-				return "[StacksNetMessage Stacks.Count=0]";
+			if (Channels.Length == 0)
+				return "[ChannelsNetMessage Channels.Count=0]";
 			else
-				return string.Format("[StacksNetMessage Stacks={0}]", Stacks);
+				return string.Format("[ChannelsNetMessage Channels={0}]", Channels);
 		}
 	}
 }

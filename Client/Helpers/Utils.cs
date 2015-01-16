@@ -26,7 +26,7 @@ namespace Client
         }
 
 
-        public static Stack FolderStack()
+        public static Channel FolderChannel()
         {
             return null;
             /*var catalog = new Catalog.Catalog();
@@ -35,19 +35,19 @@ namespace Client
             catalog.Namespace = "Base Programs";
             catalog.Description = "Test Catalog for Base Programs";
 
-            Stack faxes = new Stack()
+            Channel faxes = new Channel()
             {
                 Id = Guid.NewGuid(),
                 Name = "Faxes Shit",
                 Description = "All fax wangs shit",
                 PublicKey = "..."
             };
-            FileWad blazingSaddles = new FileWad() { StackId = faxes.Id, BlockSize = 1024, Name = "My Program", Description = "A hilarious Program" };
+            FileWad blazingSaddles = new FileWad() { ChannelId = faxes.Id, BlockSize = 1024, Name = "My Program", Description = "A hilarious Program" };
             blazingSaddles.BuildFromPath(@".");
 
             faxes.Wads.Add(blazingSaddles);
 
-            catalog.Stacks.Add(faxes);
+            catalog.Channels.Add(faxes);
             catalog.Save();*/
         }
     }

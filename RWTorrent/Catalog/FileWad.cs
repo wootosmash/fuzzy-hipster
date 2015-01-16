@@ -16,7 +16,7 @@ namespace FuzzyHipster.Catalog
   {
     public Guid Id { get; set; }
     
-    public Guid StackId { get; set; }
+    public Guid ChannelId { get; set; }
 
     public string Name { get; set; }
 
@@ -44,7 +44,7 @@ namespace FuzzyHipster.Catalog
 
     public void CatalogBlock( int block, string tempFile )
     {
-      string path = string.Format(@"{0}\Catalog\{1}\{2}\", MoustacheLayer.Singleton.Catalog.BasePath, this.StackId, Id);
+      string path = string.Format(@"{0}\Catalog\{1}\{2}\", MoustacheLayer.Singleton.Catalog.BasePath, this.ChannelId, Id);
       if ( Directory.Exists( path ))
         Directory.CreateDirectory(path);
     }
@@ -131,14 +131,14 @@ namespace FuzzyHipster.Catalog
     {
       lock (locker) {
         string basePath = MoustacheLayer.Singleton.Catalog.BasePath;
-        string stackPath = Path.Combine(basePath, string.Format(@"Catalog\Stacks\{0}\", StackId));
+        string channelPath = Path.Combine(basePath, string.Format(@"Catalog\Channels\{0}\", ChannelId));
         
-        if (!Directory.Exists(stackPath))
-          Directory.CreateDirectory(stackPath);
+        if (!Directory.Exists(channelPath))
+          Directory.CreateDirectory(channelPath);
         
-        var serialiserStacks = new XmlSerializer(typeof(FileWad));
-        using (var writer = new StreamWriter(string.Format("{0}{1}.xml", stackPath, Id)))
-          serialiserStacks.Serialize(writer, this);
+        var serialiserChannels = new XmlSerializer(typeof(FileWad));
+        using (var writer = new StreamWriter(string.Format("{0}{1}.xml", channelPath, Id)))
+          serialiserChannels.Serialize(writer, this);
       }
     }
     
@@ -194,7 +194,7 @@ namespace FuzzyHipster.Catalog
     
     public override string ToString()
     {
-      return string.Format("[FileWad Locker={0}, Id={1}, StackId={2}, Name={3}, Description={4}, BlockSize={5}, TotalBlocks={6}, TotalSize={7}, LastUpdate={8}, Files={9}, BlockIndex={10}]", locker, Id, StackId, Name, Description, BlockSize, TotalBlocks, TotalSize, LastUpdate, Files, BlockIndex);
+      return string.Format("[FileWad Locker={0}, Id={1}, ChannelId={2}, Name={3}, Description={4}, BlockSize={5}, TotalBlocks={6}, TotalSize={7}, LastUpdate={8}, Files={9}, BlockIndex={10}]", locker, Id, ChannelId, Name, Description, BlockSize, TotalBlocks, TotalSize, LastUpdate, Files, BlockIndex);
     }
     
     public static long CalculatePathSize( string path )

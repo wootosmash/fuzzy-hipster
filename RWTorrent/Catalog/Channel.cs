@@ -15,7 +15,7 @@ using System.Xml.Serialization;
 namespace FuzzyHipster.Catalog
 {
   [Serializable()]
-  public class Stack : IEquatable<Stack>
+  public class Channel : IEquatable<Channel>
   {
     public Guid Id {
       get;
@@ -51,7 +51,7 @@ namespace FuzzyHipster.Catalog
       }
     }
     
-    public Stack()
+    public Channel()
     {
       Id = Guid.NewGuid();
       Wads = new List<FileWad>();
@@ -91,14 +91,14 @@ namespace FuzzyHipster.Catalog
     public void Save()
     {
       string basePath = MoustacheLayer.Singleton.Catalog.BasePath;
-      string stackPath = Path.Combine(basePath, string.Format(@"Catalog\Stacks\{0}\", Id));
+      string channelPath = Path.Combine(basePath, string.Format(@"Catalog\Channels\{0}\", Id));
       
-      if ( !Directory.Exists(stackPath))
-        Directory.CreateDirectory(stackPath);
+      if ( !Directory.Exists(channelPath))
+        Directory.CreateDirectory(channelPath);
       
-      var serialiserStacks = new XmlSerializer(typeof(Stack));
-      using (var writer = new StreamWriter(string.Format("{0}Index.xml", stackPath)))
-        serialiserStacks.Serialize(writer, this);
+      var serialiserChannels = new XmlSerializer(typeof(Channel));
+      using (var writer = new StreamWriter(string.Format("{0}Index.xml", channelPath)))
+        serialiserChannels.Serialize(writer, this);
       
       if ( Wads != null )
         foreach( var wad in Wads)
@@ -107,11 +107,11 @@ namespace FuzzyHipster.Catalog
 
     public override string ToString()
     {
-      return string.Format("[Stack Wads={0}, Id={1}, Name={2}, Description={3}, PublicKey={4}]", _wads, Id, Name, Description, PublicKey);
+      return string.Format("[Channel Wads={0}, Id={1}, Name={2}, Description={3}, PublicKey={4}]", _wads, Id, Name, Description, PublicKey);
     }
 
     #region IEquatable implementation
-    public bool Equals(Stack other)
+    public bool Equals(Channel other)
     {
       return other.Id == Id;
     }

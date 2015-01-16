@@ -55,6 +55,7 @@ namespace FuzzyHipster
     public int MaxBlockPacketSize { get; set; }
     public int EstimatedBandwidth { get; set; }
     public DateTime LastConnection { get; set; }
+    public bool IsLocal { get; set; }
     
     [NonSerialized()]
     DateTime okToSend;
@@ -101,6 +102,9 @@ namespace FuzzyHipster
       FailedConnectionAttempts = 0;
       OkToSendAt = DateTime.MaxValue;
       MaxBlockPacketSize = MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
+      IsLocal = false;
+      LastConnection = DateTime.MinValue;
+      CatalogRecency = 0;
     }
     
     public void UpdateFromCopy( Peer peer )
@@ -116,6 +120,7 @@ namespace FuzzyHipster
       Port = peer.Port;
       OkToSendAt = peer.OkToSendAt;
       LastConnection = peer.LastConnection;
+      IsLocal = peer.IsLocal;
     }
     
     /// <summary>

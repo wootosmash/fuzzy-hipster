@@ -14,20 +14,20 @@ using System.Threading;
 using System.Xml.Serialization;
 namespace FuzzyHipster.Catalog
 {
-	public class StackCollection : List<Stack>
+	public class ChannelCollection : List<Channel>
 	{
 	  
-		public Stack this[Guid stackGuid] {
+		public Channel this[Guid channelGuid] {
 			get {
-				return Find(x => x.Id == stackGuid);
+				return Find(x => x.Id == channelGuid);
 			}
 		}
 
-		public void RefreshStack(Stack stack)
+		public void RefreshChannel(Channel channel)
 		{
-		  if ( Find( x => x.Id == stack.Id) == null )
-  			Add(stack);
-			stack.Save();
+		  if ( Find( x => x.Id == channel.Id) == null )
+  			Add(channel);
+			channel.Save();
 		}
 	}
 }

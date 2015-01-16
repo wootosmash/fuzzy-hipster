@@ -59,11 +59,11 @@ namespace FuzzyHipster
       Network.PeerConnectFailed += NetworkPeerConnectFailed;
       
       Network.NewPeer += NetworkNewPeer;
-      Network.NewStack += NetworkNewStack;
+      Network.NewChannel += NetworkNewChannel;
       Network.NewWad += NetworkNewWad;
       
       Network.PeersRequested += NetworkPeersRequested;
-      Network.StacksRequested += NetworkStacksRequested;
+      Network.ChannelsRequested += NetworkChannelsRequested;
       Network.WadsRequested += NetworkWadsRequested;
       
       Network.BlocksAvailableReceived += NetworkBlocksAvailableReceived;
@@ -131,19 +131,19 @@ namespace FuzzyHipster
       Network.SendPeerList(e.Peer, peers.ToArray());
     }
 
-    void NetworkStacksRequested( object sender, MessageComposite<RequestStacksNetMessage> e )
+    void NetworkChannelsRequested( object sender, MessageComposite<RequestChannelsNetMessage> e )
     {
-      Network.SendStacks(e.Peer, Catalog.Stacks.ToArray());
+      Network.SendChannels(e.Peer, Catalog.Channels.ToArray());
     }
 
     void NetworkWadsRequested( object sender, MessageComposite<RequestWadsNetMessage> e )
     {
-      if ( Catalog.Stacks[e.Value.StackGuid] == null )
+      if ( Catalog.Channels[e.Value.ChannelGuid] == null )
         return;
-      if ( Catalog.Stacks[e.Value.StackGuid].Wads == null )
+      if ( Catalog.Channels[e.Value.ChannelGuid].Wads == null )
         Network.SendWads( e.Peer, null);
       else
-        Network.SendWads( e.Peer, Catalog.Stacks[e.Value.StackGuid].Wads.ToArray());
+        Network.SendWads( e.Peer, Catalog.Channels[e.Value.ChannelGuid].Wads.ToArray());
     }
 
     
@@ -163,9 +163,9 @@ namespace FuzzyHipster
             Network.Connect(e.Value);
     }
     
-    void NetworkNewStack( object sender, GenericEventArgs<Stack> e)
+    void NetworkNewChannel( object sender, GenericEventArgs<Channel> e)
     {
-      Catalog.Stacks.RefreshStack(e.Value);
+      Catalog.Channels.RefreshChannel(e.Value);
       
       Peer[] peers = Network.ActivePeers.ToArray();
       
@@ -175,7 +175,7 @@ namespace FuzzyHipster
     
     void NetworkNewWad( object sender, GenericEventArgs<FileWad> e)
     {
-      Catalog.Stacks[e.Value.StackId].RefreshWad(e.Value);
+      Catalog.Channels[e.Value.ChannelId].RefreshWad(e.Value);
       
       foreach( var peer in Network.ActivePeers )
         Network.RequestBlocksAvailable( peer, e.Value );
@@ -198,7 +198,7 @@ namespace FuzzyHipster
           {
             Network.SendMyStatus( peer );
             Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
-            Network.RequestStacks(peer, Catalog.LastUpdated, Settings.HeartbeatStackRequestCount);
+            Network.RequestChannels(peer, Catalog.LastUpdated, Settings.HeartbeatChannelRequestCount);
           }
           else
             Console.WriteLine("NOT OK TO SEND: " + peer.OkToSendAt);

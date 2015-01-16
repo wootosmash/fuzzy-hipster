@@ -22,7 +22,7 @@ namespace FuzzyHipster
 	  /// </summary>
 	  public int ConnectAttemptWaitTime { get; set; }
 		public int HeartbeatPeerRequestCount {get; set; }
-		public int HeartbeatStackRequestCount {get; set; }
+		public int HeartbeatChannelRequestCount {get; set; }
 		public int HeartbeatInterval {get; set; }
 		public int Port { get; set; }		
 		public int MaxActiveBlockTransfers { get; set; }
@@ -34,7 +34,7 @@ namespace FuzzyHipster
 		{
 			MaxActivePeers = 1;
 			HeartbeatPeerRequestCount = 30;
-			HeartbeatStackRequestCount = 3;
+			HeartbeatChannelRequestCount = 3;
 			HeartbeatInterval = 10000;
 			Port = RWNetwork.RWDefaultPort;
 			ConnectAttemptWaitTime = 60;

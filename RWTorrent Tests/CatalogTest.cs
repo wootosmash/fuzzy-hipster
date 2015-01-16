@@ -24,18 +24,18 @@ namespace FuzzyHipster.Tests
       catalog.Namespace = "Base Programs";
       catalog.Description = "Test Catalog for Base Programs";
       
-      Stack faxes = new Stack() { 
+      Channel faxes = new Channel() { 
         Id = Guid.NewGuid(),
         Name = "Faxes Shit", 
         Description = "All fax wangs shit", 
         PublicKey = "..." 
       };
-      FileWad myprog = new FileWad() { StackId = faxes.Id, BlockSize = 1024, Name = "My Program", Description = "A hilarious Program" };
+      FileWad myprog = new FileWad() { ChannelId = faxes.Id, BlockSize = 1024, Name = "My Program", Description = "A hilarious Program" };
       myprog.BuildFromPath( @".");
       
       faxes.Wads.Add(myprog);      
 
-      catalog.Stacks.Add( faxes );
+      catalog.Channels.Add( faxes );
       
       var torrent = new MoustacheLayer(catalog);
       catalog.Save();

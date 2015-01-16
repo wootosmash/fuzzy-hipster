@@ -67,8 +67,8 @@
     <Compile Include="Catalog\FileDescriptor.cs" />
     <Compile Include="Catalog\FileDescriptorCollection.cs" />
     <Compile Include="Catalog\FileWad.cs" />
-    <Compile Include="Catalog\Stack.cs" />
-    <Compile Include="Catalog\StackCollection.cs" />
+    <Compile Include="Catalog\Channel.cs" />
+    <Compile Include="Catalog\ChannelCollection.cs" />
     <Compile Include="Crypto\Key.cs" />
     <Compile Include="Network\BlockReceivedEventArgs.cs" />
     <Compile Include="Network\BlockRequestedEventArgs.cs" />

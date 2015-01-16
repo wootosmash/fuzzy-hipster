@@ -11,6 +11,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using FuzzyHipster.Catalog;
+using FuzzyHipster.Crypto;
 
 namespace FuzzyHipster.Network
 {
@@ -89,19 +90,19 @@ namespace FuzzyHipster.Network
   
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack=1)]
-  public class RequestStacksNetMessage : NetMessage
+  public class RequestChannelsNetMessage : NetMessage
   {
     public long Recency { get; set; }
     public int Count { get; set; }
 
-    public RequestStacksNetMessage()
+    public RequestChannelsNetMessage()
     {
-      Type = MessageType.RequestStacks;
+      Type = MessageType.RequestChannels;
     }
     
     public override string ToString()
     {
-      return string.Format("[RequestStacksNetMessage Recency={0}, Count={1}]", Recency, Count);
+      return string.Format("[RequestChannelsNetMessage Recency={0}, Count={1}]", Recency, Count);
     }
   }
   
@@ -113,7 +114,7 @@ namespace FuzzyHipster.Network
   {
     public long Recency { get; set; }
     public int Count { get; set; }
-    public Guid StackGuid { get; set; }
+    public Guid ChannelGuid { get; set; }
 
     public RequestWadsNetMessage()
     {
@@ -122,7 +123,7 @@ namespace FuzzyHipster.Network
     
     public override string ToString()
     {
-      return string.Format("[RequestWadsNetMessage Recency={0}, Count={1}, StackGuid={2}]", Recency, Count, StackGuid);
+      return string.Format("[RequestWadsNetMessage Recency={0}, Count={1}, ChannelGuid={2}]", Recency, Count, ChannelGuid);
     }
   }
   
@@ -215,6 +216,18 @@ namespace FuzzyHipster.Network
     }
   }
 
+  [Serializable()]
+  [StructLayout(LayoutKind.Sequential, Pack=1)]
+  public class KeyNetMessage : NetMessage
+  {
+    public Key Key { get; set; }
+    
+    public KeyNetMessage()
+    {
+      Type = MessageType.Key;
+    }
+  }  
+  
   public enum MessageType
   {
     Unknown = 0,
@@ -226,9 +239,9 @@ namespace FuzzyHipster.Network
     StartPeers = 11,
     Peers = 12,
     
-    RequestStacks = 18,    
-    StartStacks = 19,
-    Stacks = 20,
+    RequestChannels = 18,    
+    StartChannels = 19,
+    Channels = 20,
     
     RequestWads = 25,
     StartWads = 26,
@@ -241,6 +254,8 @@ namespace FuzzyHipster.Network
     BlocksAvailable = 33,
     
     StartBlockTransfer = 35,
-    BlockTransferPacket = 36
+    BlockTransferPacket = 36,
+    
+    Key = 50
   }
 }

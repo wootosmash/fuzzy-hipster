@@ -14,12 +14,12 @@ namespace Client
 
         public MyListViewModel()
         {
-            MoustacheLayer.Singleton.Network.NewStack += Network_NewStack;
+            MoustacheLayer.Singleton.Network.NewChannel += Network_NewChannel;
         }
 
-        void Network_NewStack(object sender, FuzzyHipster.Network.GenericEventArgs<Stack> e)
+        void Network_NewChannel(object sender, FuzzyHipster.Network.GenericEventArgs<Channel> e)
         {
-            OnPropertyChanged("Stacks");
+            OnPropertyChanged("Channels");
         }
 
         
@@ -32,26 +32,26 @@ namespace Client
             
         }
 
-        public List<Stack> Stacks
+        public List<Channel> Channels
         {
             get
             {
-                StackCollection Stacks = FuzzyHipster.MoustacheLayer.Singleton.Catalog.Stacks;
-                return Stacks.ToList<Stack>();
+                ChannelCollection Channels = FuzzyHipster.MoustacheLayer.Singleton.Catalog.Channels;
+                return Channels.ToList<Channel>();
             }
 
         }
 
-        Stack _selectedStack;
-        public Stack SelectedStack
+        Channel _selectedChannel;
+        public Channel SelectedChannel
         {
-            get { return _selectedStack; }
+            get { return _selectedChannel; }
             set
             {
-                if (value != _selectedStack)
+                if (value != _selectedChannel)
                 {
-                    _selectedStack = value;
-                    OnPropertyChanged("SelectedStack");
+                    _selectedChannel = value;
+                    OnPropertyChanged("SelectedChannel");
                     OnPropertyChanged("IsChannelSelected");
                 }
             }
@@ -61,7 +61,7 @@ namespace Client
         {
             get
             {
-                if (SelectedStack == null)
+                if (SelectedChannel == null)
                 {
                     return false;
                 }
@@ -92,7 +92,7 @@ namespace Client
             {
 
                 ICommand _changePageCommand = new RelayCommand(
-                        p => MainWindowModel.ChangeModel(new AddFilesViewModel(SelectedStack)),
+                        p => MainWindowModel.ChangeModel(new AddFilesViewModel(SelectedChannel)),
                         p => true);
                 return _changePageCommand;
             }

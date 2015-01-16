@@ -25,7 +25,7 @@ namespace Client
     {
 
 
-        ObservableCollection<Stack> _stacks;
+        ObservableCollection<Channel> _channels;
         UserSettings settings;
 
         public MainWindow()
@@ -35,15 +35,15 @@ namespace Client
             //settings.Keys 
 
             var catalog = Catalog.Load(@".");
-            //_stacks = new ObservableCollection<Stack>(catalog.Stacks);
+            //_channels = new ObservableCollection<Channel>(catalog.Channels);
             InitializeComponent();
         }
 
-        public ObservableCollection<Stack> stacks
-        { get { return _stacks; } }
+        public ObservableCollection<Channel> channels
+        { get { return _channels; } }
 
 
-        private void OpenStackOption_Click(object sender, RoutedEventArgs e)
+        private void OpenChannelOption_Click(object sender, RoutedEventArgs e)
         {
             var path = Utils.GetFolderPath();
         }

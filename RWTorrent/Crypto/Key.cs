@@ -13,10 +13,29 @@ namespace FuzzyHipster.Crypto
   /// <summary>
   /// Description of Key.
   /// </summary>
-  public class Key
+  public class Key : IEquatable<Key>
   {
+    public Guid Id { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    
     public Key()
     {
     }
+
+    #region IEquatable implementation
+
+    public bool Equals(Key other)
+    {
+      return Id == other.Id;
+    }
+
+    #endregion
+    
+    public override string ToString()
+    {
+      return string.Format("[Key Id={0}, Name={1}, Description={2}]", Id, Name, Description);
+    }
+
   }
 }

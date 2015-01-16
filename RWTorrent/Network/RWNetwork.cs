@@ -11,6 +11,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using FuzzyHipster.Catalog;
+using FuzzyHipster.Crypto;
 
 namespace FuzzyHipster.Network
 {
@@ -86,12 +87,12 @@ namespace FuzzyHipster.Network
     }
     
     /// <summary>
-    /// Fires when there's a new stack
+    /// Fires when there's a new channel
     /// </summary>
-    public event EventHandler<GenericEventArgs<Stack>> NewStack;
-    protected virtual void OnNewStack(GenericEventArgs<Stack> e)
+    public event EventHandler<GenericEventArgs<Channel>> NewChannel;
+    protected virtual void OnNewChannel(GenericEventArgs<Channel> e)
     {
-      var handler = NewStack;
+      var handler = NewChannel;
       if (handler != null)
         handler(this, e);
     }
@@ -130,13 +131,13 @@ namespace FuzzyHipster.Network
     }
 
     /// <summary>
-    /// Fires when we received a request for stacks
+    /// Fires when we received a request for channels
     /// </summary>
-    public event EventHandler<MessageComposite<RequestStacksNetMessage>> StacksRequested;
+    public event EventHandler<MessageComposite<RequestChannelsNetMessage>> ChannelsRequested;
 
-    protected virtual void OnStacksRequested(MessageComposite<RequestStacksNetMessage> e)
+    protected virtual void OnChannelsRequested(MessageComposite<RequestChannelsNetMessage> e)
     {
-      var handler = StacksRequested;
+      var handler = ChannelsRequested;
       if (handler != null)
         handler(this, e);
     }
@@ -306,6 +307,7 @@ namespace FuzzyHipster.Network
         // Create the state object.
         var state = new ReceiveStateObject();
         state.Peer = peer;
+        state.Peer.LastConnection = DateTime.Now;
         state.ExpectedLength = sizeof(int);
         state.WaitingLengthFrame = true;
         state.ExpectedMessage = MessageType.PeerStatus;
@@ -407,14 +409,18 @@ namespace FuzzyHipster.Network
         case MessageType.Hello:
           break;
           
+        case MessageType.Goodbye:
+          Disconnect(state.Peer, "Disconnected gracefully");
+          break;
+          
         case MessageType.RequestPeers:
           var request = msg as RequestPeersNetMessage;
           OnPeersRequested(new MessageComposite<RequestPeersNetMessage>(state.Peer, request));
           break;
           
-        case MessageType.RequestStacks:
-          var stacks = msg as RequestStacksNetMessage;
-          OnStacksRequested(new MessageComposite<RequestStacksNetMessage>(state.Peer, stacks));
+        case MessageType.RequestChannels:
+          var channels = msg as RequestChannelsNetMessage;
+          OnChannelsRequested(new MessageComposite<RequestChannelsNetMessage>(state.Peer, channels));
           break;
           
         case MessageType.RequestWads:
@@ -452,10 +458,10 @@ namespace FuzzyHipster.Network
               OnNewPeer(new GenericEventArgs<Peer>(peer));
           break;
           
-        case MessageType.Stacks:
-          var stacksList = msg as StacksNetMessage;
-          foreach( var stack in stacksList.Stacks )
-            OnNewStack( new GenericEventArgs<Stack>(stack));
+        case MessageType.Channels:
+          var channelsList = msg as ChannelsNetMessage;
+          foreach( var channel in channelsList.Channels )
+            OnNewChannel( new GenericEventArgs<Channel>(channel));
           break;
           
         case MessageType.Wads:
@@ -545,6 +551,7 @@ namespace FuzzyHipster.Network
         
         // Create the state object.
         var recvState = new ReceiveStateObject();
+        recvState.Peer.LastConnection = DateTime.Now;
         recvState.Peer = connectState.Peer;
         recvState.ExpectedLength = sizeof(int);
         recvState.ExpectedMessage = MessageType.PeerStatus;
@@ -575,9 +582,9 @@ namespace FuzzyHipster.Network
     
     
     
-    public void RequestStacks( Peer peer, long recency, int count )
+    public void RequestChannels( Peer peer, long recency, int count )
     {
-      var msg = new RequestStacksNetMessage();
+      var msg = new RequestChannelsNetMessage();
       msg.Recency = recency;
       msg.Count = count;
       Send(msg, peer);
@@ -585,12 +592,12 @@ namespace FuzzyHipster.Network
     }
 
     
-    public void RequestWads(Peer peer,  long recency, int count, Guid stackGuid )
+    public void RequestWads(Peer peer,  long recency, int count, Guid channelGuid )
     {
       var msg = new RequestWadsNetMessage();
       msg.Recency = recency;
       msg.Count = count;
-      msg.StackGuid = stackGuid;
+      msg.ChannelGuid = channelGuid;
       Send(msg, peer);
 
     }
@@ -629,10 +636,10 @@ namespace FuzzyHipster.Network
     }
 
     
-    public void SendStacks( Peer peer, Stack[] stacks )
+    public void SendChannels( Peer peer, Channel[] channels )
     {
-      var msg = new StacksNetMessage();
-      msg.Stacks = stacks;
+      var msg = new ChannelsNetMessage();
+      msg.Channels = channels;
       Send(msg, peer);
 
     }
@@ -647,8 +654,11 @@ namespace FuzzyHipster.Network
     
     public void SendBlock( Peer peer, FileWad fileWad, int block )
     {
-      return;
-      int totalPackets = (int)Math.Ceiling((decimal)fileWad.BlockIndex[block].Length / peer.MaxBlockPacketSize);
+      int maxBlockPacketSize = peer.MaxBlockPacketSize;
+      if ( maxBlockPacketSize == 0 )
+        maxBlockPacketSize = MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
+      
+      int totalPackets = (int)Math.Ceiling((decimal)fileWad.BlockIndex[block].Length / (decimal)maxBlockPacketSize);
       
       var msg = new StartBlockTransferNetMessage();
       msg.Block = block;
@@ -656,8 +666,6 @@ namespace FuzzyHipster.Network
       msg.TotalPackets = totalPackets;
       msg.TransferId = Guid.NewGuid();
       Send(msg, peer);
-      
-      
     }
     
     public void RequestBlock( Peer peer, FileWad fileWad, int block )
@@ -676,6 +684,13 @@ namespace FuzzyHipster.Network
         msg.BlocksAvailable[i] = fileWad.BlockIndex[i].Downloaded;
       msg.FileWadId = fileWad.Id;
       Send(msg, peer);
+    }
+    
+    public void SendKey( Peer to, Key key )
+    {
+      var msg = new KeyNetMessage();
+      msg.Key = key;
+      Send(msg,to);
     }
 
     public void Send( NetMessage msg, params Peer[] peers )

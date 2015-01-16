@@ -26,7 +26,7 @@ namespace Client
 
         void Network_NewWad(object sender, FuzzyHipster.Network.GenericEventArgs<FileWad> e)
         {
-            OnPropertyChanged("Stacks");
+            OnPropertyChanged("Channels");
 
         } 
 
@@ -39,10 +39,10 @@ namespace Client
                 //{
                 //    return _wads;
               //  }
-                StackCollection Stacks = FuzzyHipster.MoustacheLayer.Singleton.Catalog.Stacks;
+                ChannelCollection Channels = FuzzyHipster.MoustacheLayer.Singleton.Catalog.Channels;
                 _wads = new List<FileWad>();
 
-                foreach (Stack s in Stacks)
+                foreach (Channel s in Channels)
                 {
                     //if (s.Wads == null)
                     //{

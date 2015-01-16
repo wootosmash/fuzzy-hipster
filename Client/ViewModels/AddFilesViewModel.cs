@@ -14,7 +14,7 @@ namespace Client
     {
         //
 
-        private Stack _channel = null;
+        private Channel _channel = null;
 
         public string Name
         {
@@ -25,7 +25,7 @@ namespace Client
 
         }
 
-        public AddFilesViewModel(Stack channel)
+        public AddFilesViewModel(Channel channel)
         {
             _channel = channel;
         }
@@ -119,7 +119,7 @@ namespace Client
           
             
 
-            FileWad myprog = new FileWad() { StackId = _channel.Id, BlockSize = BlockSize, Name = this._wadName, Description = _wadDescription };
+            FileWad myprog = new FileWad() { ChannelId = _channel.Id, BlockSize = BlockSize, Name = this._wadName, Description = _wadDescription };
             _channel.Wads.Add(myprog);
             myprog.Save();
 
