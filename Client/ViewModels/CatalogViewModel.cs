@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FuzzyHipster.Catalog;
 using FuzzyHipster;
+using System.Windows;
 
 
 namespace Client
@@ -34,15 +35,19 @@ namespace Client
         {
             get
             {
-                if (_wads != null)
-                {
-                    return _wads;
-                }
+               // if (_wads != null)
+                //{
+                //    return _wads;
+              //  }
                 StackCollection Stacks = FuzzyHipster.MoustacheLayer.Singleton.Catalog.Stacks;
                 _wads = new List<FileWad>();
 
                 foreach (Stack s in Stacks)
                 {
+                    if (s.Wads == null)
+                    {
+                        MessageBox.Show("Asdasdasd");
+                    }
                     _wads.AddRange(s.Wads);
                 }
 
