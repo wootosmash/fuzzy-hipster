@@ -46,22 +46,22 @@ namespace FuzzyHipster
 
       Network = new RWNetwork(Me);
       
-//      Network.PeerConnected += NetworkPeerConnected;
-//      Network.PeerConnectFailed += NetworkPeerConnectFailed;
+      Network.PeerConnected += NetworkPeerConnected;
+      Network.PeerConnectFailed += NetworkPeerConnectFailed;
       
-//      Network.NewPeer += NetworkNewPeer;
-//      Network.NewStack += NetworkNewStack;
-//      Network.NewWad += NetworkNewWad;
-//      
-//      Network.PeersRequested += NetworkPeersRequested;
-//      Network.StacksRequested += NetworkStacksRequested;
-//      Network.WadsRequested += NetworkWadsRequested;
-//      
-//      Network.BlocksAvailableReceived += NetworkBlocksAvailableReceived;
-//      Network.BlocksAvailableRequested += NetworkBlocksAvailableRequested;
-//      
-//      Network.BlockRequested += NetworkBlockRequested;
-//      Network.BlockReceived += NetworkBlockReceived;
+      Network.NewPeer += NetworkNewPeer;
+      Network.NewStack += NetworkNewStack;
+      Network.NewWad += NetworkNewWad;
+      
+      Network.PeersRequested += NetworkPeersRequested;
+      Network.StacksRequested += NetworkStacksRequested;
+      Network.WadsRequested += NetworkWadsRequested;
+      
+      Network.BlocksAvailableReceived += NetworkBlocksAvailableReceived;
+      Network.BlocksAvailableRequested += NetworkBlocksAvailableRequested;
+      
+      Network.BlockRequested += NetworkBlockRequested;
+      Network.BlockReceived += NetworkBlockReceived;
       
       HeartbeatTimer = new Timer(Settings.HeartbeatInterval);
       HeartbeatTimer.Elapsed +=  HeartbeatElapsed;
@@ -182,11 +182,14 @@ namespace FuzzyHipster
         var peers = Network.ActivePeers.ToArray();
         foreach( var peer in peers )
         {
-          if ( peer.OkToSend )
+          if ( peer.OkToSendAt <  DateTime.Now )
           {
+            Network.SendMyStatus( peer );
             Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
             Network.RequestStacks(peer, Catalog.LastUpdated, Settings.HeartbeatStackRequestCount);
           }
+          else 
+            Console.WriteLine("NOT OK TO SEND: " + peer.OkToSendAt);
         }
         
         // see if we need some new peers
@@ -206,7 +209,7 @@ namespace FuzzyHipster
     
     public void Start()
     {
-      Console.Write("Starting " + Settings.Port);
+      Console.WriteLine("Starting " + Settings.Port);
       Network.StartListening(Settings.Port);
     }
   }
