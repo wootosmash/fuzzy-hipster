@@ -23,15 +23,15 @@ namespace Client
         public PeerListViewModel()
         {
             
-            RWTorrent.Singleton.Network.PeerConnected += Network_PeerConnected;
+            MoustacheLayer.Singleton.Network.PeerConnected += Network_PeerConnected;
 
-            RWTorrent.Singleton.Network.PeerConnectFailed += Network_PeerConnected;
+            MoustacheLayer.Singleton.Network.PeerConnectFailed += Network_PeerConnected;
 
-            RWTorrent.Singleton.Network.PeerDisconnected += Network_PeerConnected;
+            MoustacheLayer.Singleton.Network.PeerDisconnected += Network_PeerConnected;
 
-            RWTorrent.Singleton.Network.NewPeer += Network_PeerConnected;
+            MoustacheLayer.Singleton.Network.NewPeer += Network_PeerConnected;
 
-           // RWTorrent.Singleton.Network. += Network_PeerConnected;
+           // MoustacheLayer.Singleton.Network. += Network_PeerConnected;
 
         }
 
@@ -44,7 +44,7 @@ namespace Client
         {
             get
             {
-                PeerCollection PeerList = FuzzyHipster.RWTorrent.Singleton.Peers;
+                PeerCollection PeerList = FuzzyHipster.MoustacheLayer.Singleton.Peers;
                 return PeerList.ToList <Peer>();
             }
 
