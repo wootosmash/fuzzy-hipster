@@ -56,6 +56,17 @@ namespace FuzzyHipster
     public int EstimatedBandwidth { get; set; }
     
     [NonSerialized()]
+    bool okToSend;
+    public bool OkToSend {
+      get {
+        return okToSend;
+      }
+      set {
+        okToSend = value;
+      }
+    }
+    
+    [NonSerialized()]
     long bytesSent;
     public long BytesSent {
       get {
@@ -86,7 +97,8 @@ namespace FuzzyHipster
       Id = Guid.NewGuid();
       NextConnectionAttempt = DateTime.MinValue;
       FailedConnectionAttempts = 0;
-      //MaxBlockPacketSize = RWTorrent.Singleton.Settings.DefaultMaxBlockPacketSize;
+      OkToSend = false;
+      MaxBlockPacketSize = RWTorrent.Singleton.Settings.DefaultMaxBlockPacketSize;
     }
     
     public void UpdateFromCopy( Peer peer )
@@ -99,7 +111,7 @@ namespace FuzzyHipster
       EstimatedBandwidth = peer.EstimatedBandwidth;
       MaxBlockPacketSize = peer.MaxBlockPacketSize;
       IPAddress = peer.IPAddress;
-      Port = peer.Port;      
+      Port = peer.Port;
     }
     
     /// <summary>

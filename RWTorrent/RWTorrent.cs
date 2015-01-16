@@ -44,10 +44,9 @@ namespace FuzzyHipster
       Me.Name = Environment.MachineName;
       
       Peers = PeerCollection.Load(Catalog.BasePath);
-      Peers.RefreshPeer(Me);
       Peers.ResetConnectionAttempts();
 
-      Network = new RWNetwork();
+      Network = new RWNetwork(Me);
       
       Network.PeerConnected += NetworkPeerConnected;
       Network.PeerConnectFailed += NetworkPeerConnectFailed;
@@ -103,9 +102,7 @@ namespace FuzzyHipster
     
     void NetworkPeerConnected( object sender, GenericEventArgs<Peer> e)
     {
-      Peers.RefreshPeer(e.Value);
       e.Value.FailedConnectionAttempts = 0;
-      Network.SendMyStatus(e.Value, Me);
     }
     
     void NetworkPeerConnectFailed( object sender, GenericEventArgs<Peer> e)
@@ -118,7 +115,7 @@ namespace FuzzyHipster
     {
       var peers = new List<Peer>();
       
-      foreach( var peer in Peers.Values )
+      foreach( var peer in Peers )
         peers.Add(peer);
       
       Network.SendPeerList(e.Peer, peers.ToArray());
@@ -151,7 +148,7 @@ namespace FuzzyHipster
       Peers.RefreshPeer(e.Value);
       
       if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
-        if ( !Peers[e.Value.Id].IsConnected )
+        if ( !Peers.Find(x => x.Id == e.Value.Id).IsConnected )
           if ( e.Value.IPAddress != null && e.Value.Port > 0 )
             Network.Connect(e.Value);
     }
@@ -187,14 +184,17 @@ namespace FuzzyHipster
         var peers = Network.ActivePeers.ToArray();
         foreach( var peer in peers )
         {
-          Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
-          Network.RequestStacks(peer, Catalog.LastUpdated, Settings.HeartbeatStackRequestCount);
+          if ( peer.OkToSend )
+          {
+            Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
+            Network.RequestStacks(peer, Catalog.LastUpdated, Settings.HeartbeatStackRequestCount);
+          }
         }
         
         // see if we need some new peers
         if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
         {
-          foreach( var peer in Peers.Values ) // for each peer that we're not connected to
+          foreach( var peer in Peers.ToArray() ) // for each peer that we're not connected to
             if ( !peer.IsConnected ) // we're not connected
               if ( peer.NextConnectionAttempt < DateTime.Now ) // wait is over
                 Network.Connect(peer);

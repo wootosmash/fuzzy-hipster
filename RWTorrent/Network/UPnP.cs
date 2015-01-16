@@ -146,10 +146,16 @@ namespace FuzzyHipster.Network
       r.ContentLength = b.Length;
       r.GetRequestStream().Write(b, 0, b.Length);
       XmlDocument resp = new XmlDocument();
-      WebResponse wres = r.GetResponse();
-      Stream ress = wres.GetResponseStream();
-      resp.Load(ress);
-      return resp;
+      try {
+        WebResponse wres = r.GetResponse();
+        Stream ress = wres.GetResponseStream();
+        resp.Load(ress);
+        return resp;
+      } catch (WebException ex) {
+        
+        Console.WriteLine(ex.ToString());
+        return null;
+      }
     }
   }
 }

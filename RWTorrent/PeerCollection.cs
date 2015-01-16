@@ -9,20 +9,20 @@ using System.Linq;
 
 namespace FuzzyHipster
 {
-  public class PeerCollection : SortedList<Guid, Peer>
+  public class PeerCollection : List<Peer>
   {
     public Peer FindBySocket( Socket socket )
     {
-      return Values.FirstOrDefault(x => x.Socket == socket);
+      return this.FirstOrDefault(x => x.Socket == socket);
     }
     
     public Peer GetRandom()
     {
-      if ( Values.Count == 0 )
+      if ( Count == 0 )
         return null;
       
-      int index = RWTorrent.Singleton.Random.Next(0, Values.Count);
-      return Values[index];
+      int index = RWTorrent.Singleton.Random.Next(0, Count);
+      return this[index];
     }
     
     public void RefreshPeer(Peer peer)
@@ -34,22 +34,22 @@ namespace FuzzyHipster
         if ( myPeer != null )
           myPeer.UpdateFromCopy(peer);
         else
-          Add(peer.Id, peer);
+          Add(peer);
       }
-      else if (ContainsKey(peer.Id))
+      else if (Contains(peer))
       {
-        myPeer = this[peer.Id];
+        myPeer = this.Find( x => x.Id == peer.Id);
         myPeer.UpdateFromCopy(peer);
       }
       else
-        Add(peer.Id, peer);
+        Add(peer);
       
       Save();
     }
 
     public void Add(Peer peer)
     {
-      Add(peer.Id, peer);
+      Add(peer);
     }
     
     public static PeerCollection Load( string basePath )
@@ -67,7 +67,7 @@ namespace FuzzyHipster
         {
           var list = serialiser.Deserialize(reader) as List<Peer>;
           foreach( var peer in list )
-            if ( !col.ContainsKey(peer.Id))
+            if ( !col.Contains(peer))
               col.Add(peer);
         }
       }
@@ -75,27 +75,41 @@ namespace FuzzyHipster
       return col;
     }
     
+    
     public void Save()
     {
-      string basePath = RWTorrent.Singleton.Catalog.BasePath;
-      string peersPath = Path.Combine(basePath, @"Catalog\");
+      lock( this)
+      {
+        string basePath = RWTorrent.Singleton.Catalog.BasePath;
+        string peersPath = Path.Combine(basePath, @"Catalog\");
+        
+        if ( !Directory.Exists(peersPath))
+          Directory.CreateDirectory(peersPath);
+        
+        var list = new List<Peer>();
+        
+        foreach( var peer in this )
+          list.Add(peer);
+        
+        var serialiser = new XmlSerializer(typeof(List<Peer>));
+        using (var writer = new StreamWriter(peersPath + "Peers.xml"))
+          serialiser.Serialize(writer, list);
+      }
+    }
+    
+    public Peer[] ToArray()
+    {
+      List<Peer> peers = new List<Peer>();
       
-      if ( !Directory.Exists(peersPath))
-        Directory.CreateDirectory(peersPath);
+      while ( peers.Count < Count )
+        peers.Add(this[peers.Count]);
       
-      var list = new List<Peer>();
-      
-      foreach( var peer in Values )
-        list.Add(peer);
-      
-      var serialiser = new XmlSerializer(typeof(List<Peer>));
-      using (var writer = new StreamWriter(peersPath + "Peers.xml"))
-        serialiser.Serialize(writer, list);
+      return peers.ToArray();
     }
     
     public void ResetConnectionAttempts()
     {
-      foreach( var peer in Values )
+      foreach( var peer in this )
         peer.ResetConnectionAttempts();
     }
     

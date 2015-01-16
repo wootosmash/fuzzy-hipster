@@ -13,6 +13,17 @@ using FuzzyHipster.Catalog;
 
 namespace FuzzyHipster.Network
 {
+  public class NewConnectionEventArgs : EventArgs
+  {
+    public Socket Socket = null;
+    public bool Accept = true;
+    
+    public NewConnectionEventArgs(Socket socket)
+    {
+      Socket = socket;
+    }
+  }
+  
   public class RWNetwork
   {
     public const int RWDefaultPort = 7892;
@@ -20,7 +31,7 @@ namespace FuzzyHipster.Network
     public List<Peer> ActivePeers { get; set; }
     public IPEndPoint LocalEndPoint { get; set; }
     public Socket Listener { get; set; }
-    public Guid Id { get; set; }
+    public Peer Me { get; set; }
     public SortedList<Guid, TransferManager> InProgressTransfers { get; set; }
     
     public long BytesReceived { get; set; }
@@ -30,6 +41,14 @@ namespace FuzzyHipster.Network
     ManualResetEvent allDone = new ManualResetEvent(false);
     
     #region events
+
+    public event EventHandler<NewConnectionEventArgs> NewConnection;
+    protected virtual void OnNewConnection(NewConnectionEventArgs e)
+    {
+      var handler = NewConnection;
+      if (handler != null)
+        handler(this, e);
+    }
     
     /// <summary>
     /// Fires when a peer disconnects
@@ -206,10 +225,10 @@ namespace FuzzyHipster.Network
 
     #endregion
     
-    public RWNetwork()
+    public RWNetwork(Peer me)
     {
+      Me = me;
       ActivePeers = new List<Peer>();
-      Id = Guid.NewGuid();
       InProgressTransfers = new SortedList<Guid, TransferManager>();
     }
 
@@ -260,29 +279,46 @@ namespace FuzzyHipster.Network
       Socket listener = ar.AsyncState as Socket;
       Socket handler = listener.EndAccept(ar);
       
-      var peer = new Peer()
+      var args = new NewConnectionEventArgs( handler );
+      OnNewConnection( args);
+      
+      if ( !args.Accept ) // have the oppourtunity to not accept the connection
       {
-        Id = Guid.NewGuid(),
-        Socket = handler,
-        IPAddress = (handler.RemoteEndPoint as IPEndPoint).Address.ToString(),
-        Port = (handler.RemoteEndPoint as IPEndPoint).Port,
-        CatalogRecency = 0,
-        PeerCount = 0,
-        Name = "",
-        Uptime = 0
-      };
-      
-      ActivePeers.Add(peer);
-      
-      OnPeerConnected( new GenericEventArgs<Peer>(peer));
-      
-      // Create the state object.
-      var state = new ReceiveStateObject();
-      state.Peer = peer;
-      state.ExpectedLength = sizeof(int);
-      state.WaitingLengthFrame = true;
-      handler.BeginReceive( state.Buffer, 0, state.ExpectedLength, 0,
-                           new AsyncCallback(WaitMessageCallback), state); // get the message size first
+        handler.Disconnect(false);
+        handler.Dispose();
+      }
+      else
+      {        
+        var peer = new Peer()
+        {
+          Id = Guid.Empty,
+          Socket = handler,
+          IPAddress = (handler.RemoteEndPoint as IPEndPoint).Address.ToString(),
+          Port = 0,
+          CatalogRecency = 0,
+          PeerCount = 0,
+          Name = "",
+          Uptime = 0
+        };
+        
+        // Create the state object.
+        var state = new ReceiveStateObject();
+        state.Peer = peer;
+        state.ExpectedLength = sizeof(int);
+        state.WaitingLengthFrame = true;
+        state.ExpectedMessage = MessageType.PeerStatus;
+        try
+        {
+          handler.BeginReceive( state.Buffer.GetBuffer(), 0, state.ExpectedLength, 0,
+                               new AsyncCallback(WaitMessageCallback), state); // get the message size first
+          
+          SendMyStatus(state.Peer, Me);
+        }
+        catch( Exception ex )
+        {
+          Console.WriteLine(ex);
+        }
+      }
     }
 
     void WaitMessageCallback(IAsyncResult ar)
@@ -297,29 +333,50 @@ namespace FuzzyHipster.Network
         peer.BytesReceived += bytesRead;
         BytesReceived += bytesRead;
         
-        if ( bytesRead == state.ExpectedLength )
+        if ( bytesRead == 0 )
+          Disconnect(peer, "Connection closed");
+        else if ( bytesRead > 0 && bytesRead < state.ExpectedLength ) // partial receive
         {
+          // buffering
+          state.Buffer.Seek(bytesRead, SeekOrigin.Current);
+          state.ExpectedLength -= bytesRead;
+          peer.Socket.BeginReceive( state.Buffer.GetBuffer(), (int)state.Buffer.Position, state.ExpectedLength, 0,
+                                   new AsyncCallback(WaitMessageCallback), state);
+        }
+        else if ( bytesRead == state.ExpectedLength ) // receive finished
+        {
+          state.Buffer.Seek(0, SeekOrigin.Begin);
+          
           if ( state.WaitingLengthFrame )
           {
-            state.ExpectedLength = BitConverter.ToInt32(state.Buffer, 0);
-            if ( state.ExpectedLength < state.Buffer.Length )
-              peer.Socket.BeginReceive( state.Buffer, 0, state.ExpectedLength, 0,
-                                       new AsyncCallback(WaitMessageCallback), state);
+            state.ExpectedLength = BitConverter.ToInt32(state.Buffer.GetBuffer(), 0);
             state.WaitingLengthFrame = false;
+            if ( state.ExpectedLength < state.Buffer.Capacity )
+            {
+              peer.Socket.BeginReceive( state.Buffer.GetBuffer(), 0, state.ExpectedLength, 0,
+                                       new AsyncCallback(WaitMessageCallback), state);
+            }
           }
           else
           {
-            NetMessage message = NetMessage.FromBytes(state.Buffer);
+            NetMessage message = NetMessage.FromBytes(state.Buffer.GetBuffer());
             
-            ProcessMessage(message, state);
-            OnNetMessageReceived(new GenericEventArgs<NetMessage>(message));
-            state.ExpectedLength = sizeof(int);
-            peer.Socket.BeginReceive( state.Buffer, 0, state.ExpectedLength, 0,
-                                     new AsyncCallback(WaitMessageCallback), state); // read the message size first
-            state.WaitingLengthFrame = true; // waiting for the message size
+            if ( state.ExpectedMessage != MessageType.Unknown && message.Type != state.ExpectedMessage) // crappy connection
+              Disconnect(state.Peer, string.Format("Didn't receive the message we expected {0}. Received {1}", state.ExpectedMessage, message.Type));
+            else
+            {
+              ProcessMessage(message, state);
+              OnNetMessageReceived(new GenericEventArgs<NetMessage>(message));
+              
+              state.ExpectedMessage = MessageType.Unknown;
+              state.ExpectedLength = sizeof(int);
+              state.WaitingLengthFrame = true; // waiting for the message size
+              peer.Socket.BeginReceive( state.Buffer.GetBuffer(), 0, state.ExpectedLength, 0,
+                                       new AsyncCallback(WaitMessageCallback), state); // read the message size first
+            }
           }
         }
-        else
+        else // outside the expected?
         {
           throw new Exception(string.Format("Unexpected length received read={0} expected={1}", bytesRead, state.ExpectedLength));
         }
@@ -327,7 +384,7 @@ namespace FuzzyHipster.Network
       }
       catch( Exception ex )
       {
-        Disconnect(peer);
+        Disconnect(peer, "Exception in WaitMessageCallback");
         Console.WriteLine(ex);
       }
     }
@@ -366,12 +423,12 @@ namespace FuzzyHipster.Network
           state.Peer.Uptime = status.Peers[0].Uptime;
           state.Peer.IPAddress = (state.Peer.Socket.RemoteEndPoint as IPEndPoint).Address.ToString();
           state.Peer.Port = status.Peers[0].Port;
+          state.Peer.OkToSend = true;
           
           if ( !ActivePeers.Contains(state.Peer))
             ActivePeers.Add(state.Peer);
-            
-          OnNewPeer(new GenericEventArgs<Peer>(state.Peer));
           
+          OnNewPeer(new GenericEventArgs<Peer>(state.Peer));
           
           break;
           
@@ -469,7 +526,6 @@ namespace FuzzyHipster.Network
       try
       {
         connectState.Peer.Socket.EndConnect(result);
-        ActivePeers.Add(connectState.Peer);
         
         OnPeerConnected(new GenericEventArgs<Peer>(connectState.Peer));
         
@@ -478,20 +534,20 @@ namespace FuzzyHipster.Network
         recvState.Peer = connectState.Peer;
         recvState.ExpectedLength = sizeof(int);
         recvState.WaitingLengthFrame = true;
-        recvState.Peer.Socket.BeginReceive( recvState.Buffer, 0, recvState.ExpectedLength, 0,
+        recvState.Peer.Socket.BeginReceive( recvState.Buffer.GetBuffer(), 0, recvState.ExpectedLength, 0,
                                            new AsyncCallback(WaitMessageCallback), recvState);
       }
       catch( Exception ex )
       {
-        Log("CONNECT FAILED: {0}", connectState.Peer);
-        Disconnect(connectState.Peer);
+        Disconnect(connectState.Peer, "Connect failed to " + connectState.Peer.IPAddress + " "  + connectState.Peer.Port);
         OnPeerConnectFailed( new GenericEventArgs<Peer>( connectState.Peer) );
         
       }
     }
     
-    public void Disconnect( Peer peer )
+    public void Disconnect( Peer peer, string why )
     {
+      Log(string.Format("DISCONNECT: {0} {1} {2} {3}", why, peer.Name, peer.IPAddress, peer.Id));
       if ( peer.Socket != null )
       {
         peer.Socket.Dispose();
@@ -632,7 +688,7 @@ namespace FuzzyHipster.Network
           }
           catch( Exception ex )
           {
-            Disconnect(peer);
+            Disconnect(peer, "Beginning to send to failed");
           }
         }
       }
@@ -653,7 +709,7 @@ namespace FuzzyHipster.Network
       }
       catch (Exception e)
       {
-        Disconnect(state.Peer);
+        Disconnect(state.Peer, "Send failed");
         Console.WriteLine(e.ToString());
       }
     }
@@ -661,7 +717,7 @@ namespace FuzzyHipster.Network
     void Log( string format, params object [] args )
     {
       string str = string.Format(format, args );
-      Console.WriteLine("{0} {1}", Id, str);
+      Console.WriteLine("{0} {1}", Me.Id, str);
     }
   }
   

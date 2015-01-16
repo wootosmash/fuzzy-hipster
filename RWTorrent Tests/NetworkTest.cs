@@ -35,14 +35,14 @@ namespace FuzzyHipster.Tests
     [Test]
     public void ConnectTest()
     {
-      var client = new RWNetwork();
+      var client = new RWNetwork(localHostPeer2);
       client.Connect(localHostPeer);
     }
     
     [Test]
     public void HelloMessageTest()
     {
-      var client = new RWNetwork();
+      var client = new RWNetwork(localHostPeer2);
       client.Connect(localHostPeer);
       
       var msg = new NetMessage();
@@ -55,7 +55,7 @@ namespace FuzzyHipster.Tests
     [Test]
     public void PeerStatusMessageTest()
     {
-      var network = new RWNetwork();
+      var network = new RWNetwork(localHostPeer2);
       
       network.Connect(localHostPeer);
       
@@ -68,7 +68,7 @@ namespace FuzzyHipster.Tests
     [Test]
     public void WadsMessageTest()
     {
-      var network = new RWNetwork();
+      var network = new RWNetwork(localHostPeer2);
       
       network.NewStack += delegate(object sender, GenericEventArgs<Stack> e) {
         Console.WriteLine(e.Value);
@@ -99,5 +99,11 @@ namespace FuzzyHipster.Tests
       }
     }
     
+    [Test]
+    public void CreateRouteTest()
+    {
+      UPnP.Discover();
+      UPnP.ForwardPort(7893, System.Net.Sockets.ProtocolType.Tcp, "MY AWESOMENESS");
+    }
   }
 }
