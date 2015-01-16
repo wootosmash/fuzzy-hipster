@@ -28,6 +28,7 @@ namespace FuzzyHipster
 		public int MaxActiveBlockTransfers { get; set; }
 		public int DefaultMaxBlockPacketSize { get; set; }
 		public int ThinkTimeGraceMilliseconds { get; set; }
+		public int DefaultBlockQuantity { get; set; }
 
 		public Settings()
 		{
@@ -40,6 +41,7 @@ namespace FuzzyHipster
 			MaxActiveBlockTransfers = 10;
 			DefaultMaxBlockPacketSize = 40000;
 			ThinkTimeGraceMilliseconds = 3000;
+			DefaultBlockQuantity = 100;
 		}
 		
 		public static Settings Load(string path)

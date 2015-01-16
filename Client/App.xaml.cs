@@ -37,18 +37,6 @@ namespace Client
 
       var thread = new Thread(
         new ThreadStart(
-<<<<<<< HEAD
-          delegate
-          {
-            var catalog = Catalog.Load(".");
-            var rwt = new FuzzyHipster.MoustacheLayer(catalog);
-            OnMoustacheLayerLoaded(new EventArgs());
-            rwt.Start();
-          }
-         )
-       );
-      
-=======
             delegate
             {
                 var catalog = Catalog.Load(".");
@@ -62,11 +50,6 @@ namespace Client
    );
 
       MoustacheLayerLoaded += App_MoustacheLayerLoaded;
-     
->>>>>>> 927064472a4d04d85a96c08052835753e98aba24
-
-
-
 
       MainWindow app = new MainWindow();
       MainWindowModel context = new MainWindowModel();
