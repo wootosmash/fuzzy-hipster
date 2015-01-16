@@ -354,12 +354,14 @@ namespace FuzzyHipster.Network
           {
             state.ExpectedLength = BitConverter.ToInt32(state.Buffer.GetBuffer(), 0);
             state.WaitingLengthFrame = false;
-            if ( state.ExpectedLength < state.Buffer.Capacity )
+            if ( state.ExpectedLength <= state.Buffer.Capacity )
             {
               //receiveSemaphore.Reset();
               peer.Socket.BeginReceive( state.Buffer.GetBuffer(), 0, state.ExpectedLength, 0,
                                        new AsyncCallback(WaitMessageCallback), state);
             }
+            else
+              Disconnect(state.Peer, "Expected Length is greater than the buffer capacity!");
           }
           else
           {
@@ -457,8 +459,9 @@ namespace FuzzyHipster.Network
           
         case MessageType.Wads:
           var wadsList = msg as WadsNetMessage;
-          foreach( var wad in wadsList.Wads )
-            OnNewWad( new GenericEventArgs<FileWad>(wad));
+          if ( wadsList.Wads != null )
+            foreach( var wad in wadsList.Wads )
+              OnNewWad( new GenericEventArgs<FileWad>(wad));
           break;
           
         case MessageType.RequestBlocksAvailable:
