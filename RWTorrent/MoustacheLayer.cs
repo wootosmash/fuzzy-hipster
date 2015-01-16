@@ -31,11 +31,11 @@ namespace FuzzyHipster
 
     public Timer HeartBeat
     {
-        get
-        {
-            return HeartbeatTimer;
-        }
-        
+      get
+      {
+        return HeartbeatTimer;
+      }
+      
     }
     
     public MoustacheLayer( Catalog.Catalog catalog )
@@ -138,9 +138,9 @@ namespace FuzzyHipster
       if ( Catalog.Stacks[e.Value.StackGuid] == null )
         return;
       if ( Catalog.Stacks[e.Value.StackGuid].Wads == null )
-        return;
-      
-      Network.SendWads( e.Peer, Catalog.Stacks[e.Value.StackGuid].Wads.ToArray());
+        Network.SendWads( e.Peer, null);
+      else        
+        Network.SendWads( e.Peer, Catalog.Stacks[e.Value.StackGuid].Wads.ToArray());
     }
 
     
@@ -197,7 +197,7 @@ namespace FuzzyHipster
             Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
             Network.RequestStacks(peer, Catalog.LastUpdated, Settings.HeartbeatStackRequestCount);
           }
-          else 
+          else
             Console.WriteLine("NOT OK TO SEND: " + peer.OkToSendAt);
         }
         
