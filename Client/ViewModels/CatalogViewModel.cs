@@ -44,10 +44,10 @@ namespace Client
 
                 foreach (Stack s in Stacks)
                 {
-                    if (s.Wads == null)
-                    {
-                        MessageBox.Show("Asdasdasd");
-                    }
+                    //if (s.Wads == null)
+                    //{
+                    // MessageBox.Show("Asdasdasd");
+                    //}
                     _wads.AddRange(s.Wads);
                 }
 

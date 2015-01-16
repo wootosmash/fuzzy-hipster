@@ -2,6 +2,7 @@
 using FuzzyHipster.Catalog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -105,10 +106,20 @@ namespace Client
 
         public void AddWad()
         {
+
+            long BlockSize = 1024;
+            try
+            {
+                 BlockSize = FileWad.CalculatePathSize(WadPath);
+            }
+            catch (Exception e)
+            {
+                Debug.Print(e.ToString());
+            }
+          
             
-            FileWad myprog = new FileWad() { StackId = _channel.Id, Name = this._wadName, Description = _wadDescription };
-            
-            myprog.BuildFromPath(@WadPath);
+
+            FileWad myprog = new FileWad() { StackId = _channel.Id, BlockSize = BlockSize, Name = this._wadName, Description = _wadDescription };
             _channel.Wads.Add(myprog);
             myprog.Save();
 
