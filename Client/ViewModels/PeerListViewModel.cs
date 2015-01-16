@@ -22,17 +22,22 @@ namespace Client
 
         public PeerListViewModel()
         {
+            
             RWTorrent.Singleton.Network.PeerConnected += Network_PeerConnected;
+
             RWTorrent.Singleton.Network.PeerConnectFailed += Network_PeerConnected;
+
             RWTorrent.Singleton.Network.PeerDisconnected += Network_PeerConnected;
+
             RWTorrent.Singleton.Network.NewPeer += Network_PeerConnected;
+
            // RWTorrent.Singleton.Network. += Network_PeerConnected;
 
         }
 
         void Network_PeerConnected(object sender, FuzzyHipster.Network.GenericEventArgs<Peer> e)
         {
-            throw new NotImplementedException();
+            OnPropertyChanged("Peers");
         }
 
         public List<Peer> Peers
@@ -40,7 +45,7 @@ namespace Client
             get
             {
                 PeerCollection PeerList = FuzzyHipster.RWTorrent.Singleton.Peers;
-                return PeerList.Values.ToList();
+                return PeerList.ToList <Peer>();
             }
 
         }
