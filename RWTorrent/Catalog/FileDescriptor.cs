@@ -53,7 +53,7 @@ namespace FuzzyHipster.Catalog
       set;
     }
 
-    public string Hash {
+    public byte[] Hash {
       get;
       set;
     }
@@ -81,6 +81,7 @@ namespace FuzzyHipster.Catalog
       }
       IsAllocated = true;
     }
+    
     
     public override string ToString()
     {

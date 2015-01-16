@@ -63,12 +63,15 @@
     <Compile Include="Catalog\Block.cs" />
     <Compile Include="Catalog\BlockIndexItem.cs" />
     <Compile Include="Catalog\BlockIndexItemCollection.cs" />
+    <Compile Include="Catalog\BlockStream.cs" />
     <Compile Include="Catalog\Catalog.cs" />
     <Compile Include="Catalog\FileDescriptor.cs" />
     <Compile Include="Catalog\FileDescriptorCollection.cs" />
     <Compile Include="Catalog\FileWad.cs" />
     <Compile Include="Catalog\Channel.cs" />
     <Compile Include="Catalog\ChannelCollection.cs" />
+    <Compile Include="Catalog\FileWadCollection.cs" />
+    <Compile Include="Crypto\Hash.cs" />
     <Compile Include="Crypto\Key.cs" />
     <Compile Include="Network\BlockReceivedEventArgs.cs" />
     <Compile Include="Network\BlockRequestedEventArgs.cs" />

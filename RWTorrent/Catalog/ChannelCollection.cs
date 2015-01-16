@@ -29,6 +29,16 @@ namespace FuzzyHipster.Catalog
   			Add(channel);
 			channel.Save();
 		}
+		
+    public Channel GetRandom()
+    {
+      if ( Count == 0 )
+        return null;
+      
+      int index = MoustacheLayer.Singleton.Random.Next(0, Count);
+      return this[index];
+    }
+		
 	}
 }
 

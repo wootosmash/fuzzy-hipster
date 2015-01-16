@@ -14,6 +14,8 @@ using System.Threading;
 using System.Xml.Serialization;
 namespace FuzzyHipster.Catalog
 {
+  
+  
   [Serializable()]
   public class Channel : IEquatable<Channel>
   {

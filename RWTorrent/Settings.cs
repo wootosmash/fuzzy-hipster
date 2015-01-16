@@ -35,7 +35,7 @@ namespace FuzzyHipster
 			MaxActivePeers = 1;
 			HeartbeatPeerRequestCount = 30;
 			HeartbeatChannelRequestCount = 3;
-			HeartbeatInterval = 10000;
+			HeartbeatInterval = 60000;
 			Port = RWNetwork.RWDefaultPort;
 			ConnectAttemptWaitTime = 60;
 			MaxActiveBlockTransfers = 10;

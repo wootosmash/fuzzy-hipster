@@ -12,10 +12,9 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using System.Xml.Serialization;
+using FuzzyHipster.Crypto;
 namespace FuzzyHipster.Catalog
 {
-  
-  
   public class Catalog
   {
     public Guid Guid { get; set; }
@@ -103,13 +102,13 @@ namespace FuzzyHipster.Catalog
         channel.Save();
     }
     
-    public FileWad[] GetFileWadsByFileHash( string hash )
+    public FileWad[] GetFileWadsByFileHash( byte[] hash )
     {
       var wads = new List<FileWad>();
       foreach( var s in Channels )
         foreach( var wad in s.Wads )
           foreach( var file in wad.Files )
-            if ( file.Hash == hash )
+            if ( Hash.Compare( file.Hash, hash ))
               wads.Add( wad );
       return wads.ToArray();
     }

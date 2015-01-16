@@ -118,6 +118,14 @@ namespace FuzzyHipster.Network
       if (handler != null)
         handler(this, e);
     }
+    
+    public event EventHandler<MessageComposite<Key>> KeyReceived;
+    protected virtual void OnKeyReceived(MessageComposite<Key> e)
+    {
+      var handler = KeyReceived;
+      if (handler != null)
+        handler(this, e);
+    }
 
     /// <summary>
     /// Fires when a request for peers is received
@@ -512,6 +520,11 @@ namespace FuzzyHipster.Network
           }
 
           break;
+          
+        case MessageType.Key:
+          var key = msg as KeyNetMessage;
+          OnKeyReceived( new MessageComposite<Key>(state.Peer, key.Key));
+          break;
       }
     }
     
@@ -551,8 +564,8 @@ namespace FuzzyHipster.Network
         
         // Create the state object.
         var recvState = new ReceiveStateObject();
-        recvState.Peer.LastConnection = DateTime.Now;
         recvState.Peer = connectState.Peer;
+        recvState.Peer.LastConnection = DateTime.Now;
         recvState.ExpectedLength = sizeof(int);
         recvState.ExpectedMessage = MessageType.PeerStatus;
         recvState.WaitingLengthFrame = true;
@@ -563,9 +576,9 @@ namespace FuzzyHipster.Network
       }
       catch( Exception ex )
       {
+        Log(ex.ToString());
         Disconnect(connectState.Peer, "Connect failed to " + connectState.Peer.IPAddress + " "  + connectState.Peer.Port);
         OnPeerConnectFailed( new GenericEventArgs<Peer>( connectState.Peer) );
-        
       }
     }
     
@@ -632,7 +645,6 @@ namespace FuzzyHipster.Network
       msg.Type = MessageType.PeerStatus;
       msg.Peers = new []{Me};
       Send(msg, peer);
-
     }
 
     
@@ -641,7 +653,6 @@ namespace FuzzyHipster.Network
       var msg = new ChannelsNetMessage();
       msg.Channels = channels;
       Send(msg, peer);
-
     }
     
     public void SendWads( Peer peer, FileWad[] wads )
@@ -649,12 +660,11 @@ namespace FuzzyHipster.Network
       var msg = new WadsNetMessage();
       msg.Wads = wads;
       Send(msg, peer);
-
     }
     
-    public void SendBlock( Peer peer, FileWad fileWad, int block )
+    public void SendBlock( Peer to, FileWad fileWad, int block )
     {
-      int maxBlockPacketSize = peer.MaxBlockPacketSize;
+      int maxBlockPacketSize = to.MaxBlockPacketSize;
       if ( maxBlockPacketSize == 0 )
         maxBlockPacketSize = MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
       
@@ -665,7 +675,30 @@ namespace FuzzyHipster.Network
       msg.BlockSize = (int)fileWad.BlockIndex[block].Length;
       msg.TotalPackets = totalPackets;
       msg.TransferId = Guid.NewGuid();
-      Send(msg, peer);
+      Send(msg, to);
+      
+      using ( var stream = new BlockStream( fileWad ))
+      {
+        long length = fileWad.BlockIndex[block].Length;
+        stream.SeekBlock(block);
+        for ( int i=0;i<totalPackets;i++)
+        {
+          int packetSize = maxBlockPacketSize;
+          if ( packetSize > length )
+            packetSize = (int)length;
+          
+          var blockMsg = new BlockPacketNetMessage();
+          blockMsg.Data = new byte[maxBlockPacketSize];
+          blockMsg.DataLength = packetSize;
+          blockMsg.TransferId = msg.TransferId;
+          
+          stream.Read(blockMsg.Data, 0, packetSize);
+          
+          length -= packetSize;
+          
+          Send(msg, to);
+        }
+      }
     }
     
     public void RequestBlock( Peer peer, FileWad fileWad, int block )
@@ -678,6 +711,9 @@ namespace FuzzyHipster.Network
     
     public void SendBlocksAvailable( Peer peer, FileWad fileWad )
     {
+      if ( fileWad.BlockIndex != null )
+        return;
+      
       var msg = new BlocksAvailableNetMessage();
       msg.BlocksAvailable = new bool[fileWad.BlockIndex.Count];
       for(int i=0;i<fileWad.BlockIndex.Count;i++)

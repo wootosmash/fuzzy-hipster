@@ -14,19 +14,20 @@ using System.Threading;
 using System.Xml.Serialization;
 namespace FuzzyHipster.Catalog
 {
-  [Serializable()]
-	public class BlockIndexItemCollection : List<BlockIndexItem>
+	[Serializable()]
+	public class FileWadCollection : List<FileWad>
 	{
-    public BlockIndexItem GetRandom()
-    {
-      if ( Count == 0 )
-        return null;
-      
-      int index = MoustacheLayer.Singleton.Random.Next(0, Count);
-      return this[index];
-    }
+		public FileWad GetRandom()
+		{
+			if (Count == 0)
+				return null;
+			int index = MoustacheLayer.Singleton.Random.Next(0, Count);
+			return this[index];
+		}
 	}
 }
+
+
 
 
 

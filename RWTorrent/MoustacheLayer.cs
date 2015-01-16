@@ -97,7 +97,11 @@ namespace FuzzyHipster
     
     void NetworkBlocksAvailableRequested( object sender, MessageComposite<RequestBlocksAvailableNetMessage> e)
     {
-      Network.SendBlocksAvailable( e.Peer, Catalog.GetFileWad(e.Value.FileWadId) );
+      var wad = Catalog.GetFileWad(e.Value.FileWadId);
+      if ( wad == null )
+        return; 
+      
+      Network.SendBlocksAvailable( e.Peer, wad );
     }
     
     void NetworkBlockRequested( object sender, BlockRequestedEventArgs e)
@@ -197,8 +201,12 @@ namespace FuzzyHipster
           if ( peer.OkToSendAt <  DateTime.Now )
           {
             Network.SendMyStatus( peer );
-            Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
-            Network.RequestChannels(peer, Catalog.LastUpdated, Settings.HeartbeatChannelRequestCount);
+            //            Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
+            //            Network.RequestChannels(peer, Catalog.LastUpdated, Settings.HeartbeatChannelRequestCount);
+            foreach( var channel in Catalog.Channels.ToArray() )
+              if ( channel.Wads != null )
+                if ( channel.Wads.Count > 0 )
+                  Network.RequestBlocksAvailable(peer, channel.Wads[0]);
           }
           else
             Console.WriteLine("NOT OK TO SEND: " + peer.OkToSendAt);

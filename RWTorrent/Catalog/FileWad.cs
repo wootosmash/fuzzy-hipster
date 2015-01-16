@@ -9,6 +9,7 @@
 using System;
 using System.IO;
 using System.Xml.Serialization;
+using FuzzyHipster.Crypto;
 namespace FuzzyHipster.Catalog
 {
   [Serializable()]
@@ -48,6 +49,57 @@ namespace FuzzyHipster.Catalog
       if ( Directory.Exists( path ))
         Directory.CreateDirectory(path);
     }
+    
+    public long GetBlockSize( FileDescriptor file, int block )
+    {
+      if ( file.StartBlock > block )
+        return 0;
+      if ( file.EndBlock < block )
+        return 0;
+      
+      if ( file.StartBlock == file.EndBlock && file.StartBlock == block )
+        return file.EndOffset - file.StartOffset;
+      if ( file.StartBlock == block )
+        return BlockSize - file.StartOffset;
+      if ( file.EndBlock == block )
+        return BlockSize - file.EndOffset;
+      if ( file.StartBlock < block && file.EndBlock > block )
+        return BlockSize;
+      return 0;
+    }
+    
+    public long GetBlockStartOffset( FileDescriptor file, int block )
+    {
+      if ( file.EndBlock < block )
+        return -1;
+      if ( file.StartBlock > block )
+        return -1;
+      
+      if ( file.StartBlock == block )
+        return file.StartOffset;
+      if ( file.EndBlock == block )
+        return 0;
+      if ( file.StartBlock < block && file.EndBlock > block )
+        return 0;
+      return -1;
+    }
+    
+    public long GetBlockEndOffset( FileDescriptor file, int block )
+    {
+      if ( file.EndBlock < block )
+        return -1;
+      if ( file.StartBlock > block )
+        return -1;
+      
+      if ( file.StartBlock == block )
+        return BlockSize - file.StartOffset;
+      if ( file.EndBlock == block )
+        return file.EndOffset;
+      if ( file.StartBlock < block && file.EndBlock > block )
+        return BlockSize;
+      return -1;
+    }
+    
     
     public bool VerifyBlock(string tempFile )
     {
@@ -126,10 +178,9 @@ namespace FuzzyHipster.Catalog
       }
     }
 
-    object locker = new object();
     public void Save()
     {
-      lock (locker) {
+      lock (this) {
         string basePath = MoustacheLayer.Singleton.Catalog.BasePath;
         string channelPath = Path.Combine(basePath, string.Format(@"Catalog\Channels\{0}\", ChannelId));
         
@@ -157,6 +208,7 @@ namespace FuzzyHipster.Catalog
       var info = new FileInfo(file);
       var descriptor = new FileDescriptor()
       {
+        Hash = Hash.GetHash(file),
         CatalogFilepath = file.Substring(basePath.Length),
         LocalFilepath = file,
         IsAllocated = true,
@@ -192,10 +244,12 @@ namespace FuzzyHipster.Catalog
     }
     #endregion
     
+
     public override string ToString()
     {
-      return string.Format("[FileWad Locker={0}, Id={1}, ChannelId={2}, Name={3}, Description={4}, BlockSize={5}, TotalBlocks={6}, TotalSize={7}, LastUpdate={8}, Files={9}, BlockIndex={10}]", locker, Id, ChannelId, Name, Description, BlockSize, TotalBlocks, TotalSize, LastUpdate, Files, BlockIndex);
+      return string.Format("[FileWad Id={0}, ChannelId={1}, Name={2}, Description={3}, BlockSize={4}, TotalBlocks={5}, TotalSize={6}, LastUpdate={7}, Files={8}, BlockIndex={9}]", Id, ChannelId, Name, Description, BlockSize, TotalBlocks, TotalSize, LastUpdate, Files, BlockIndex);
     }
+
     
     public static long CalculatePathSize( string path )
     {
@@ -204,14 +258,15 @@ namespace FuzzyHipster.Catalog
       if ( !Directory.Exists(path))
         return 0;
       
+      foreach( string file in Directory.GetFiles(path))
+      {
+        var info = new FileInfo(file);
+        size += info.Length;
+      }
+      
       foreach( string dir in Directory.GetDirectories(path))
       {
         size += CalculatePathSize(dir);
-        foreach( string file in Directory.GetFiles(dir))
-        {
-          var info = new FileInfo(file);
-          size += info.Length;
-        }
       }
       
       return size;
