@@ -28,7 +28,7 @@ namespace Client
         private void ChangeView_Click(object sender, RoutedEventArgs e)
         {
 
-            MainWindowModel.ChangeModel(new MyListViewModel());
+            MainWindowModel.ChangeModel(typeof(MyListViewModel));
         }
     }
 }

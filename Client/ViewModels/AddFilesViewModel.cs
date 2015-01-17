@@ -29,6 +29,11 @@ namespace Client
         {
             _channel = channel;
         }
+        public AddFilesViewModel()
+        {
+            _channel = null;
+        }
+
 
         public string Channel
         {
@@ -83,15 +88,42 @@ namespace Client
         }
 
 
+        public ICommand SelectFile
+        {
+            get
+            {
+                return new RelayCommand(p => getFile());
+            }
+        }
+
+        public ICommand SelectFolder
+        {
+            get
+            {
+                return new RelayCommand(p => getFolder());
+            }
+        }
+
+
+        private void getFolder()
+        {
+            WadPath = Utils.GetFolderPath();
+            OnPropertyChanged("WadPath");
+        }
+
+        private void getFile()
+        {
+            WadPath = Utils.getFilePath();
+            OnPropertyChanged("WadPath");
+        }
+
+
+
         public ICommand CreateFolder
         {
             get
             {
-
-                ICommand _changePageCommand = new RelayCommand(
-                        p => AddWad(),
-                        p => true);
-                return _changePageCommand;
+                return new RelayCommand(p => AddWad());
             }
         }
 
@@ -99,7 +131,7 @@ namespace Client
         {
             get
             {
-                return new RelayCommand(p => { MainWindowModel.ChangeModel(new MyListViewModel()); });
+                return new RelayCommand(p => { MainWindowModel.ChangeModel(typeof (MyListViewModel)); });
             }
         }
 
@@ -123,7 +155,7 @@ namespace Client
             _channel.Wads.Add(myprog);
             myprog.Save();
 
-            MainWindowModel.ChangeModel(new MyListViewModel());
+            MainWindowModel.ChangeModel(typeof(MyListViewModel));
         }
 
     }

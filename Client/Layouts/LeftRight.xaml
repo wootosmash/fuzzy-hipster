@@ -41,7 +41,7 @@
                         </Menu>
 
                         <Border  Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0,0,1,0">
-                            <ItemsControl ItemsSource="{Binding DataContext.PageViewModels, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
+                            <ItemsControl ItemsSource="{Binding DataContext.XamlPageMenuDef, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Grid>

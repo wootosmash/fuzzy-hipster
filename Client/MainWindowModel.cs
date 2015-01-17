@@ -24,23 +24,26 @@ namespace Client
 
         public MainWindowModel()
         {
-            // Add available pages
-
-           
-
-            // Set starting page
             CurrentPageViewModel = new SplashViewModel();
-
         }
 
         public void Setup()
         {
+            //Map views against declared type
+            PageViewModelMap.Add(typeof(StartUpViewModel).Name, new StartUpViewModel());
+            PageViewModelMap.Add(typeof(MyListViewModel).Name, new MyListViewModel());
+            PageViewModelMap.Add(typeof(CatalogViewModel).Name, new CatalogViewModel());
+            PageViewModelMap.Add(typeof(PeerListViewModel).Name, new PeerListViewModel());
+            PageViewModelMap.Add(typeof(AddFilesViewModel).Name, new AddFilesViewModel());
+            PageViewModelMap.Add(typeof(NewChannelViewModel).Name, new NewChannelViewModel());
 
-            PageViewModels.Add(new StartUpViewModel());
-            PageViewModels.Add(new MyListViewModel());
-            PageViewModels.Add(new CatalogViewModel());
-            PageViewModels.Add(new PeerListViewModel());
 
+
+            //
+            XamlPageMenuDef.Add(PageViewModelMap[typeof(StartUpViewModel).Name]);
+            XamlPageMenuDef.Add(PageViewModelMap[typeof(MyListViewModel).Name]);
+            XamlPageMenuDef.Add(PageViewModelMap[typeof(CatalogViewModel).Name]);
+            XamlPageMenuDef.Add(PageViewModelMap[typeof(PeerListViewModel).Name]);
         }
 
         #region Properties / Commands
@@ -60,7 +63,7 @@ namespace Client
             }
         }
 
-        public List<IPageViewModel> PageViewModels
+        public List<IPageViewModel> XamlPageMenuDef
         {
             get
             {
@@ -82,9 +85,30 @@ namespace Client
             }
         }
 
-        public static void ChangeModel(IPageViewModel model){
+        //public static void ChangeModel(IPageViewModel model){
+        //    MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
+        //    mw.CurrentPageViewModel = model;
+        //}
+
+
+
+        public static void ChangeModel(Type classType)
+        {
+
+
+            string item = classType.Name;
+
             MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
-            mw.CurrentPageViewModel = model;
+           // mw.CurrentPageViewModel = model;
+
+
+            if (!mw.PageViewModelMap.Keys.Contains(item))
+            {
+                return;
+            }
+
+            mw.CurrentPageViewModel = mw.PageViewModelMap[item];
+
         }
 
         public static void RememberState(string key)
@@ -131,12 +155,18 @@ namespace Client
 
         public void ChangeViewModel(IPageViewModel viewModel)
         {
-            if (!PageViewModels.Contains(viewModel))
-                PageViewModels.Add(viewModel);
+           // if (!XamlPageMenuDef.Contains(viewModel))
+             //   XamlPageMenuDef.Add(viewModel);
 
-            CurrentPageViewModel = PageViewModels
+            CurrentPageViewModel = XamlPageMenuDef
                 .FirstOrDefault(vm => vm == viewModel);
+
+
+
         }
+
+
+
 
         #endregion
     }

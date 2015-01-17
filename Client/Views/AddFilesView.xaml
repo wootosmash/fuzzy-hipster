@@ -14,20 +14,16 @@
 
             <Separator Margin="10"></Separator>
 
-            <Label Margin="0,10,0,0">Select Folder</Label>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="80"/>
-                </Grid.ColumnDefinitions>
-                <TextBox TextBlock.LineHeight="27" 
-    TextBlock.LineStackingStrategy="BlockLineHeight"   Height="27" x:Name="Folder"  Margin="0,5,0,0" Text="{Binding WadPath}" VerticalAlignment="Center"/>
-                <Button Width="80"  Margin="0,5,0,0"  Height="27" Content="Folder" BorderBrush="{x:Null}" HorizontalAlignment="Right" Grid.Column="1"></Button>
-            </Grid>
+            <TextBox TextBlock.LineHeight="27" TextBlock.LineStackingStrategy="BlockLineHeight"   Height="27" x:Name="Folder"  Margin="5,5,5,0" Text="{Binding WadPath, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+            <WrapPanel Margin="5,0,5,0" HorizontalAlignment="Right">
 
+                <Button Width="auto" Margin="5" Padding="5"  Height="27" Content="Select File"  Command="{Binding SelectFile}" CommandParameter="{Binding }" BorderBrush="{x:Null}" HorizontalAlignment="Right" Grid.Column="0"></Button>
+                <Button Width="80"  Margin="5" Padding="5"  Height="27" Content="Select Folder" BorderBrush="{x:Null}"  Command="{Binding SelectFolder}" CommandParameter="{Binding }" HorizontalAlignment="Right" Grid.Column="1"></Button>
+
+            </WrapPanel>
 
             <TextBlock  TextBlock.LineHeight="27" 
-    TextBlock.LineStackingStrategy="BlockLineHeight"   Height="27" Margin="0,20,0,0" Text="Upload Meta" FontSize="24" />
+    TextBlock.LineStackingStrategy="BlockLineHeight"   Height="27" Margin="0,20,0,0" Text="Share Data" FontSize="24" />
             <Label>Name</Label>
             <TextBox x:Name="ChannelName" Margin="5"  Height="22" TextWrapping="Wrap" Text="{Binding WadName ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   Width="auto" />
             <Label>Description</Label>

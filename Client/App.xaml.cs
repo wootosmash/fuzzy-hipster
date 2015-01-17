@@ -63,7 +63,7 @@ namespace Client
         {
             MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
             mw.Setup();
-            MainWindowModel.ChangeModel(new CatalogViewModel());
+            MainWindowModel.ChangeModel(typeof(CatalogViewModel));
         }));
     }  
 

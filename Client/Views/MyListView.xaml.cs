@@ -33,7 +33,7 @@ namespace Client
 
         private void CreateChannel_Click(object sender, RoutedEventArgs e)
         {
-            MainWindowModel.ChangeModel(new NewChannelViewModel());
+            MainWindowModel.ChangeModel(typeof(NewChannelViewModel));
         }
     }
 }

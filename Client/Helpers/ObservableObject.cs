@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace Client
 {
@@ -33,6 +34,7 @@ namespace Client
                     Debug.Fail(msg);
             }
         }
+
 
         /// <summary>
         /// Returns whether an exception is thrown, or if a Debug.Fail() is used

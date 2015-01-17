@@ -67,7 +67,7 @@ namespace Client
         {
             get
             {
-                return new RelayCommand( p => { MainWindowModel.ChangeModel(new MyListViewModel()); });
+                return new RelayCommand( p => { MainWindowModel.ChangeModel(typeof(MyListViewModel)); });
             }
         }
 
@@ -89,7 +89,7 @@ namespace Client
             catalog.Channels.Add(newChannel);
             catalog.Save();
 
-            MainWindowModel.ChangeModel(new MyListViewModel());
+            MainWindowModel.ChangeModel(typeof(MyListViewModel));
         }
     }
 }
