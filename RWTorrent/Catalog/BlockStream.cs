@@ -19,7 +19,10 @@ namespace FuzzyHipster.Catalog
     public FileWad Wad { get; set; }
     public int CurrentBlock { get; protected set; }
     public FileDescriptor CurrentFile { get; protected set; }
-        
+    
+    Stream CurrentStream;
+    long fragmentSize = 0;
+    
     public BlockStream( FileWad wad )
     {
       Wad = wad;
@@ -29,7 +32,49 @@ namespace FuzzyHipster.Catalog
     public void SeekBlock( int block )
     {
       CurrentBlock = block;
+      long fileOffset = 0;
+      currentFile = -1;
       
+      do
+      {
+        CurrentFile = GetNext();
+        fileOffset = Wad.GetFileOffset(CurrentFile, CurrentBlock);
+      }
+      while ( CurrentFile != null && fileOffset < 0 );
+      
+      if ( CurrentStream != null )
+        CloseStream();
+      
+      Console.WriteLine("{0} {1}", CurrentFile, fileOffset);
+      
+      OpenStream();
+      CurrentStream.Seek(fileOffset, SeekOrigin.Begin);
+    }
+    
+    private void CloseStream()
+    {
+      if ( CurrentStream != null )
+      {
+        CurrentStream.Close();
+        CurrentStream.Dispose();
+        CurrentStream = null;
+      }
+    }
+    
+    private void OpenStream()
+    {
+      if ( CurrentFile == null )
+        return; 
+      
+      if ( !File.Exists(CurrentFile.LocalFilepath))
+        throw new Exception(string.Format("Local file for getting blocks doesn't exist. File is {0}. Expected local path is {1}",
+                                          CurrentFile.CatalogFilepath,
+                                          CurrentFile.LocalFilepath));
+      
+      
+      CurrentStream = new FileStream(CurrentFile.LocalFilepath, FileMode.Open);
+      fragmentSize = Wad.GetBlockFragmentSize(CurrentFile, CurrentBlock );
+
     }
     
     public FileDescriptor GetNext()
@@ -71,35 +116,31 @@ namespace FuzzyHipster.Catalog
     public override int Read(byte[] buffer, int offset, int count)
     {
       int totalBytes = 0;
-      FileDescriptor file = GetNext();
       
-      while ( file != null && count > 0 )
-      {
-        long startOffset = Wad.GetFileOffset( file, CurrentBlock );
-        long fragmentSize = Wad.GetBlockFragmentSize(file, CurrentBlock );
+      while ( count > 0 && CurrentFile != null )
+      {        
+        int bytesToRead = count;
+        if ( bytesToRead > fragmentSize )
+          bytesToRead = (int)fragmentSize;
         
-        if ( startOffset >= 0 )
+        //Console.WriteLine("READ {0} {1} {2}", bytesToRead, count, CurrentFile);
+                
+        int bytesRead = CurrentStream.Read(buffer, offset, (int)bytesToRead);
+        
+        //Console.WriteLine("BYTESREAD {0} {1}", bytesRead, CurrentStream.Position);
+        
+        offset += bytesRead;
+        totalBytes += bytesRead;
+        count -= bytesRead;
+        Position += bytesRead;
+        
+        if ( bytesRead == 0 || CurrentStream.Position == CurrentStream.Length)
         {
-          if ( !File.Exists(file.LocalFilepath))
-            throw new Exception(string.Format("Local file for getting blocks doesn't exist. File is {0}. Expected local path is {1}", 
-                                              file.CatalogFilepath, 
-                                              file.LocalFilepath));
-          
-          using ( var stream = new FileStream(file.LocalFilepath, FileMode.Open))
-          {            
-            stream.Seek(startOffset, SeekOrigin.Begin);
-            int bytes = stream.Read(buffer, offset, (int)fragmentSize);
-            totalBytes += bytes;
-            offset += bytes;
-
-            //if ( count > bytes )
-            count -= bytes;
-            
-            Position += bytes;
-          }
+          CloseStream();
+          CurrentFile = GetNext();
+          OpenStream();
         }
         
-        file = GetNext();
       }
       
       return totalBytes;
@@ -140,7 +181,13 @@ namespace FuzzyHipster.Catalog
     public override long Position { get; set; }
 
     #endregion
-        
+    
+    protected override void Dispose(bool disposing)
+    {
+      CloseStream();
+      base.Dispose(disposing);
+    }
+    
     /// <summary>
     /// Gets a stream for the block/WAD. Figures out where the look in the system
     /// </summary>

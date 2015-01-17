@@ -23,6 +23,7 @@ namespace FuzzyHipster.Crypto
     
     public static byte[] GetHash( Stream stream, long length )
     {
+      Console.WriteLine("GetHash() " + length);
       using ( var md5 = MD5.Create())
       {
         using ( var partial = new PartialStream(stream, 0, length))
