@@ -57,6 +57,25 @@ namespace FuzzyHipster
           
         }
         
+        if ( key.Key == ConsoleKey.D )
+        {
+          var wad = new FileWad();
+          wad.Name = "Test WAD-" + DateTime.Now;
+          wad.Description = "Built from D";
+          wad.BuildFromPath( @"E:\temp\HIMYM");
+          
+          if ( catalog.Channels.Count == 0 )
+          {
+            var channel = new Channel();
+            channel.Name = "Rof Chan";
+            channel.Description = "A Rof Chan Channel";
+            catalog.AddChannel(channel);
+            
+            wad.ChannelId = channel.Id;
+            catalog.AddFileWad(wad);
+          }
+        }
+        
         if ( key.Key == ConsoleKey.T )
           stache.Think();
         

@@ -60,12 +60,12 @@ namespace FuzzyHipster.Catalog
 		{
 			int lengthOfBytesToWrite = (int)Length;
 			if (Sequence == descriptor.StartBlock && Sequence == descriptor.EndBlock)
-				lengthOfBytesToWrite = (int)descriptor.StartOffset - (int)descriptor.EndOffset;
+				lengthOfBytesToWrite = (int)descriptor.StartOffset - (int)descriptor.EndFragmentSize;
 			else {
 				if (Sequence == descriptor.StartBlock)
 				  lengthOfBytesToWrite -= (int)descriptor.StartOffset;
 				if (Sequence == descriptor.EndBlock)
-				  lengthOfBytesToWrite -= (int)descriptor.EndOffset;
+				  lengthOfBytesToWrite -= (int)descriptor.EndFragmentSize;
 			}
 			return lengthOfBytesToWrite;
 		}

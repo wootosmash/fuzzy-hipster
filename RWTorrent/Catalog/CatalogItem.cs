@@ -18,6 +18,7 @@ namespace FuzzyHipster.Catalog
   [Serializable()]
 	public abstract class CatalogItem
 	{
+	  public Guid Id { get; set; }
 	  public long LastUpdated { get; set; }
 	  
 	  public abstract void Validate();

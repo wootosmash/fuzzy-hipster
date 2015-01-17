@@ -48,6 +48,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BlockStreamTest.cs" />
     <Compile Include="CatalogTest.cs" />
     <Compile Include="CryptoTest.cs" />
     <Compile Include="NetworkTest.cs" />

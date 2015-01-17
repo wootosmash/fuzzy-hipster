@@ -19,11 +19,6 @@ namespace FuzzyHipster.Catalog
   [Serializable()]
   public class Channel : CatalogItem, IEquatable<Channel>
   {
-    public Guid Id {
-      get;
-      set;
-    }
-
     public string Name {
       get;
       set;

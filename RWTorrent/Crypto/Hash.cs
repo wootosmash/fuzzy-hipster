@@ -43,11 +43,11 @@ namespace FuzzyHipster.Crypto
       }
     }
     
-    public static byte[] GetHash( byte[] data )
+    public static byte[] GetHash( byte[] data, long length )
     {
       using ( var md5 = MD5.Create())
       {
-        using ( var stream = new MemoryStream(data))
+        using ( var stream = new MemoryStream(data, 0, (int)length))
         {
           return md5.ComputeHash(stream);
         }

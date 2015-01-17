@@ -15,16 +15,7 @@ using FuzzyHipster.Crypto;
 
 namespace FuzzyHipster.Network
 {
-  public class NewConnectionEventArgs : EventArgs
-  {
-    public Socket Socket = null;
-    public bool Accept = true;
-    
-    public NewConnectionEventArgs(Socket socket)
-    {
-      Socket = socket;
-    }
-  }
+  
   
   public class RWNetwork
   {
@@ -42,7 +33,6 @@ namespace FuzzyHipster.Network
     
     Random random = new Random(DateTime.Now.Millisecond);
     ManualResetEvent acceptSemaphore = new ManualResetEvent(false);
-    ManualResetEvent receiveSemaphore = new ManualResetEvent(false);
     
     #region events
 

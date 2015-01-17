@@ -18,9 +18,7 @@ namespace FuzzyHipster.Catalog
   
   
   public class Catalog : CatalogItem
-  {
-    public Guid Guid { get; set; }
-    
+  {    
     public string Namespace { get; set; }
 
     public string Description { get; set; }
@@ -37,7 +35,7 @@ namespace FuzzyHipster.Catalog
 
     public Catalog()
     {
-      Guid = Guid.NewGuid();
+      Id = Guid.NewGuid();
       Channels = new ChannelCollection();
     }
 

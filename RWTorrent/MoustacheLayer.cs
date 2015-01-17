@@ -72,7 +72,7 @@ namespace FuzzyHipster
 
       Me = new Peer();
       Me.Port = Settings.Port;
-      Me.Id = catalog.Guid;
+      Me.Id = catalog.Id;
       Me.Name = Environment.MachineName;
       
       Peers = PeerCollection.Load(Catalog.BasePath);
@@ -240,9 +240,14 @@ namespace FuzzyHipster
             //            Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
             Network.RequestChannels(peer, Catalog.LastUpdated, Settings.HeartbeatChannelRequestCount);
             foreach( var channel in Catalog.Channels.ToArray() )
-              if ( channel.Wads != null )
-                if ( channel.Wads.Count > 0 )
-                  Network.RequestBlocksAvailable(peer, channel.Wads[0]);
+            {
+              if ( channel.Wads != null && channel.Wads.Count > 0 )
+              {
+                foreach( var wad in channel.Wads.ToArray())
+                  if ( !wad.IsFullyDownloaded )
+                    Network.RequestBlocksAvailable(peer, channel.Wads[0]);
+              }
+            }
           }
           else
             Console.WriteLine("NOT OK TO SEND: " + peer.OkToSendAt);

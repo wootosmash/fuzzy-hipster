@@ -15,8 +15,6 @@ namespace FuzzyHipster.Catalog
   [Serializable()]
   public class FileWad : CatalogItem, IEquatable<FileWad>
   {
-    public Guid Id { get; set; }
-    
     public Guid ChannelId { get; set; }
 
     public string Name { get; set; }
@@ -77,7 +75,13 @@ namespace FuzzyHipster.Catalog
       IsFullyDownloaded = downloaded;
     }
     
-    public long GetBlockSize( FileDescriptor file, int block )
+    /// <summary>
+    /// For this file, how much of this block does it take up?
+    /// </summary>
+    /// <param name="file"></param>
+    /// <param name="block"></param>
+    /// <returns></returns>
+    public long GetBlockFragmentSize( FileDescriptor file, int block )
     {
       if ( file.StartBlock > block )
         return 0;
@@ -85,18 +89,26 @@ namespace FuzzyHipster.Catalog
         return 0;
       
       if ( file.StartBlock == file.EndBlock && file.StartBlock == block )
-        return file.EndOffset - file.StartOffset;
+        return file.Length;
       if ( file.StartBlock == block )
         return BlockSize - file.StartOffset;
       if ( file.EndBlock == block )
-        return BlockSize - file.EndOffset;
+        return file.EndFragmentSize;
       if ( file.StartBlock < block && file.EndBlock > block )
         return BlockSize;
       return 0;
     }
     
-    public long GetBlockStartOffset( FileDescriptor file, int block )
+    /// <summary>
+    /// Determines the offset to start writing a file into this block
+    /// </summary>
+    /// <param name="file"></param>
+    /// <param name="block"></param>
+    /// <returns></returns>
+    public long GetBlockOffset( FileDescriptor file, int block )
     {
+      Console.WriteLine(file.ToString() + " looking for block " + block);
+      
       if ( file.EndBlock < block )
         return -1;
       if ( file.StartBlock > block )
@@ -104,29 +116,27 @@ namespace FuzzyHipster.Catalog
       
       if ( file.StartBlock == block )
         return file.StartOffset;
-      if ( file.EndBlock == block )
-        return 0;
-      if ( file.StartBlock < block && file.EndBlock > block )
-        return 0;
-      return -1;
+      
+      return 0;
     }
     
-    public long GetBlockEndOffset( FileDescriptor file, int block )
+    /// <summary>
+    /// Determines the offset within a file to write/read this block
+    /// </summary>
+    /// <param name="file"></param>
+    /// <param name="block"></param>
+    /// <returns></returns>
+    public long GetFileOffset( FileDescriptor file, int block )
     {
-      if ( file.EndBlock < block )
-        return -1;
       if ( file.StartBlock > block )
+        return -1;
+      if ( file.EndBlock < block )
         return -1;
       
       if ( file.StartBlock == block )
-        return BlockSize - file.StartOffset;
-      if ( file.EndBlock == block )
-        return file.EndOffset;
-      if ( file.StartBlock < block && file.EndBlock > block )
-        return BlockSize;
-      return -1;
+        return 0;
+      return (BlockSize - file.StartOffset) + ((block - file.StartBlock -1) * BlockSize);
     }
-    
 
     public string GetBlocksPath()
     {
@@ -138,13 +148,17 @@ namespace FuzzyHipster.Catalog
     {
       string blocksPath = GetBlocksPath();
       string [] blocks = Directory.GetFiles(blocksPath);
+      
+      Console.WriteLine(blocksPath);
+      
       foreach( string file in blocks )
       {
-        if ( file.StartsWith(block + "-"))
+        
+        if ( Path.GetFileName(file).StartsWith(block + "-"))
           return new FileStream(file, FileMode.Open);
       }
       
-      return null;
+      throw new Exception(string.Format("Cant find the file for block {0} in path {1}", block, blocksPath));
     }
     
     public void SaveFromBlocks( string basePath )
@@ -168,29 +182,34 @@ namespace FuzzyHipster.Catalog
     public void SaveFromBlocks( FileDescriptor file, string basePath )
     {
       const int bufferLength = 1024;
-      byte[] buffer = new byte[bufferLength];
+      var buffer = new byte[bufferLength];
       string blocksPath = GetBlocksPath();
       
       if ( !Directory.Exists(basePath))
         Directory.CreateDirectory(basePath);
       
       string filePath = Path.Combine(basePath, file.CatalogFilepath);
+      
+      if ( !Directory.Exists(Path.GetDirectoryName(filePath)))
+        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+      
       using (var writer = new FileStream(filePath, FileMode.CreateNew))
       {
         for ( int block = file.StartBlock; block <= file.EndBlock; block++ )
         {
           using (var reader = GetBlockStream(block))
           {
-            long start = GetBlockStartOffset(file, block);
-            long end = GetBlockEndOffset(file, block);
-            long totalLength = end - start;
+            long start = GetBlockOffset(file, block);
+            long totalLength = GetBlockFragmentSize(file, block);
+            
+            reader.Seek(start, SeekOrigin.Begin);
             
             while ( totalLength > 0 )
             {
               long count = bufferLength;
               if ( count > totalLength )
                 count = totalLength;
-              count = reader.Read(buffer, (int)GetBlockStartOffset(file, block), (int)count);
+              count = reader.Read(buffer, 0, (int)count);
               writer.Write(buffer, 0,  (int)count);
               totalLength -= count;
             }
@@ -199,32 +218,31 @@ namespace FuzzyHipster.Catalog
       }
       
       byte[] hash = Hash.GetHash(filePath);
-      if ( Hash.Compare(file.Hash, hash))
+      if ( !Hash.Compare(file.Hash, hash))
       {
-        File.Delete(filePath);
-        throw new Exception(string.Format("Convert from blocks failed, hash is bad. {0} != {1}", file.Hash, hash));
+        //File.Delete(filePath);
+        throw new Exception(string.Format("Convert file {0} from blocks failed, hash is bad.", file.CatalogFilepath));
       }
     }
     
-    public bool VerifyBlock( int block, string blockFilePath )
+    public void VerifyBlock( int block, string blockFilePath )
     {
       var info = new FileInfo(blockFilePath);
 
       BlockIndexItem item = BlockIndex[block];
       
       if ( item.Hash == null )
-        throw new Exception("BlockIndex item " + block + " has no hash");
+        throw new Exception(string.Format("BlockIndex item {0} has no hash", block));
       
       // block length doesn't match expected length
       if (info.Length != item.Length)
-        return false;
+        throw new Exception(string.Format("Temp file length {0} and BlockIndex lengths {1} do not match", info.Length, item.Length));
       // hashes dont match
-      if ( Hash.Compare(Hash.GetHash(blockFilePath), item.Hash))
-        return false;
+      if ( !Hash.Compare(Hash.GetHash(blockFilePath), item.Hash))
+        throw new Exception(string.Format("Temp file hash and BlockIndex hashes do not match"));
       // length of data buffer doesn't match block size
-      if (info.Length != BlockSize)
-        return false;
-      return true;
+      if (info.Length != BlockSize && block != BlockIndex.Count-1)
+        throw new Exception(string.Format("Block size {0} does not match the expected block size from our index {1} bytes", info.Length, BlockSize));
     }
 
     /// <summary>
@@ -253,25 +271,35 @@ namespace FuzzyHipster.Catalog
       
       int lastBlock = 0;
       long lastOffset = 0;
+      bool firstLoop = true;
       
       // build file descs
       foreach (FileDescriptor file in Files)
       {
-        file.StartBlock = lastBlock;
-        lastBlock += (int)Math.Floor((double)file.Length / (double)BlockSize);
-        
-        if (lastOffset == 0)
+        if (lastOffset == 0 && !firstLoop )
           lastBlock++;
         
+        firstLoop = false;
+        
+        file.StartBlock = lastBlock;
+        
+        lastBlock += (int)Math.Floor((double)(file.Length + lastOffset) / (double)BlockSize);
+
         file.EndBlock = lastBlock;
         file.StartOffset = lastOffset;
         
-        if (file.StartBlock == file.EndBlock)
-          lastOffset += (long)file.Length % BlockSize;
-        else
-          lastOffset = (long)file.Length % BlockSize;
         
-        file.EndOffset = lastOffset;
+        if (file.StartBlock == file.EndBlock)
+        {
+          file.EndFragmentSize = file.Length;
+          lastOffset += file.EndFragmentSize;
+        }
+        else
+        {
+          file.EndFragmentSize = (long)((file.Length - (BlockSize - file.StartOffset)) % BlockSize);
+          lastOffset = file.EndFragmentSize;
+        }
+        
         file.Hash = Hash.GetHash(file.LocalFilepath );
       }
       
@@ -288,20 +316,37 @@ namespace FuzzyHipster.Catalog
         BlockIndex[BlockIndex.Count - 1].Length = totalLength % BlockSize;
       
       // calculate the hashes
-      using ( var stream = new BlockStream( this ))
+      for(int i=0;i<BlockIndex.Count;i++)
       {
-        foreach( var block in BlockIndex )
+        using ( var stream = new BlockStream( this ))
         {
-          block.Hash = Hash.GetHash(stream, block.Length);
+          stream.SeekBlock(i);
+          BlockIndex[i].Hash = Hash.GetHash(stream, BlockIndex[i].Length);
         }
       }
       
-      
+      Validate();      
     }
     
     public override void Validate()
     {
       CheckIfFullyDownloaded();
+      
+      foreach( var file in Files )
+      {
+        long len = (BlockSize - file.StartOffset) + ((file.EndBlock - file.StartBlock - 1) * BlockSize) + file.EndFragmentSize;
+        if ( file.StartBlock == file.EndBlock )
+        {
+          if ( file.StartOffset + file.EndFragmentSize > BlockSize )
+            throw new Exception("Offsets and fragment sizes are too big for the block: " + file);
+          len = file.EndFragmentSize;
+        }
+        
+        if ( file.Length != len )
+          throw new Exception(string.Format("File descriptor length doesn't validate calculated={0}, expected={1}, descriptor={2}", 
+                                            file.Length, len, file));
+      }
+      
     }
 
     public void Save()
@@ -335,7 +380,7 @@ namespace FuzzyHipster.Catalog
       var descriptor = new FileDescriptor()
       {
         Hash = Hash.GetHash(file),
-        CatalogFilepath = file.Substring(basePath.Length),
+        CatalogFilepath = file.Substring(basePath.Length + 1),
         LocalFilepath = file,
         IsAllocated = true,
         Length = info.Length
