@@ -17,7 +17,7 @@ namespace FuzzyHipster.Catalog
   
   
   [Serializable()]
-  public class Channel : IEquatable<Channel>
+  public class Channel : CatalogItem, IEquatable<Channel>
   {
     public Guid Id {
       get;
@@ -72,7 +72,7 @@ namespace FuzzyHipster.Catalog
       
       while( i < count && i < Wads.Count )
       {
-        if ( wads[i].LastUpdate > recency )
+        if ( wads[i].LastUpdated > recency )
           wads.Add( Wads[i] );
         i++;
       }
@@ -80,16 +80,9 @@ namespace FuzzyHipster.Catalog
       return wads.ToArray();
     }
     
-    public void RefreshWad( FileWad wad )
+    public override void Validate()
     {
-      if ( Wads == null )
-        Wads = new List<FileWad>();
       
-      if ( Wads.Find(x => x.Id == wad.Id) == null )
-      {
-        Wads.Add(wad);
-        wad.Save();
-      }
     }
     
     public void Save()

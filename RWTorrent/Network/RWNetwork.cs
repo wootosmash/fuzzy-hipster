@@ -35,6 +35,7 @@ namespace FuzzyHipster.Network
     public Socket Listener { get; set; }
     public Peer Me { get; set; }
     public SortedList<Guid, TransferManager> InProgressTransfers { get; set; }
+    public RateLimiter RateLimiter { get; set; }
     
     public long BytesReceived { get; set; }
     public long BytesSent { get; set; }
@@ -241,6 +242,7 @@ namespace FuzzyHipster.Network
       Me = me;
       ActivePeers = new List<Peer>();
       InProgressTransfers = new SortedList<Guid, TransferManager>();
+      RateLimiter = new RateLimiter(MoustacheLayer.Singleton.Settings.MaxReceiveRate);
     }
 
     /// <summary>
@@ -347,6 +349,12 @@ namespace FuzzyHipster.Network
         peer.BytesReceived += bytesRead;
         BytesReceived += bytesRead;
         
+        // record the length so we can use it to calculate statistics
+        peer.RateLimiter.GotPacket( bytesRead );
+        // see if we need to limit ourselves
+        RateLimiter.GotPacket( bytesRead );
+        
+        
         if ( bytesRead == 0 )
           Disconnect(peer, "Connection closed");
         else if ( bytesRead > 0 && bytesRead < state.ExpectedLength ) // partial receive
@@ -354,8 +362,7 @@ namespace FuzzyHipster.Network
           // buffering
           state.Buffer.Seek(bytesRead, SeekOrigin.Current);
           state.ExpectedLength -= bytesRead;
-          peer.Socket.BeginReceive( state.Buffer.GetBuffer(), (int)state.Buffer.Position, state.ExpectedLength, 0,
-                                   new AsyncCallback(WaitMessageCallback), state);
+          BeginReceive( peer, state.Buffer.GetBuffer(), (int)state.Buffer.Position, state.ExpectedLength, state);
         }
         else if ( bytesRead == state.ExpectedLength ) // receive finished
         {
@@ -366,11 +373,7 @@ namespace FuzzyHipster.Network
             state.ExpectedLength = BitConverter.ToInt32(state.Buffer.GetBuffer(), 0);
             state.WaitingLengthFrame = false;
             if ( state.ExpectedLength <= state.Buffer.Capacity )
-            {
-              //receiveSemaphore.Reset();
-              peer.Socket.BeginReceive( state.Buffer.GetBuffer(), 0, state.ExpectedLength, 0,
-                                       new AsyncCallback(WaitMessageCallback), state);
-            }
+              BeginReceive( peer, state.Buffer.GetBuffer(), 0, state.ExpectedLength, state);
             else
               Disconnect(state.Peer, "Expected Length is greater than the buffer capacity!");
           }
@@ -382,16 +385,13 @@ namespace FuzzyHipster.Network
               Disconnect(state.Peer, string.Format("Didn't receive the message we expected {0}. Received {1}", state.ExpectedMessage, message.Type));
             else
             {
-              
               state.ExpectedMessage = MessageType.Unknown;
               state.ExpectedLength = sizeof(int);
               state.WaitingLengthFrame = true; // waiting for the message size
               
               OnNetMessageReceived(new GenericEventArgs<NetMessage>(message));
               ProcessMessage(message, state);
-              //receiveSemaphore.Reset();
-              peer.Socket.BeginReceive( state.Buffer.GetBuffer(), 0, state.ExpectedLength, 0,
-                                       new AsyncCallback(WaitMessageCallback), state); // read the message size first
+              BeginReceive( peer, state.Buffer.GetBuffer(), 0, state.ExpectedLength, state); // read the message size first
             }
           }
         }
@@ -406,6 +406,17 @@ namespace FuzzyHipster.Network
         Disconnect(peer, "Exception in WaitMessageCallback");
         Console.WriteLine(ex);
       }
+    }
+    
+    void BeginReceive( Peer peer, byte[] buffer, int position, int count, ReceiveStateObject state )
+    {
+      // will halt if the data is coming in too fast
+      peer.RateLimiter.Limit();
+      RateLimiter.Limit();
+      
+      
+      peer.Socket.BeginReceive( buffer, position, count, 0,
+                               new AsyncCallback(WaitMessageCallback), state);
     }
     
     void ProcessMessage(NetMessage msg, ReceiveStateObject state)
@@ -798,61 +809,7 @@ namespace FuzzyHipster.Network
     }
   }
   
-  public class BlockTransferManager : TransferManager
-  {
-    public override void Execute()
-    {
-      var fileWad = MoustacheLayer.Singleton.Catalog.GetFileWad(FileWadId);
-      
-      if ( fileWad == null )
-        throw new Exception("Can't find file wad to save block to " + FileWadId);
-      fileWad.VerifyBlock(TempFile);
-      fileWad.CatalogBlock(Block, TempFile);
-      fileWad.BlockIndex[Block].Downloaded = true;
-    }
-  }
   
-  public abstract class TransferManager
-  {
-    public Guid TransferId { get; set; }
-    public Guid FileWadId { get; set; }
-    public int Block { get; set; }
-    public int ExpectedPackets { get; set; }
-    public int TotalLength { get; set; }
-    public int NextPacket { get; set; }
-    public bool IsCompleted { get { return ExpectedPackets <= NextPacket; } }
-    public string TempFile { get; set; }
-    public int CurrentPosition { get; set; }
-    
-    public TransferManager()
-    {
-      NextPacket = 0;
-      TransferId = Guid.NewGuid();
-      CurrentPosition = 0;
-    }
-    
-    public void SavePacket( BlockPacketNetMessage msg )
-    {
-      if ( String.IsNullOrWhiteSpace(TempFile))
-      {
-        string blocksPath = Path.Combine(MoustacheLayer.Singleton.Catalog.BasePath, string.Format(@"Catalog\Blocks\{0}\", FileWadId));
-        TempFile = blocksPath + Block + "-" + TransferId + ".blk";
-        if ( !Directory.Exists(blocksPath))
-          Directory.CreateDirectory(blocksPath);
-      }
-      
-      using ( var stream = new FileStream(TempFile, FileMode.OpenOrCreate))
-      {
-        stream.Seek(CurrentPosition, SeekOrigin.Begin);
-        stream.Write(msg.Data, 0, msg.DataLength);
-        CurrentPosition += msg.DataLength;
-      }
-      
-      NextPacket++;
-      if ( IsCompleted )
-        Execute();
-    }
-    
-    public abstract void Execute();
-  }
+  
+  
 }

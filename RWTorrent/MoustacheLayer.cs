@@ -145,6 +145,8 @@ namespace FuzzyHipster
       FileWad wad = Catalog.GetFileWad(e.FileWadId);
       if ( !wad.IsFullyDownloaded )
         Network.RequestBlocksAvailable(e.Peer, wad);
+      else
+        wad.SaveFromBlocks( Catalog.BasePath + @"\Files\" );
     }
     
     void NetworkPeerConnected( object sender, GenericEventArgs<Peer> e)
@@ -202,7 +204,7 @@ namespace FuzzyHipster
     
     void NetworkNewChannel( object sender, GenericEventArgs<Channel> e)
     {
-      Catalog.Channels.RefreshChannel(e.Value);
+      Catalog.AddChannel(e.Value);
       
       Peer[] peers = Network.ActivePeers.ToArray();
       
@@ -212,10 +214,11 @@ namespace FuzzyHipster
     
     void NetworkNewWad( object sender, GenericEventArgs<FileWad> e)
     {
-      Catalog.Channels[e.Value.ChannelId].RefreshWad(e.Value);
+      Catalog.AddFileWad(e.Value);
       
       foreach( var peer in Network.ActivePeers )
         Network.RequestBlocksAvailable( peer, e.Value );
+      
     }
     
     void HeartbeatElapsed(object sender, ElapsedEventArgs e)

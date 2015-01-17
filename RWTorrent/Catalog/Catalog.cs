@@ -15,7 +15,9 @@ using System.Xml.Serialization;
 using FuzzyHipster.Crypto;
 namespace FuzzyHipster.Catalog
 {
-  public class Catalog
+  
+  
+  public class Catalog : CatalogItem
   {
     public Guid Guid { get; set; }
     
@@ -72,12 +74,19 @@ namespace FuzzyHipster.Catalog
           using (var reader = new StreamReader(string.Format(@"{0}\Index.xml", dir)))
           {
             channel = (Channel)serialiserChannels.Deserialize(reader);
+            channel.Validate();
             catalog.Channels.Add(channel);
           }
           
           foreach( string file in Directory.GetFiles(Path.Combine(basePath, string.Format(@"Catalog\Channels\{0}\",channel.Id))))
+          {
             if ( !file.EndsWith("Index.xml"))
-              channel.Wads.Add(FileWad.Load(file));
+            {
+              var wad = FileWad.Load( file);
+              wad.Validate();
+              channel.Wads.Add(wad);
+            }
+          }
         }
       }
       
@@ -126,6 +135,38 @@ namespace FuzzyHipster.Catalog
             return wad;
       
       return null;
+    }
+    
+    public void AddFileWad( FileWad wad )
+    {
+      var channel = Channels.Find( x => x.Id == wad.ChannelId );
+      
+      if ( channel == null )
+        throw new Exception("Wad has no associated channel");
+      
+      if ( channel.Wads == null )
+        channel.Wads = new List<FileWad>();
+      
+      if ( channel.Wads.Find(x => x.Id == wad.Id) == null )
+      {
+        channel.Wads.Add(wad);
+        wad.Save();
+      } 
+
+      UpdateLastUpdated( wad.LastUpdated );
+    }
+    
+    public void AddChannel( Channel channel )
+    {
+      if ( Channels[channel.Id] == null )
+  			Channels.Add(channel);
+			channel.Save();
+      
+			UpdateLastUpdated(channel.LastUpdated);
+    }
+    
+    public override void Validate()
+    {
     }
     
     public override string ToString()

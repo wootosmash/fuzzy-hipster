@@ -65,6 +65,7 @@
     <Compile Include="Catalog\BlockIndexItemCollection.cs" />
     <Compile Include="Catalog\BlockStream.cs" />
     <Compile Include="Catalog\Catalog.cs" />
+    <Compile Include="Catalog\CatalogItem.cs" />
     <Compile Include="Catalog\FileDescriptor.cs" />
     <Compile Include="Catalog\FileDescriptorCollection.cs" />
     <Compile Include="Catalog\FileWad.cs" />
@@ -75,15 +76,18 @@
     <Compile Include="Crypto\Key.cs" />
     <Compile Include="Network\BlockReceivedEventArgs.cs" />
     <Compile Include="Network\BlockRequestedEventArgs.cs" />
+    <Compile Include="Network\BlockTransferManager.cs" />
     <Compile Include="Network\BlockTransferStartedEventArgs.cs" />
     <Compile Include="Network\GenericEventArgs.cs" />
     <Compile Include="Network\IPSniffer.cs" />
     <Compile Include="Network\MessageComposite.cs" />
     <Compile Include="Network\NetMessage.cs" />
+    <Compile Include="Network\RateLimiter.cs" />
     <Compile Include="Network\ReceiveStateObject.cs" />
     <Compile Include="Network\RWNetwork.cs" />
     <Compile Include="Network\SendState.cs" />
     <Compile Include="Network\StacksNetMessage.cs" />
+    <Compile Include="Network\TransferManager.cs" />
     <Compile Include="Network\UPnP.cs" />
     <Compile Include="Peer.cs" />
     <Compile Include="PeerCollection.cs" />

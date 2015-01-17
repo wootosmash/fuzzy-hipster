@@ -15,6 +15,8 @@ using FuzzyHipster.Crypto;
 
 namespace FuzzyHipster.Network
 {
+
+  
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack=1)]
   public class NetMessage
@@ -54,7 +56,6 @@ namespace FuzzyHipster.Network
     {
       return string.Format("[NetMessage Type={0}, Length={1}]", Type, Length);
     }
-
   }
   
   [Serializable()]
@@ -176,6 +177,12 @@ namespace FuzzyHipster.Network
     {
       Type = MessageType.StartBlockTransfer;
     }
+    
+    public override string ToString()
+    {
+      return string.Format("[StartBlockTransferNetMessage TransferId={0}, FileWadId={1}, Block={2}, TotalPackets={3}, BlockSize={4}]", TransferId, FileWadId, Block, TotalPackets, BlockSize);
+    }
+
   }
   
   [Serializable()]

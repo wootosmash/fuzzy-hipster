@@ -73,7 +73,7 @@ namespace FuzzyHipster.Catalog
         isAllocated = value;
       }
     }
-
+    
     public void AllocateFile()
     {
       using (FileStream file = File.Create(LocalFilepath)) {
@@ -82,6 +82,15 @@ namespace FuzzyHipster.Catalog
       IsAllocated = true;
     }
     
+    /// <summary>
+    /// Determines if the block sequence contains part of this file
+    /// </summary>
+    /// <param name="block"></param>
+    /// <returns></returns>
+    public bool IsFileBlock( int block )
+    {
+      return StartBlock <= block && EndBlock >= block;
+    }
     
     public override string ToString()
     {

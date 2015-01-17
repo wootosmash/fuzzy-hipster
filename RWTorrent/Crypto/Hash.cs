@@ -21,6 +21,17 @@ namespace FuzzyHipster.Crypto
     {
     }
     
+    public static byte[] GetHash( Stream stream, long length )
+    {
+      using ( var md5 = MD5.Create())
+      {
+        using ( var partial = new PartialStream(stream, 0, length))
+        {
+          return md5.ComputeHash(stream);
+        }
+      }
+    }
+    
     public static byte[] GetHash( string filename )
     {
       using ( var md5 = MD5.Create())
@@ -54,5 +65,113 @@ namespace FuzzyHipster.Crypto
       
       return true;
     }
+    
+
+    
   }
+  
+  public class PartialStream : Stream
+  {
+    private readonly Stream _UnderlyingStream;
+    private readonly long _Position;
+    private readonly long _Length;
+
+    public PartialStream(Stream underlyingStream, long position, long length)
+    {
+      if (!underlyingStream.CanRead ) //|| !underlyingStream.CanSeek)
+        throw new ArgumentException(string.Format("underlyingStream CanRead={0} CanSeek={1}", underlyingStream.CanRead, underlyingStream.CanSeek));
+
+      _UnderlyingStream = underlyingStream;
+      _Position = position;
+      _Length = length;
+      _UnderlyingStream.Position = position;
+    }
+
+    public override bool CanRead
+    {
+      get
+      {
+        return _UnderlyingStream.CanRead;
+      }
+    }
+
+    public override bool CanWrite
+    {
+      get
+      {
+        return false;
+      }
+    }
+
+    public override bool CanSeek
+    {
+      get
+      {
+        return true;
+      }
+    }
+
+    public override long Length
+    {
+      get
+      {
+        return _Length;
+      }
+    }
+
+    public override long Position
+    {
+      get
+      {
+        return _UnderlyingStream.Position - _Position;
+      }
+
+      set
+      {
+        _UnderlyingStream.Position = value + _Position;
+      }
+    }
+
+    public override void Flush()
+    {
+      throw new NotSupportedException();
+    }
+
+    public override long Seek(long offset, SeekOrigin origin)
+    {
+      switch (origin)
+      {
+        case SeekOrigin.Begin:
+          return _UnderlyingStream.Seek(_Position + offset, SeekOrigin.Begin) - _Position;
+
+        case SeekOrigin.End:
+          return _UnderlyingStream.Seek(_Length + offset, SeekOrigin.Begin) - _Position;
+
+        case SeekOrigin.Current:
+          return _UnderlyingStream.Seek(offset, SeekOrigin.Current) - _Position;
+
+        default:
+          throw new ArgumentException("origin");
+      }
+    }
+
+    public override void SetLength(long length)
+    {
+      throw new NotSupportedException();
+    }
+
+    public override int Read(byte[] buffer, int offset, int count)
+    {
+      long left = _Length - Position;
+      if (left < count)
+        count = (int)left;
+      return _UnderlyingStream.Read(buffer, offset, count);
+    }
+
+    public override void Write(byte[] buffer, int offset, int count)
+    {
+      throw new NotSupportedException();
+    }
+  }
+  
 }

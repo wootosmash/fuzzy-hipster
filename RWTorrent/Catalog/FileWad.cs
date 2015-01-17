@@ -13,7 +13,7 @@ using FuzzyHipster.Crypto;
 namespace FuzzyHipster.Catalog
 {
   [Serializable()]
-  public class FileWad : IEquatable<FileWad>
+  public class FileWad : CatalogItem, IEquatable<FileWad>
   {
     public Guid Id { get; set; }
     
@@ -29,8 +29,6 @@ namespace FuzzyHipster.Catalog
     
     public long TotalSize { get; set; }
     
-    public long LastUpdate { get; set; }
-
     public FileDescriptorCollection Files { get; set; }
 
     public BlockIndexItemCollection BlockIndex { get; set; }
@@ -51,7 +49,7 @@ namespace FuzzyHipster.Catalog
       Id = Guid.NewGuid();
       Files = new FileDescriptorCollection();
       BlockIndex = new BlockIndexItemCollection();
-      LastUpdate = DateTime.Now.ToFileTimeUtc();
+      LastUpdated = DateTime.Now.ToFileTimeUtc();
       IsFullyDownloaded = true;
     }
 
@@ -67,15 +65,16 @@ namespace FuzzyHipster.Catalog
     public void CheckIfFullyDownloaded()
     {
       bool downloaded = true;
-      foreach ( var block in BlockIndex )
+      for( int i=0;i<BlockIndex.Count;i++)
       {
-        if ( !block.Downloaded )
+        if ( !BlockIndex[i].Downloaded )
         {
+          Console.WriteLine("Block {0} is not downloaded", i);
           downloaded = false;
           break;
         }
       }
-      IsFullyDownloaded = downloaded;      
+      IsFullyDownloaded = downloaded;
     }
     
     public long GetBlockSize( FileDescriptor file, int block )
@@ -128,25 +127,103 @@ namespace FuzzyHipster.Catalog
       return -1;
     }
     
-    
-    public bool VerifyBlock(string tempFile )
+
+    public string GetBlocksPath()
     {
-//			if (block.Sequence >= BlockIndex.Count)
-//				return false;
-//			// sequence wrong
-//			if (block.Sequence <= -1)
-//				return false;
-//			// sequence wrong
-//			BlockIndexItem item = BlockIndex[block.Sequence];
-//			if (block.Length != item.Length)
-//				return false;
-//			// block length doesn't match expected length
-//			if (block.Hash != item.Hash)
-//				return false;
-//			// hashes dont match
-//			if (block.Data.Length != BlockSize)
-//				return false;
-//			// length of data buffer doesn't match block size
+      string path = Path.Combine(MoustacheLayer.Singleton.Catalog.BasePath, @"Catalog\Blocks\" + Id + @"\");
+      return path;
+    }
+    
+    public Stream GetBlockStream( int block )
+    {
+      string blocksPath = GetBlocksPath();
+      string [] blocks = Directory.GetFiles(blocksPath);
+      foreach( string file in blocks )
+      {
+        if ( file.StartsWith(block + "-"))
+          return new FileStream(file, FileMode.Open);
+      }
+      
+      return null;
+    }
+    
+    public void SaveFromBlocks( string basePath )
+    {
+      Console.WriteLine("Saving from blocks");
+      
+      if ( Files == null )
+        throw new Exception("FileWad.Files is not set");
+      if ( Files.Count == 0 )
+        throw new Exception("FileDescriptors list is empty");
+      
+      foreach( var file in Files )
+        SaveFromBlocks(file, basePath);
+    }
+
+    /// <summary>
+    /// Save a file from blocks
+    /// </summary>
+    /// <param name="file"></param>
+    /// <param name="basePath"></param>
+    public void SaveFromBlocks( FileDescriptor file, string basePath )
+    {
+      const int bufferLength = 1024;
+      byte[] buffer = new byte[bufferLength];
+      string blocksPath = GetBlocksPath();
+      
+      if ( !Directory.Exists(basePath))
+        Directory.CreateDirectory(basePath);
+      
+      string filePath = Path.Combine(basePath, file.CatalogFilepath);
+      using (var writer = new FileStream(filePath, FileMode.CreateNew))
+      {
+        for ( int block = file.StartBlock; block <= file.EndBlock; block++ )
+        {
+          using (var reader = GetBlockStream(block))
+          {
+            long start = GetBlockStartOffset(file, block);
+            long end = GetBlockEndOffset(file, block);
+            long totalLength = end - start;
+            
+            while ( totalLength > 0 )
+            {
+              long count = bufferLength;
+              if ( count > totalLength )
+                count = totalLength;
+              count = reader.Read(buffer, (int)GetBlockStartOffset(file, block), (int)count);
+              writer.Write(buffer, 0,  (int)count);
+              totalLength -= count;
+            }
+          }
+        }
+      }
+      
+      byte[] hash = Hash.GetHash(filePath);
+      if ( Hash.Compare(file.Hash, hash))
+      {
+        File.Delete(filePath);
+        throw new Exception(string.Format("Convert from blocks failed, hash is bad. {0} != {1}", file.Hash, hash));
+      }
+    }
+    
+    public bool VerifyBlock( int block, string blockFilePath )
+    {
+      var info = new FileInfo(blockFilePath);
+
+      BlockIndexItem item = BlockIndex[block];
+      
+      if ( item.Hash == null )
+        throw new Exception("BlockIndex item " + block + " has no hash");
+      
+      // block length doesn't match expected length
+      if (info.Length != item.Length)
+        return false;
+      // hashes dont match
+      if ( Hash.Compare(Hash.GetHash(blockFilePath), item.Hash))
+        return false;
+      // length of data buffer doesn't match block size
+      if (info.Length != BlockSize)
+        return false;
       return true;
     }
 
@@ -169,23 +246,15 @@ namespace FuzzyHipster.Catalog
         totalLength = RecursiveBuildFiles(path, path);
       }
       
+      if ( BlockSize <= 0 )
+        BlockSize = EstimateBlockSize(MoustacheLayer.Singleton.Settings.DefaultBlockQuantity, CalculatePathSize(path));
+      
       TotalBlocks = (int)Math.Ceiling((double)totalLength / (double)BlockSize);
-      
-      for (int i = 0; i < TotalBlocks; i++)
-      {
-        var block = new BlockIndexItem();
-        block.Length = BlockSize;
-        block.Downloaded = true;
-//				block.Hash = GetHash();
-        BlockIndex.Add(block);
-      }
-      
-      if (totalLength % BlockSize > 0)
-        BlockIndex[BlockIndex.Count - 1].Length = totalLength % BlockSize;
       
       int lastBlock = 0;
       long lastOffset = 0;
       
+      // build file descs
       foreach (FileDescriptor file in Files)
       {
         file.StartBlock = lastBlock;
@@ -203,7 +272,36 @@ namespace FuzzyHipster.Catalog
           lastOffset = (long)file.Length % BlockSize;
         
         file.EndOffset = lastOffset;
+        file.Hash = Hash.GetHash(file.LocalFilepath );
       }
+      
+      // build block index
+      for (int i = 0; i < TotalBlocks; i++)
+      {
+        var block = new BlockIndexItem();
+        block.Length = BlockSize;
+        block.Downloaded = true;
+        BlockIndex.Add(block);
+      }
+      
+      if (totalLength % BlockSize > 0)
+        BlockIndex[BlockIndex.Count - 1].Length = totalLength % BlockSize;
+      
+      // calculate the hashes
+      using ( var stream = new BlockStream( this ))
+      {
+        foreach( var block in BlockIndex )
+        {
+          block.Hash = Hash.GetHash(stream, block.Length);
+        }
+      }
+      
+      
+    }
+    
+    public override void Validate()
+    {
+      CheckIfFullyDownloaded();
     }
 
     public void Save()
@@ -275,7 +373,7 @@ namespace FuzzyHipster.Catalog
 
     public override string ToString()
     {
-      return string.Format("[FileWad Id={0}, ChannelId={1}, Name={2}, Description={3}, BlockSize={4}, TotalBlocks={5}, TotalSize={6}, LastUpdate={7}, Files={8}, BlockIndex={9}]", Id, ChannelId, Name, Description, BlockSize, TotalBlocks, TotalSize, LastUpdate, Files, BlockIndex);
+      return string.Format("[FileWad Id={0}, ChannelId={1}, Name={2}, Description={3}, BlockSize={4}, TotalBlocks={5}, TotalSize={6}, LastUpdate={7}, Files={8}, BlockIndex={9}]", Id, ChannelId, Name, Description, BlockSize, TotalBlocks, TotalSize, LastUpdated, Files, BlockIndex);
     }
 
     
