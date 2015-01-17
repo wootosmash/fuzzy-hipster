@@ -86,8 +86,10 @@ namespace FuzzyHipster.Catalog
         Wads = new List<FileWad>();
       
       if ( Wads.Find(x => x.Id == wad.Id) == null )
+      {
         Wads.Add(wad);
-      wad.Save();
+        wad.Save();
+      }
     }
     
     public void Save()

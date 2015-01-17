@@ -29,6 +29,7 @@ namespace FuzzyHipster
 		public int DefaultMaxBlockPacketSize { get; set; }
 		public int ThinkTimeGraceMilliseconds { get; set; }
 		public int DefaultBlockQuantity { get; set; }
+		public int KeepAliveInterval { get; set; }
 
 		public Settings()
 		{
@@ -42,6 +43,7 @@ namespace FuzzyHipster
 			DefaultMaxBlockPacketSize = 40000;
 			ThinkTimeGraceMilliseconds = 3000;
 			DefaultBlockQuantity = 100;
+			KeepAliveInterval = 1000 * 60 * 1; // 1 minute
 		}
 		
 		public static Settings Load(string path)

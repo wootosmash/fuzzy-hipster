@@ -27,10 +27,17 @@ namespace FuzzyHipster
 			set;
 		}
 
+	  [NonSerialized()]
+    bool downloaded;
+    
 		public bool Downloaded {
-			get;
-			set;
-		}
+      get {
+        return downloaded;
+      }
+      set {
+        downloaded = value;
+      }
+    }
 	}
 }
 

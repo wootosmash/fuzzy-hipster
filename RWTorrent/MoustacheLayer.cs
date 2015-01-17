@@ -15,6 +15,29 @@ using FuzzyHipster.Network;
 
 namespace FuzzyHipster
 {
+  public abstract class MoustacheAction
+  {
+    public DateTime NextThink { get; set; }
+    public abstract void Think();
+  }
+  
+  public class KeepAliveMoustacheAction : MoustacheAction
+  {
+    public override void Think()
+    {
+      MoustacheLayer.Singleton.Network.SendMyStatus(MoustacheLayer.Singleton.Network.ActivePeers.ToArray());
+      NextThink = DateTime.Now.AddMilliseconds(MoustacheLayer.Singleton.Settings.KeepAliveInterval);
+    }
+  }
+  // MoustacheAction
+  //   NextThink
+  //   Execute()
+  
+  // KeepAliveMoustacheAction
+  // RequestCatalogItems
+  // 
+
+  
   public class MoustacheLayer
   {
     public static MoustacheLayer Singleton { get; protected set; }
@@ -26,6 +49,8 @@ namespace FuzzyHipster
     public PeerCollection Peers { get; set; }
     public bool IsConnectedToGrid { get { return Network.ActivePeers.Count > 0; } }
     public Random Random { get; set; }
+    
+    public List<MoustacheAction> HeartbeatActions { get; set; }
 
     Timer HeartbeatTimer = new Timer();
 
@@ -35,7 +60,6 @@ namespace FuzzyHipster
       {
         return HeartbeatTimer;
       }
-      
     }
     
     public MoustacheLayer( Catalog.Catalog catalog )
@@ -44,6 +68,7 @@ namespace FuzzyHipster
       Random = new Random(DateTime.Now.Millisecond);
       Catalog = catalog;
       Settings = Settings.Load("settings.xml");
+      HeartbeatActions = new List<MoustacheAction>();
 
       Me = new Peer();
       Me.Port = Settings.Port;
@@ -83,35 +108,43 @@ namespace FuzzyHipster
       
       var list = new List<int>();
       
+      // build the list of indexes from the availabililty list
       for( int i=0;i<e.Value.BlocksAvailable.Length;i++)
         if ( e.Value.BlocksAvailable[i] )
           list.Add(i);
       
-      int index = -1;
-      if ( list.Count > 0 )
-        index = list[MoustacheLayer.Singleton.Random.Next(0,list.Count)];
+      // Find what indexes we haven't downloaded
+      for( int i=list.Count-1;i>=0;i--)
+        if ( wad.BlockIndex[list[i]].Downloaded )
+          list.RemoveAt(i);
       
-      if ( index >= 0)
+      // pick one at random and request it
+      if ( list.Count > 0 )
+      {
+        int index = list[MoustacheLayer.Singleton.Random.Next(0,list.Count)];
         Network.RequestBlock(e.Peer, wad, index);
+      }
     }
     
     void NetworkBlocksAvailableRequested( object sender, MessageComposite<RequestBlocksAvailableNetMessage> e)
     {
       var wad = Catalog.GetFileWad(e.Value.FileWadId);
       if ( wad == null )
-        return; 
+        return;
       
       Network.SendBlocksAvailable( e.Peer, wad );
     }
     
     void NetworkBlockRequested( object sender, BlockRequestedEventArgs e)
     {
-      Network.SendBlock( e.Peer, Catalog.GetFileWad(e.FileWadId), e.Block );
+      Network.SendBlock( Catalog.GetFileWad(e.FileWadId), e.Block, e.Peer );
     }
     
     void NetworkBlockReceived( object sender, BlockReceivedEventArgs e)
     {
-      // do nothing
+      FileWad wad = Catalog.GetFileWad(e.FileWadId);
+      if ( !wad.IsFullyDownloaded )
+        Network.RequestBlocksAvailable(e.Peer, wad);
     }
     
     void NetworkPeerConnected( object sender, GenericEventArgs<Peer> e)
@@ -132,12 +165,12 @@ namespace FuzzyHipster
       foreach( var peer in Peers )
         peers.Add(peer);
       
-      Network.SendPeerList(e.Peer, peers.ToArray());
+      Network.SendPeerList( peers.ToArray(), e.Peer );
     }
 
     void NetworkChannelsRequested( object sender, MessageComposite<RequestChannelsNetMessage> e )
     {
-      Network.SendChannels(e.Peer, Catalog.Channels.ToArray());
+      Network.SendChannels( Catalog.Channels.ToArray(), e.Peer);
     }
 
     void NetworkWadsRequested( object sender, MessageComposite<RequestWadsNetMessage> e )
@@ -145,9 +178,9 @@ namespace FuzzyHipster
       if ( Catalog.Channels[e.Value.ChannelGuid] == null )
         return;
       if ( Catalog.Channels[e.Value.ChannelGuid].Wads == null )
-        Network.SendWads( e.Peer, null);
+        Network.SendWads( null, e.Peer);
       else
-        Network.SendWads( e.Peer, Catalog.Channels[e.Value.ChannelGuid].Wads.ToArray());
+        Network.SendWads( Catalog.Channels[e.Value.ChannelGuid].Wads.ToArray(), e.Peer);
     }
 
     
@@ -202,7 +235,7 @@ namespace FuzzyHipster
           {
             Network.SendMyStatus( peer );
             //            Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
-            //            Network.RequestChannels(peer, Catalog.LastUpdated, Settings.HeartbeatChannelRequestCount);
+            Network.RequestChannels(peer, Catalog.LastUpdated, Settings.HeartbeatChannelRequestCount);
             foreach( var channel in Catalog.Channels.ToArray() )
               if ( channel.Wads != null )
                 if ( channel.Wads.Count > 0 )

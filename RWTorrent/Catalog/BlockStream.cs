@@ -72,6 +72,9 @@ namespace FuzzyHipster.Catalog
         
         if ( startOffset >= 0 )
         {
+          if ( !File.Exists(file.LocalFilepath))
+            throw new Exception(string.Format("Local file for getting blocks doesn't exist. File is {0}. Expected local path is {1}", file.CatalogFilepath, file.LocalFilepath));
+          
           using ( var stream = new FileStream(file.LocalFilepath, FileMode.Open))
           {
             stream.Seek(Wad.GetBlockStartOffset(file, CurrentBlock), SeekOrigin.Begin);
@@ -126,5 +129,20 @@ namespace FuzzyHipster.Catalog
     public override long Position { get; set; }
 
     #endregion
+    
+    public static Stream Create( FileWad wad, int block )
+    {
+      string blockPath = MoustacheLayer.Singleton.Catalog.BasePath + @"Catalog\Blocks\" + wad.Id + @"\";
+      if ( Directory.Exists(blockPath))
+      {
+        string [] files = Directory.GetFiles(blockPath, block + "-*.blk");
+        if ( files.Length > 0 )
+          return new FileStream( files[0], FileMode.Open );
+      }
+      
+      var stream = new BlockStream(wad);
+      stream.SeekBlock(block);
+      return stream;
+    }
   }
 }

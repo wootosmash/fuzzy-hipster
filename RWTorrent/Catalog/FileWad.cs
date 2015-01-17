@@ -34,6 +34,17 @@ namespace FuzzyHipster.Catalog
     public FileDescriptorCollection Files { get; set; }
 
     public BlockIndexItemCollection BlockIndex { get; set; }
+    
+    [NonSerialized()]
+    bool isFullyDownloaded;
+    public bool IsFullyDownloaded {
+      get {
+        return isFullyDownloaded;
+      }
+      set {
+        isFullyDownloaded = value;
+      }
+    }
 
     public FileWad()
     {
@@ -41,6 +52,7 @@ namespace FuzzyHipster.Catalog
       Files = new FileDescriptorCollection();
       BlockIndex = new BlockIndexItemCollection();
       LastUpdate = DateTime.Now.ToFileTimeUtc();
+      IsFullyDownloaded = true;
     }
 
     public void CatalogBlock( int block, string tempFile )
@@ -48,6 +60,22 @@ namespace FuzzyHipster.Catalog
       string path = string.Format(@"{0}\Catalog\{1}\{2}\", MoustacheLayer.Singleton.Catalog.BasePath, this.ChannelId, Id);
       if ( Directory.Exists( path ))
         Directory.CreateDirectory(path);
+
+      CheckIfFullyDownloaded();
+    }
+    
+    public void CheckIfFullyDownloaded()
+    {
+      bool downloaded = true;
+      foreach ( var block in BlockIndex )
+      {
+        if ( !block.Downloaded )
+        {
+          downloaded = false;
+          break;
+        }
+      }
+      IsFullyDownloaded = downloaded;      
     }
     
     public long GetBlockSize( FileDescriptor file, int block )

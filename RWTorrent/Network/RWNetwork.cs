@@ -503,6 +503,7 @@ namespace FuzzyHipster.Network
           mgr.TransferId = startTransfer.TransferId;
           mgr.FileWadId = startTransfer.FileWadId;
           mgr.TotalLength = startTransfer.BlockSize;
+          mgr.Block = startTransfer.Block;
 
           InProgressTransfers.Add(startTransfer.TransferId, mgr);
           
@@ -631,72 +632,75 @@ namespace FuzzyHipster.Network
 
     }
     
-    public void SendPeerList(Peer to, Peer[] peers )
+    public void SendPeerList(Peer[] listToSend, params Peer[] to )
     {
       var msg = new PeerListNetMessage();
-      msg.Peers = peers;
+      msg.Peers = listToSend;
       Send(msg, to);
 
     }
 
-    public void SendMyStatus(Peer peer )
+    public void SendMyStatus( params Peer[] to )
     {
       var msg = new PeerListNetMessage();
       msg.Type = MessageType.PeerStatus;
       msg.Peers = new []{Me};
-      Send(msg, peer);
+      Send(msg, to);
     }
 
     
-    public void SendChannels( Peer peer, Channel[] channels )
+    public void SendChannels( Channel[] channels, params Peer[] to )
     {
       var msg = new ChannelsNetMessage();
       msg.Channels = channels;
-      Send(msg, peer);
+      Send(msg, to);
     }
     
-    public void SendWads( Peer peer, FileWad[] wads )
+    public void SendWads( FileWad[] wads, params Peer[] to )
     {
       var msg = new WadsNetMessage();
       msg.Wads = wads;
-      Send(msg, peer);
+      Send(msg, to);
     }
     
-    public void SendBlock( Peer to, FileWad fileWad, int block )
+    public void SendBlock( FileWad fileWad, int block, params Peer [] to )
     {
-      int maxBlockPacketSize = to.MaxBlockPacketSize;
-      if ( maxBlockPacketSize == 0 )
-        maxBlockPacketSize = MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
-      
-      int totalPackets = (int)Math.Ceiling((decimal)fileWad.BlockIndex[block].Length / (decimal)maxBlockPacketSize);
-      
-      var msg = new StartBlockTransferNetMessage();
-      msg.Block = block;
-      msg.BlockSize = (int)fileWad.BlockIndex[block].Length;
-      msg.TotalPackets = totalPackets;
-      msg.TransferId = Guid.NewGuid();
-      Send(msg, to);
-      
-      using ( var stream = new BlockStream( fileWad ))
+      foreach( Peer p in to )
       {
-        long length = fileWad.BlockIndex[block].Length;
-        stream.SeekBlock(block);
-        for ( int i=0;i<totalPackets;i++)
+        int maxBlockPacketSize = p.MaxBlockPacketSize;
+        if ( maxBlockPacketSize == 0 )
+          maxBlockPacketSize = MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
+        
+        int totalPackets = (int)Math.Ceiling((decimal)fileWad.BlockIndex[block].Length / (decimal)maxBlockPacketSize);
+        
+        var msg = new StartBlockTransferNetMessage();
+        msg.Block = block;
+        msg.BlockSize = (int)fileWad.BlockIndex[block].Length;
+        msg.TotalPackets = totalPackets;
+        msg.TransferId = Guid.NewGuid();
+        msg.FileWadId = fileWad.Id;
+        Send(msg, p);
+        
+        using ( var stream = BlockStream.Create( fileWad, block ))
         {
-          int packetSize = maxBlockPacketSize;
-          if ( packetSize > length )
-            packetSize = (int)length;
-          
-          var blockMsg = new BlockPacketNetMessage();
-          blockMsg.Data = new byte[maxBlockPacketSize];
-          blockMsg.DataLength = packetSize;
-          blockMsg.TransferId = msg.TransferId;
-          
-          stream.Read(blockMsg.Data, 0, packetSize);
-          
-          length -= packetSize;
-          
-          Send(msg, to);
+          long length = fileWad.BlockIndex[block].Length;
+          for ( int i=0;i<totalPackets;i++)
+          {
+            int packetSize = maxBlockPacketSize;
+            if ( packetSize > length )
+              packetSize = (int)length;
+            
+            var blockMsg = new BlockPacketNetMessage();
+            blockMsg.Data = new byte[maxBlockPacketSize];
+            blockMsg.DataLength = packetSize;
+            blockMsg.TransferId = msg.TransferId;
+            
+            stream.Read(blockMsg.Data, 0, packetSize);
+            
+            length -= packetSize;
+            
+            Send(blockMsg, p);
+          }
         }
       }
     }
@@ -711,8 +715,11 @@ namespace FuzzyHipster.Network
     
     public void SendBlocksAvailable( Peer peer, FileWad fileWad )
     {
-      if ( fileWad.BlockIndex != null )
+      if ( fileWad.BlockIndex == null )
+      {
+        Log(string.Format("BUILD: Failed, {0} has an empty BlockIndex", fileWad.Id));
         return;
+      }
       
       var msg = new BlocksAvailableNetMessage();
       msg.BlocksAvailable = new bool[fileWad.BlockIndex.Count];
@@ -779,7 +786,7 @@ namespace FuzzyHipster.Network
       catch (Exception e)
       {
         Disconnect(state.Peer, "Send failed");
-        Console.WriteLine(e.ToString());
+        Console.WriteLine(e);
       }
     }
     
@@ -797,6 +804,8 @@ namespace FuzzyHipster.Network
     {
       var fileWad = MoustacheLayer.Singleton.Catalog.GetFileWad(FileWadId);
       
+      if ( fileWad == null )
+        throw new Exception("Can't find file wad to save block to " + FileWadId);
       fileWad.VerifyBlock(TempFile);
       fileWad.CatalogBlock(Block, TempFile);
       fileWad.BlockIndex[Block].Downloaded = true;
@@ -813,22 +822,30 @@ namespace FuzzyHipster.Network
     public int NextPacket { get; set; }
     public bool IsCompleted { get { return ExpectedPackets <= NextPacket; } }
     public string TempFile { get; set; }
+    public int CurrentPosition { get; set; }
     
     public TransferManager()
     {
       NextPacket = 0;
+      TransferId = Guid.NewGuid();
+      CurrentPosition = 0;
     }
     
     public void SavePacket( BlockPacketNetMessage msg )
     {
       if ( String.IsNullOrWhiteSpace(TempFile))
-        TempFile = Path.Combine(Path.GetTempPath(), TransferId + ".dat");
-      
-      Console.WriteLine("Saving block to " + TempFile);
+      {
+        string blocksPath = Path.Combine(MoustacheLayer.Singleton.Catalog.BasePath, string.Format(@"Catalog\Blocks\{0}\", FileWadId));
+        TempFile = blocksPath + Block + "-" + TransferId + ".blk";
+        if ( !Directory.Exists(blocksPath))
+          Directory.CreateDirectory(blocksPath);
+      }
       
       using ( var stream = new FileStream(TempFile, FileMode.OpenOrCreate))
       {
+        stream.Seek(CurrentPosition, SeekOrigin.Begin);
         stream.Write(msg.Data, 0, msg.DataLength);
+        CurrentPosition += msg.DataLength;
       }
       
       NextPacket++;
