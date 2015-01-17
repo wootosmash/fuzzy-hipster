@@ -15,16 +15,7 @@ using FuzzyHipster.Crypto;
 
 namespace FuzzyHipster.Network
 {
-  public class NewConnectionEventArgs : EventArgs
-  {
-    public Socket Socket = null;
-    public bool Accept = true;
-    
-    public NewConnectionEventArgs(Socket socket)
-    {
-      Socket = socket;
-    }
-  }
+  
   
   public class RWNetwork
   {
@@ -35,13 +26,13 @@ namespace FuzzyHipster.Network
     public Socket Listener { get; set; }
     public Peer Me { get; set; }
     public SortedList<Guid, TransferManager> InProgressTransfers { get; set; }
+    public RateLimiter RateLimiter { get; set; }
     
     public long BytesReceived { get; set; }
     public long BytesSent { get; set; }
     
     Random random = new Random(DateTime.Now.Millisecond);
     ManualResetEvent acceptSemaphore = new ManualResetEvent(false);
-    ManualResetEvent receiveSemaphore = new ManualResetEvent(false);
     
     #region events
 
@@ -241,6 +232,7 @@ namespace FuzzyHipster.Network
       Me = me;
       ActivePeers = new List<Peer>();
       InProgressTransfers = new SortedList<Guid, TransferManager>();
+      RateLimiter = new RateLimiter(MoustacheLayer.Singleton.Settings.MaxReceiveRate);
     }
 
     /// <summary>
@@ -347,6 +339,12 @@ namespace FuzzyHipster.Network
         peer.BytesReceived += bytesRead;
         BytesReceived += bytesRead;
         
+        // record the length so we can use it to calculate statistics
+        peer.RateLimiter.GotPacket( bytesRead );
+        // see if we need to limit ourselves
+        RateLimiter.GotPacket( bytesRead );
+        
+        
         if ( bytesRead == 0 )
           Disconnect(peer, "Connection closed");
         else if ( bytesRead > 0 && bytesRead < state.ExpectedLength ) // partial receive
@@ -354,8 +352,7 @@ namespace FuzzyHipster.Network
           // buffering
           state.Buffer.Seek(bytesRead, SeekOrigin.Current);
           state.ExpectedLength -= bytesRead;
-          peer.Socket.BeginReceive( state.Buffer.GetBuffer(), (int)state.Buffer.Position, state.ExpectedLength, 0,
-                                   new AsyncCallback(WaitMessageCallback), state);
+          BeginReceive( peer, state.Buffer.GetBuffer(), (int)state.Buffer.Position, state.ExpectedLength, state);
         }
         else if ( bytesRead == state.ExpectedLength ) // receive finished
         {
@@ -366,11 +363,7 @@ namespace FuzzyHipster.Network
             state.ExpectedLength = BitConverter.ToInt32(state.Buffer.GetBuffer(), 0);
             state.WaitingLengthFrame = false;
             if ( state.ExpectedLength <= state.Buffer.Capacity )
-            {
-              //receiveSemaphore.Reset();
-              peer.Socket.BeginReceive( state.Buffer.GetBuffer(), 0, state.ExpectedLength, 0,
-                                       new AsyncCallback(WaitMessageCallback), state);
-            }
+              BeginReceive( peer, state.Buffer.GetBuffer(), 0, state.ExpectedLength, state);
             else
               Disconnect(state.Peer, "Expected Length is greater than the buffer capacity!");
           }
@@ -382,16 +375,13 @@ namespace FuzzyHipster.Network
               Disconnect(state.Peer, string.Format("Didn't receive the message we expected {0}. Received {1}", state.ExpectedMessage, message.Type));
             else
             {
-              
               state.ExpectedMessage = MessageType.Unknown;
               state.ExpectedLength = sizeof(int);
               state.WaitingLengthFrame = true; // waiting for the message size
               
               OnNetMessageReceived(new GenericEventArgs<NetMessage>(message));
               ProcessMessage(message, state);
-              //receiveSemaphore.Reset();
-              peer.Socket.BeginReceive( state.Buffer.GetBuffer(), 0, state.ExpectedLength, 0,
-                                       new AsyncCallback(WaitMessageCallback), state); // read the message size first
+              BeginReceive( peer, state.Buffer.GetBuffer(), 0, state.ExpectedLength, state); // read the message size first
             }
           }
         }
@@ -406,6 +396,17 @@ namespace FuzzyHipster.Network
         Disconnect(peer, "Exception in WaitMessageCallback");
         Console.WriteLine(ex);
       }
+    }
+    
+    void BeginReceive( Peer peer, byte[] buffer, int position, int count, ReceiveStateObject state )
+    {
+      // will halt if the data is coming in too fast
+      peer.RateLimiter.Limit();
+      RateLimiter.Limit();
+      
+      
+      peer.Socket.BeginReceive( buffer, position, count, 0,
+                               new AsyncCallback(WaitMessageCallback), state);
     }
     
     void ProcessMessage(NetMessage msg, ReceiveStateObject state)
@@ -503,6 +504,7 @@ namespace FuzzyHipster.Network
           mgr.TransferId = startTransfer.TransferId;
           mgr.FileWadId = startTransfer.FileWadId;
           mgr.TotalLength = startTransfer.BlockSize;
+          mgr.Block = startTransfer.Block;
 
           InProgressTransfers.Add(startTransfer.TransferId, mgr);
           
@@ -631,72 +633,75 @@ namespace FuzzyHipster.Network
 
     }
     
-    public void SendPeerList(Peer to, Peer[] peers )
+    public void SendPeerList(Peer[] listToSend, params Peer[] to )
     {
       var msg = new PeerListNetMessage();
-      msg.Peers = peers;
+      msg.Peers = listToSend;
       Send(msg, to);
 
     }
 
-    public void SendMyStatus(Peer peer )
+    public void SendMyStatus( params Peer[] to )
     {
       var msg = new PeerListNetMessage();
       msg.Type = MessageType.PeerStatus;
       msg.Peers = new []{Me};
-      Send(msg, peer);
+      Send(msg, to);
     }
 
     
-    public void SendChannels( Peer peer, Channel[] channels )
+    public void SendChannels( Channel[] channels, params Peer[] to )
     {
       var msg = new ChannelsNetMessage();
       msg.Channels = channels;
-      Send(msg, peer);
+      Send(msg, to);
     }
     
-    public void SendWads( Peer peer, FileWad[] wads )
+    public void SendWads( FileWad[] wads, params Peer[] to )
     {
       var msg = new WadsNetMessage();
       msg.Wads = wads;
-      Send(msg, peer);
+      Send(msg, to);
     }
     
-    public void SendBlock( Peer to, FileWad fileWad, int block )
+    public void SendBlock( FileWad fileWad, int block, params Peer [] to )
     {
-      int maxBlockPacketSize = to.MaxBlockPacketSize;
-      if ( maxBlockPacketSize == 0 )
-        maxBlockPacketSize = MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
-      
-      int totalPackets = (int)Math.Ceiling((decimal)fileWad.BlockIndex[block].Length / (decimal)maxBlockPacketSize);
-      
-      var msg = new StartBlockTransferNetMessage();
-      msg.Block = block;
-      msg.BlockSize = (int)fileWad.BlockIndex[block].Length;
-      msg.TotalPackets = totalPackets;
-      msg.TransferId = Guid.NewGuid();
-      Send(msg, to);
-      
-      using ( var stream = new BlockStream( fileWad ))
+      foreach( Peer p in to )
       {
-        long length = fileWad.BlockIndex[block].Length;
-        stream.SeekBlock(block);
-        for ( int i=0;i<totalPackets;i++)
+        int maxBlockPacketSize = p.MaxBlockPacketSize;
+        if ( maxBlockPacketSize == 0 )
+          maxBlockPacketSize = MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
+        
+        int totalPackets = (int)Math.Ceiling((decimal)fileWad.BlockIndex[block].Length / (decimal)maxBlockPacketSize);
+        
+        var msg = new StartBlockTransferNetMessage();
+        msg.Block = block;
+        msg.BlockSize = (int)fileWad.BlockIndex[block].Length;
+        msg.TotalPackets = totalPackets;
+        msg.TransferId = Guid.NewGuid();
+        msg.FileWadId = fileWad.Id;
+        Send(msg, p);
+        
+        using ( var stream = BlockStream.Create( fileWad, block ))
         {
-          int packetSize = maxBlockPacketSize;
-          if ( packetSize > length )
-            packetSize = (int)length;
-          
-          var blockMsg = new BlockPacketNetMessage();
-          blockMsg.Data = new byte[maxBlockPacketSize];
-          blockMsg.DataLength = packetSize;
-          blockMsg.TransferId = msg.TransferId;
-          
-          stream.Read(blockMsg.Data, 0, packetSize);
-          
-          length -= packetSize;
-          
-          Send(msg, to);
+          long length = fileWad.BlockIndex[block].Length;
+          for ( int i=0;i<totalPackets;i++)
+          {
+            int packetSize = maxBlockPacketSize;
+            if ( packetSize > length )
+              packetSize = (int)length;
+            
+            var blockMsg = new BlockPacketNetMessage();
+            blockMsg.Data = new byte[maxBlockPacketSize];
+            blockMsg.DataLength = packetSize;
+            blockMsg.TransferId = msg.TransferId;
+            
+            stream.Read(blockMsg.Data, 0, packetSize);
+            
+            length -= packetSize;
+            
+            Send(blockMsg, p);
+          }
         }
       }
     }
@@ -711,8 +716,11 @@ namespace FuzzyHipster.Network
     
     public void SendBlocksAvailable( Peer peer, FileWad fileWad )
     {
-      if ( fileWad.BlockIndex != null )
+      if ( fileWad.BlockIndex == null )
+      {
+        Log(string.Format("BUILD: Failed, {0} has an empty BlockIndex", fileWad.Id));
         return;
+      }
       
       var msg = new BlocksAvailableNetMessage();
       msg.BlocksAvailable = new bool[fileWad.BlockIndex.Count];
@@ -779,7 +787,7 @@ namespace FuzzyHipster.Network
       catch (Exception e)
       {
         Disconnect(state.Peer, "Send failed");
-        Console.WriteLine(e.ToString());
+        Console.WriteLine(e);
       }
     }
     
@@ -791,51 +799,7 @@ namespace FuzzyHipster.Network
     }
   }
   
-  public class BlockTransferManager : TransferManager
-  {
-    public override void Execute()
-    {
-      var fileWad = MoustacheLayer.Singleton.Catalog.GetFileWad(FileWadId);
-      
-      fileWad.VerifyBlock(TempFile);
-      fileWad.CatalogBlock(Block, TempFile);
-      fileWad.BlockIndex[Block].Downloaded = true;
-    }
-  }
   
-  public abstract class TransferManager
-  {
-    public Guid TransferId { get; set; }
-    public Guid FileWadId { get; set; }
-    public int Block { get; set; }
-    public int ExpectedPackets { get; set; }
-    public int TotalLength { get; set; }
-    public int NextPacket { get; set; }
-    public bool IsCompleted { get { return ExpectedPackets <= NextPacket; } }
-    public string TempFile { get; set; }
-    
-    public TransferManager()
-    {
-      NextPacket = 0;
-    }
-    
-    public void SavePacket( BlockPacketNetMessage msg )
-    {
-      if ( String.IsNullOrWhiteSpace(TempFile))
-        TempFile = Path.Combine(Path.GetTempPath(), TransferId + ".dat");
-      
-      Console.WriteLine("Saving block to " + TempFile);
-      
-      using ( var stream = new FileStream(TempFile, FileMode.OpenOrCreate))
-      {
-        stream.Write(msg.Data, 0, msg.DataLength);
-      }
-      
-      NextPacket++;
-      if ( IsCompleted )
-        Execute();
-    }
-    
-    public abstract void Execute();
-  }
+  
+  
 }

@@ -23,12 +23,6 @@ namespace FuzzyHipster.Catalog
 			}
 		}
 
-		public void RefreshChannel(Channel channel)
-		{
-		  if ( Find( x => x.Id == channel.Id) == null )
-  			Add(channel);
-			channel.Save();
-		}
 		
     public Channel GetRandom()
     {

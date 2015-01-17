@@ -12,34 +12,26 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using System.Xml.Serialization;
-namespace FuzzyHipster
+using FuzzyHipster.Crypto;
+namespace FuzzyHipster.Catalog
 {
   [Serializable()]
-	public class BlockIndexItem
+	public abstract class CatalogItem
 	{
-	  public byte[] Hash {
-			get;
-			set;
-		}
-
-		public long Length {
-			get;
-			set;
-		}
-
-	  [NonSerialized()]
-    bool downloaded;
-    
-		public bool Downloaded {
-      get {
-        return downloaded;
-      }
-      set {
-        downloaded = value;
-      }
-    }
+	  public Guid Id { get; set; }
+	  public long LastUpdated { get; set; }
+	  
+	  public abstract void Validate();
+	  
+    public void UpdateLastUpdated( long lastUpdated )
+    {
+      if ( lastUpdated > LastUpdated )
+        LastUpdated = lastUpdated;
+    }	  
 	}
 }
+
+
 
 
 

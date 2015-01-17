@@ -59,7 +59,7 @@ namespace FuzzyHipster.Tests
       
       network.Connect(localHostPeer);
       
-      network.SendPeerList(localHostPeer, new Peer[]{localHostPeer2});
+      network.SendPeerList( new Peer[]{localHostPeer2}, localHostPeer);
       
       //network.Disconnect();
       Thread.Sleep(20000);

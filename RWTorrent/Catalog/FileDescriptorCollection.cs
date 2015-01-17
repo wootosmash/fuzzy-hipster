@@ -34,6 +34,7 @@ namespace FuzzyHipster.Catalog
       int index = MoustacheLayer.Singleton.Random.Next(0, Count);
       return this[index];
     }    
+    
   }
 }
 

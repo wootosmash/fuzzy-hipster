@@ -7,9 +7,11 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
+using FuzzyHipster.Network;
 
 namespace FuzzyHipster
 {
@@ -33,18 +35,12 @@ namespace FuzzyHipster
     }
 
     [XmlIgnore()]
+    public Socket Socket {
+      get { return socket; }
+      set { socket = value; }
+    }
     [NonSerialized()]
     Socket socket;
-
-    [XmlIgnore()]
-    public Socket Socket {
-      get {
-        return socket;
-      }
-      set {
-        socket = value;
-      }
-    }
 
 
     // network statistics
@@ -53,42 +49,47 @@ namespace FuzzyHipster
     public int PeerCount { get; set; }
     public long Uptime { get; set; }
     public int MaxBlockPacketSize { get; set; }
-    public int EstimatedBandwidth { get; set; }
+    
+    /// <summary>
+    /// Whats the current estimate of bytes per second this peer can receive at
+    /// </summary>
+    public int EstimatedRxBandwidth { get; set; } 
+    
+    /// <summary>
+    /// Whats the current estimate of bytes per second this peer can send at
+    /// </summary>
+    public int EstimatedTxBandwidth { get; set; }
     public DateTime LastConnection { get; set; }
     public bool IsLocal { get; set; }
+    
+    [NonSerialized()]
+    RateLimiter rateLimiter;
+    [XmlIgnore]
+    public RateLimiter RateLimiter {
+      get { return rateLimiter; }
+      set { rateLimiter = value; }
+    }
     
     [NonSerialized()]
     DateTime okToSend;
     [XmlIgnore()]
     public DateTime OkToSendAt {
-      get {
-        return okToSend;
-      }
-      set {
-        okToSend = value;
-      }
+      get { return okToSend; }
+      set { okToSend = value; }
     }
     
     [NonSerialized()]
     long bytesSent;
     public long BytesSent {
-      get {
-        return bytesSent;
-      }
-      set {
-        bytesSent = value;
-      }
+      get { return bytesSent; }
+      set { bytesSent = value; }
     }
     
     [NonSerialized()]
     long bytesReceived;
     public long BytesReceived {
-      get {
-        return bytesReceived;
-      }
-      set {
-        bytesReceived = value;
-      }
+      get { return bytesReceived; }
+      set { bytesReceived = value; }
     }
     
     // catalog statistics
@@ -105,7 +106,9 @@ namespace FuzzyHipster
       IsLocal = false;
       LastConnection = DateTime.MinValue;
       CatalogRecency = 0;
+      RateLimiter = new RateLimiter(MoustacheLayer.Singleton.Settings.MaxReceiveRate);
     }
+
     
     public void UpdateFromCopy( Peer peer )
     {
@@ -114,7 +117,8 @@ namespace FuzzyHipster
       PeerCount = peer.PeerCount;
       CatalogRecency = peer.CatalogRecency;
       Uptime = peer.Uptime;
-      EstimatedBandwidth = peer.EstimatedBandwidth;
+      EstimatedRxBandwidth = peer.EstimatedRxBandwidth;
+      EstimatedTxBandwidth = peer.EstimatedTxBandwidth;
       MaxBlockPacketSize = peer.MaxBlockPacketSize;
       IPAddress = peer.IPAddress;
       Port = peer.Port;
@@ -134,7 +138,7 @@ namespace FuzzyHipster
     
     public override string ToString()
     {
-      return string.Format("[Peer Socket={0}, BytesSent={1}, BytesReceived={2}, Id={3}, Name={4}, IPAddress={5}, Port={6}, NextConnectionAttempt={7}, FailedConnectionAttempts={8}, PeerCount={9}, Uptime={10}, MaxBlockPacketSize={11}, EstimatedBandwidth={12}, CatalogRecency={13}]", socket, bytesSent, bytesReceived, Id, Name, IPAddress, Port, NextConnectionAttempt, FailedConnectionAttempts, PeerCount, Uptime, MaxBlockPacketSize, EstimatedBandwidth, CatalogRecency);
+      return string.Format("[Peer Id={0}, Name={1}, IPAddress={2}, Port={3} RxRate={4}]", Id, Name, IPAddress, Port, RateLimiter.CurrentRate);
     }
 
     
