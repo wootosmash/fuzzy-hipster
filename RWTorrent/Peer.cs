@@ -53,7 +53,7 @@ namespace FuzzyHipster
     /// <summary>
     /// Whats the current estimate of bytes per second this peer can receive at
     /// </summary>
-    public int EstimatedRxBandwidth { get; set; } 
+    public int EstimatedRxBandwidth { get; set; }
     
     /// <summary>
     /// Whats the current estimate of bytes per second this peer can send at
@@ -102,11 +102,28 @@ namespace FuzzyHipster
       NextConnectionAttempt = DateTime.MinValue;
       FailedConnectionAttempts = 0;
       OkToSendAt = DateTime.MaxValue;
+<<<<<<< HEAD
       MaxBlockPacketSize = 40000;//MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
       IsLocal = false;
       LastConnection = DateTime.MinValue;
       CatalogRecency = 0;
       RateLimiter = new RateLimiter(RateLimiter.UnlimitedRate);//MoustacheLayer.Singleton.Settings.MaxReceiveRate);
+=======
+      
+      if ( MoustacheLayer.Singleton != null )
+        MaxBlockPacketSize = MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
+      else
+        MaxBlockPacketSize = 40000;
+      
+      IsLocal = false;
+      LastConnection = DateTime.MinValue;
+      CatalogRecency = 0;
+      
+      if ( MoustacheLayer.Singleton != null )
+        RateLimiter = new RateLimiter(MoustacheLayer.Singleton.Settings.MaxReceiveRate);
+      else
+        RateLimiter = new RateLimiter(RateLimiter.UnlimitedRate);
+>>>>>>> 1c979de73687ca20efc2907fa47abe06a5b76a93
     }
 
     
