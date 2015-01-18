@@ -9,6 +9,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using FuzzyHipster.Crypto;
 using NUnit.Framework;
 
 namespace FuzzyHipster.Tests
@@ -20,31 +21,48 @@ namespace FuzzyHipster.Tests
     
     [Test]
     public void SignAndVerifyTest()
-    {
+    {      
       string plaintext = "ROFL MY LOFL";
       string cyphertext = "";
       
-      using (var rsa = new RSACryptoServiceProvider(1024))
-      {
-        try
-        {
-          var encoder = new UTF8Encoding();
-          byte[] encbytes = rsa.Encrypt(encoder.GetBytes(plaintext), true);
-          
-          Console.WriteLine(encoder.GetString(encbytes));
-          
-          byte[] decbytes = rsa.Decrypt(encbytes, true);
-          
-          Console.WriteLine(encoder.GetString(decbytes));
-          
-          Console.WriteLine(rsa.ToXmlString(false));
-          Console.WriteLine(rsa.ToXmlString(true));
-        }
-        finally
-        {
-          rsa.PersistKeyInCsp = false;
-        }
-      }
+      AsymmetricKey k = AsymmetricKey.Create();
+      
+      var encoder = new UTF8Encoding();
+      byte[] encbytes = k.Encrypt(encoder.GetBytes(plaintext));
+      byte[] decbytes = k.Decrypt(encbytes);
+
+      Assert.IsTrue(encoder.GetString(decbytes) == plaintext);
+      
+      var s = SymmetricKey.Create();
+      
+      encbytes = s.Encrypt(encoder.GetBytes(plaintext));
+      decbytes = s.Decrypt(encbytes);
+
+      Assert.IsTrue(encoder.GetString(decbytes) == plaintext);
+      
+      
+//
+      //      using (var rsa = new RSACryptoServiceProvider(1024))
+      //      {
+      //        try
+      //        {
+      //          var encoder = new UTF8Encoding();
+      //          byte[] encbytes = rsa.Encrypt(encoder.GetBytes(plaintext), true);
+//
+      //          Console.WriteLine(encoder.GetString(encbytes));
+//
+      //          byte[] decbytes = rsa.Decrypt(encbytes, true);
+//
+      //          Console.WriteLine(encoder.GetString(decbytes));
+//
+      //          Console.WriteLine(rsa.ToXmlString(false));
+      //          Console.WriteLine(rsa.ToXmlString(true));
+      //        }
+      //        finally
+      //        {
+      //          rsa.PersistKeyInCsp = false;
+      //        }
+      //      }
       
       //      CryptoTest crypto = new CryptoTest();
       //      RSAParameters privateKey = crypto.GenerateKeys("simlanghoff@gmail.com");

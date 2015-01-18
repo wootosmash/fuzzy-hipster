@@ -18,7 +18,9 @@ namespace FuzzyHipster.Catalog
   {
     All,
     WriteableOnly,
-    ReadableOnly
+    ReadableOnly,
+    FullyDownloaded,
+    PartiallyDownloaded
   }
   
 	public class ChannelCollection : List<Channel>
@@ -29,6 +31,11 @@ namespace FuzzyHipster.Catalog
 				return Find(x => x.Id == channelGuid);
 			}
 		}
+	  
+	  public Channel[] Find( SearchFilter filter )
+	  {
+	    return Find("", filter);
+	  }
 
 	  public Channel[] Find( string searchText, SearchFilter filter )
 	  {

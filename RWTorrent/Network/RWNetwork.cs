@@ -322,7 +322,8 @@ namespace FuzzyHipster.Network
           handler.BeginReceive( state.Buffer.GetBuffer(), 0, state.ExpectedLength, 0,
                                new AsyncCallback(WaitMessageCallback), state); // get the message size first
           
-          SendMyStatus(state.Peer);
+          
+          SendHello(state.Peer);
         }
         catch( Exception ex )
         {
@@ -530,6 +531,12 @@ namespace FuzzyHipster.Network
           
         case MessageType.Key:
           var key = msg as KeyNetMessage;
+          
+          if ( key.Key is SymmetricKey )
+            state.Peer.SymmetricKey = key.Key as SymmetricKey;
+          else if (key.Key is AsymmetricKey )
+            state.Peer.AsymmetricKey = key.Key as AsymmetricKey;
+          
           OnKeyReceived( new MessageComposite<Key>(state.Peer, key.Key));
           break;
       }
@@ -566,7 +573,7 @@ namespace FuzzyHipster.Network
       {
         connectState.Peer.Socket.EndConnect(result);
         
-        SendMyStatus(connectState.Peer);
+        SendHello(connectState.Peer);
         OnPeerConnected(new GenericEventArgs<Peer>(connectState.Peer));
         
         // Create the state object.
@@ -644,6 +651,13 @@ namespace FuzzyHipster.Network
       msg.Peers = listToSend;
       Send(msg, to);
 
+    }
+    
+    public void SendHello( Peer to )
+    {
+      SendMyStatus(to);
+      SendKey(to, Me.AsymmetricKey.GetPublicKey());
+      SendKey(to, Me.SymmetricKey);
     }
 
     public void SendMyStatus( params Peer[] to )

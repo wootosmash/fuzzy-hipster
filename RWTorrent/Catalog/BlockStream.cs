@@ -16,6 +16,7 @@ namespace FuzzyHipster.Catalog
   /// </summary>
   public class BlockStream : Stream
   {
+    
     public FileWad Wad { get; set; }
     public int CurrentBlock { get; protected set; }
     public FileDescriptor CurrentFile { get; protected set; }
