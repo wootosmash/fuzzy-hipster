@@ -10,7 +10,7 @@
             <TextBlock Text="Adding Files/Folders to Channel:" />
 
         
-            <Label Content="{Binding Channel}" FontSize="36"/>
+            <Label Content="{Binding ChannelName}" FontSize="36"/>
 
             <Separator Margin="10"></Separator>
 

@@ -232,7 +232,7 @@ namespace FuzzyHipster.Network
       Me = me;
       ActivePeers = new List<Peer>();
       InProgressTransfers = new SortedList<Guid, TransferManager>();
-      RateLimiter = new RateLimiter(MoustacheLayer.Singleton.Settings.MaxReceiveRate);
+      RateLimiter = new RateLimiter(RateLimiter.UnlimitedRate);
     }
 
     /// <summary>

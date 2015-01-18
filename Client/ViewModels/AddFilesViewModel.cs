@@ -35,14 +35,25 @@ namespace Client
         }
 
 
-        public string Channel
+        public string ChannelName
         {
             get { 
 
-                MyListViewModel mylist = (MyListViewModel)MainWindowModel.GetModel(typeof(MyListViewModel));
-                return mylist.SelectedChannel.Name;
+                
+                return Channel.Name;
                 
            }
+        }
+
+        public Channel Channel
+        {
+            get
+            {
+
+                MyListViewModel mylist = (MyListViewModel)MainWindowModel.GetModel(typeof(MyListViewModel));
+                return mylist.SelectedChannel;
+
+            }
         }
         
         private string _wadPath;
@@ -62,7 +73,7 @@ namespace Client
 
         
 
-        private string _wadName;
+        private string _wadName = "";
         public string WadName
         {
             get { return this._wadName; }
@@ -77,7 +88,7 @@ namespace Client
             }
         }
 
-        private string _wadDescription;
+        private string _wadDescription = "";
         public string WadDescription
         {
             get { return this._wadDescription; }
@@ -144,22 +155,9 @@ namespace Client
         public void AddWad()
         {
 
-            long BlockSize = 1024;
-            try
-            {
-                 BlockSize = FileWad.CalculatePathSize(WadPath);
-            }
-            catch (Exception e)
-            {
-                Debug.Print(e.ToString());
-            }
-          
-            
-
-            FileWad myprog = new FileWad() { ChannelId = _channel.Id, BlockSize = BlockSize, Name = this._wadName, Description = _wadDescription };
-            _channel.Wads.Add(myprog);
-            myprog.Save();
-
+            FileWad myprog = new FileWad() { ChannelId = this.Channel.Id , BlockSize = 0, Name = WadName, Description = WadDescription };
+            myprog.BuildFromPath(WadPath);
+            MoustacheLayer.Singleton.Catalog.AddFileWad(myprog);
             MainWindowModel.ChangeModel(typeof(MyListViewModel));
         }
 
