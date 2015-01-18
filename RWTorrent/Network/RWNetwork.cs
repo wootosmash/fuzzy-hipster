@@ -237,6 +237,7 @@ namespace FuzzyHipster.Network
         RateLimiter = new RateLimiter(MoustacheLayer.Singleton.Settings.MaxReceiveRate);
       else
         RateLimiter = new RateLimiter(RateLimiter.UnlimitedRate);
+
     }
 
     /// <summary>

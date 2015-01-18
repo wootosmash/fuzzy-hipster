@@ -91,10 +91,16 @@ namespace Client
             get
             {
 
-                ICommand _changePageCommand = new RelayCommand(
-                        p => MainWindowModel.ChangeModel(typeof(AddFilesViewModel)),
-                        p => true);
-                return _changePageCommand;
+                return new RelayCommand( p => MainWindowModel.ChangeModel(new AddFilesViewModel()) );
+            }
+        }
+
+        public ICommand NewChannel
+        {
+            get
+            {
+
+               return  new RelayCommand( p => MainWindowModel.ChangeModel(new NewChannelViewModel()));
             }
         }
         

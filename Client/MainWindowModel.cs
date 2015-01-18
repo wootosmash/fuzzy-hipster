@@ -34,6 +34,7 @@ namespace Client
             PageViewModelMap.Add(typeof(MyListViewModel).Name, new MyListViewModel());
             PageViewModelMap.Add(typeof(CatalogViewModel).Name, new CatalogViewModel());
             PageViewModelMap.Add(typeof(PeerListViewModel).Name, new PeerListViewModel());
+            
             PageViewModelMap.Add(typeof(AddFilesViewModel).Name, new AddFilesViewModel());
             PageViewModelMap.Add(typeof(NewChannelViewModel).Name, new NewChannelViewModel());
 
@@ -95,7 +96,6 @@ namespace Client
         public static void ChangeModel(Type classType)
         {
 
-
             string item = classType.Name;
 
             MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
@@ -108,6 +108,17 @@ namespace Client
             }
 
             mw.CurrentPageViewModel = mw.PageViewModelMap[item];
+
+        }
+
+
+        public static void ChangeModel(IPageViewModel model)
+        {
+           
+            MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
+
+
+            mw.CurrentPageViewModel = model;
 
         }
 
@@ -126,10 +137,10 @@ namespace Client
 
 
 
-         public static void LoadState(string key)
+        public static IPageViewModel GetModel(Type classType)
         {
             MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
-            mw.CurrentPageViewModel = mw.PageViewModelMap[key];
+            return mw.PageViewModelMap[classType.Name];
         }
 
 

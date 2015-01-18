@@ -27,7 +27,7 @@ namespace FuzzyHipster.Tests
     
     Peer localHostPeer2 = new Peer()
     {
-      IPAddress = "106.69.66.115",
+      IPAddress = "106.68.36.126",
       Port = RWNetwork.RWDefaultPort, Name = "Al!!"
     };
 
