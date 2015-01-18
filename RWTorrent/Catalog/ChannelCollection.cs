@@ -14,6 +14,15 @@ using System.Threading;
 using System.Xml.Serialization;
 namespace FuzzyHipster.Catalog
 {
+  public enum SearchFilter 
+  {
+    All,
+    WriteableOnly,
+    ReadableOnly,
+    FullyDownloaded,
+    PartiallyDownloaded
+  }
+  
 	public class ChannelCollection : List<Channel>
 	{
 	  
@@ -22,7 +31,16 @@ namespace FuzzyHipster.Catalog
 				return Find(x => x.Id == channelGuid);
 			}
 		}
+	  
+	  public Channel[] Find( SearchFilter filter )
+	  {
+	    return Find("", filter);
+	  }
 
+	  public Channel[] Find( string searchText, SearchFilter filter )
+	  {
+	    return ToArray();
+	  }
 		
     public Channel GetRandom()
     {

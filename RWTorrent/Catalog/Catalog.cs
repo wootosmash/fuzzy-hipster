@@ -32,11 +32,17 @@ namespace FuzzyHipster.Catalog
       get;
       set;
     }
+    
+    [XmlIgnore()]
+    public KeyCollection Keys {
+      get; set; 
+    }
 
     public Catalog()
     {
       Id = Guid.NewGuid();
       Channels = new ChannelCollection();
+      Keys = new KeyCollection();
     }
 
 
@@ -57,7 +63,8 @@ namespace FuzzyHipster.Catalog
         using (var reader = new StreamReader( catalogEndPointPath ))
           catalog = (Catalog)serialiser.Deserialize(reader);
 
-        catalog.BasePath = basePath;
+        catalog.BasePath = basePath;        
+        catalog.Keys = KeyCollection.Load(catalog.BasePath);
         
         string channelsPath = Path.Combine(basePath, @"Catalog\Channels");
         
@@ -67,7 +74,6 @@ namespace FuzzyHipster.Catalog
         var serialiserChannels = new XmlSerializer(typeof(Channel));
         foreach (string dir in Directory.GetDirectories(channelsPath))
         {
-          Console.WriteLine(dir);
           Channel channel = null;
           using (var reader = new StreamReader(string.Format(@"{0}\Index.xml", dir)))
           {
@@ -145,6 +151,7 @@ namespace FuzzyHipster.Catalog
       if ( channel.Wads == null )
         channel.Wads = new List<FileWad>();
       
+      // wad doesn't exist
       if ( channel.Wads.Find(x => x.Id == wad.Id) == null )
       {
         channel.Wads.Add(wad);
@@ -161,6 +168,12 @@ namespace FuzzyHipster.Catalog
 			channel.Save();
       
 			UpdateLastUpdated(channel.LastUpdated);
+    }
+    
+    public void AddKey( Key key )
+    {
+      Keys.Add(key);
+      Keys.Save();
     }
     
     public override void Validate()

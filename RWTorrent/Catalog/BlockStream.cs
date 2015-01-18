@@ -16,6 +16,7 @@ namespace FuzzyHipster.Catalog
   /// </summary>
   public class BlockStream : Stream
   {
+    
     public FileWad Wad { get; set; }
     public int CurrentBlock { get; protected set; }
     public FileDescriptor CurrentFile { get; protected set; }
@@ -44,9 +45,7 @@ namespace FuzzyHipster.Catalog
       
       if ( CurrentStream != null )
         CloseStream();
-      
-      Console.WriteLine("{0} {1}", CurrentFile, fileOffset);
-      
+            
       OpenStream();
       CurrentStream.Seek(fileOffset, SeekOrigin.Begin);
     }
@@ -72,7 +71,7 @@ namespace FuzzyHipster.Catalog
                                           CurrentFile.LocalFilepath));
       
       
-      CurrentStream = new FileStream(CurrentFile.LocalFilepath, FileMode.Open);
+      CurrentStream = new FileStream(CurrentFile.LocalFilepath, FileMode.Open, FileAccess.Read);
       fragmentSize = Wad.GetBlockFragmentSize(CurrentFile, CurrentBlock );
 
     }
@@ -201,7 +200,7 @@ namespace FuzzyHipster.Catalog
       {
         string [] files = Directory.GetFiles(blockPath, block + "-*.blk");
         if ( files.Length > 0 )
-          return new FileStream( files[0], FileMode.Open );
+          return new FileStream( files[0], FileMode.Open, FileAccess.Read );
       }
       
       var stream = new BlockStream(wad);

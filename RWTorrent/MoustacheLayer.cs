@@ -106,22 +106,12 @@ namespace FuzzyHipster
     {
       var wad = MoustacheLayer.Singleton.Catalog.GetFileWad(e.Value.FileWadId);
       
-      var list = new List<int>();
-      
-      // build the list of indexes from the availabililty list
-      for( int i=0;i<e.Value.BlocksAvailable.Length;i++)
-        if ( e.Value.BlocksAvailable[i] )
-          list.Add(i);
-      
-      // Find what indexes we haven't downloaded
-      for( int i=list.Count-1;i>=0;i--)
-        if ( wad.BlockIndex[list[i]].Downloaded )
-          list.RemoveAt(i);
+      var list = wad.GetAvailabilityNeededIntersection(e.Value.BlocksAvailable);
       
       // pick one at random and request it
-      if ( list.Count > 0 )
+      if ( list.Length > 0 )
       {
-        int index = list[MoustacheLayer.Singleton.Random.Next(0,list.Count)];
+        int index = list[MoustacheLayer.Singleton.Random.Next(0,list.Length)];
         Network.RequestBlock(e.Peer, wad, index);
       }
     }
@@ -148,6 +138,8 @@ namespace FuzzyHipster
         Network.RequestBlocksAvailable(e.Peer, wad);
       else
         wad.SaveFromBlocks( Catalog.BasePath + @"\Files\" );
+      
+      wad.Save();
     }
     
     void NetworkPeerConnected( object sender, GenericEventArgs<Peer> e)

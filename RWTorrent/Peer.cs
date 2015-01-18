@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
+using FuzzyHipster.Crypto;
 using FuzzyHipster.Network;
 
 namespace FuzzyHipster
@@ -95,6 +96,31 @@ namespace FuzzyHipster
     // catalog statistics
     public int CatalogRecency { get; set; }
     
+    // crypto
+    [NonSerialized()]
+    SymmetricKey symmetricKey;
+
+    public SymmetricKey SymmetricKey {
+      get {
+        return symmetricKey;
+      }
+      set {
+        symmetricKey = value;
+      }
+    }
+    
+    [NonSerialized()]
+    AsymmetricKey asymmetricKey;
+
+    public AsymmetricKey AsymmetricKey {
+      get {
+        return asymmetricKey;
+      }
+      set {
+        asymmetricKey = value;
+      }
+    }
+    
     
     public Peer()
     {
@@ -117,7 +143,8 @@ namespace FuzzyHipster
         RateLimiter = new RateLimiter(MoustacheLayer.Singleton.Settings.MaxReceiveRate);
       else
         RateLimiter = new RateLimiter(RateLimiter.UnlimitedRate);
-
+      
+      AsymmetricKey = AsymmetricKey.Create();
     }
 
     
@@ -147,6 +174,38 @@ namespace FuzzyHipster
     {
       NextConnectionAttempt = DateTime.MinValue;
       FailedConnectionAttempts = 0;
+    }
+    
+    public byte[] SymEncrypt( byte[] plaintext )
+    {
+      if ( SymmetricKey != null )
+        return SymmetricKey.Encrypt(plaintext);
+      else
+        return plaintext;
+    }
+    
+    public byte[] SymDecrypt( byte[] cyphertext )
+    {
+      if ( SymmetricKey != null )
+        return SymmetricKey.Decrypt(cyphertext);
+      else
+        return cyphertext;
+    }
+    
+    public byte[] AsymEncrypt( byte[] plaintext )
+    {
+      if ( AsymmetricKey != null )
+        return AsymmetricKey.Encrypt(plaintext);
+      else
+        return plaintext;
+    }
+    
+    public byte[] AsymDecrypt( byte[] cyphertext )
+    {
+      if ( AsymmetricKey != null )
+        return AsymmetricKey.Decrypt(cyphertext);
+      else
+        return cyphertext;
     }
     
     public override string ToString()

@@ -70,7 +70,7 @@ namespace FuzzyHipster.Network
 					Directory.CreateDirectory(blocksPath);
 			}
 			
-			using (var stream = new FileStream(TempFile, FileMode.OpenOrCreate)) 
+			using (var stream = new FileStream(TempFile, FileMode.OpenOrCreate, FileAccess.Write)) 
 			{
 				stream.Seek(CurrentPosition, SeekOrigin.Begin);
 				stream.Write(msg.Data, 0, msg.DataLength);

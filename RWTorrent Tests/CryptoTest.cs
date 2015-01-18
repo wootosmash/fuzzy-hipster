@@ -9,6 +9,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using FuzzyHipster.Crypto;
 using NUnit.Framework;
 
 namespace FuzzyHipster.Tests
@@ -20,10 +21,11 @@ namespace FuzzyHipster.Tests
     
     [Test]
     public void SignAndVerifyTest()
-    {
+    {      
       string plaintext = "ROFL MY LOFL";
       string cyphertext = "";
       
+
       using ( var rsa = new RSACryptoServiceProvider(1024) )
       {
         try
@@ -42,6 +44,7 @@ namespace FuzzyHipster.Tests
           rsa.PersistKeyInCsp = false;
         }
       }
+
       
       //      CryptoTest crypto = new CryptoTest();
       //      RSAParameters privateKey = crypto.GenerateKeys("simlanghoff@gmail.com");

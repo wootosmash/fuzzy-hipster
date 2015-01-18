@@ -7,6 +7,8 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.IO;
+using System.Text;
 using FuzzyHipster.Crypto;
 using NUnit.Framework;
 using FuzzyHipster.Catalog;
@@ -24,9 +26,9 @@ namespace FuzzyHipster.Tests
 
       var wad = new FileWad();
       wad.Name = "Test WAD-" + DateTime.Now;
-      wad.Description = "Built from B";
-      wad.BlockSize = 4096;
-      wad.BuildFromPath( @"C:\temp\mendozaaaa");
+      wad.Description = "SINGLE FILE TEST";
+      wad.BlockSize = 0;
+      wad.BuildFromPath( @"E:\temp\SingleFileTest");
       
       var chan = new Channel();
       chan.Name = "FOR";
@@ -45,10 +47,11 @@ namespace FuzzyHipster.Tests
           byte[] buffer = new byte[count];
           stream.SeekBlock(i);
           stream.Read(buffer, 0, (int)count);
-          
+                    
           Assert.IsTrue(Hash.Compare(Hash.GetHash(buffer, count), wad.BlockIndex[i].Hash), "Hash Fail " + i + "/" + wad.BlockIndex.Count);
         }
       }
     }
+    
   }
 }

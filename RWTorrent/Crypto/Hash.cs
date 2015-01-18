@@ -23,12 +23,11 @@ namespace FuzzyHipster.Crypto
     
     public static byte[] GetHash( Stream stream, long length )
     {
-      Console.WriteLine("GetHash() " + length);
       using ( var md5 = MD5.Create())
       {
         using ( var partial = new PartialStream(stream, 0, length))
         {
-          return md5.ComputeHash(stream);
+          return md5.ComputeHash(partial);
         }
       }
     }
@@ -156,7 +155,7 @@ namespace FuzzyHipster.Crypto
       }
     }
 
-    public override void SetLength(long length)
+    public override void SetLength(long value)
     {
       throw new NotSupportedException();
     }
@@ -166,7 +165,9 @@ namespace FuzzyHipster.Crypto
       long left = _Length - Position;
       if (left < count)
         count = (int)left;
-      return _UnderlyingStream.Read(buffer, offset, count);
+      int bytesRead = _UnderlyingStream.Read(buffer, offset, count);
+            
+      return bytesRead;
     }
 
     public override void Write(byte[] buffer, int offset, int count)

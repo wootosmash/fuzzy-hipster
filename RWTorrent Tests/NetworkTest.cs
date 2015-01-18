@@ -47,7 +47,6 @@ namespace FuzzyHipster.Tests
       
       var msg = new NetMessage();
       msg.Type = MessageType.Hello;
-      msg.Length = Marshal.SizeOf(msg);
       
       client.Send( msg, localHostPeer );
     }

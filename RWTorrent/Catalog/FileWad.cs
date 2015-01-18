@@ -7,6 +7,7 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 using FuzzyHipster.Crypto;
@@ -106,9 +107,7 @@ namespace FuzzyHipster.Catalog
     /// <param name="block"></param>
     /// <returns></returns>
     public long GetBlockOffset( FileDescriptor file, int block )
-    {
-      Console.WriteLine(file.ToString() + " looking for block " + block);
-      
+    {      
       if ( file.EndBlock < block )
         return -1;
       if ( file.StartBlock > block )
@@ -149,22 +148,40 @@ namespace FuzzyHipster.Catalog
       string blocksPath = GetBlocksPath();
       string [] blocks = Directory.GetFiles(blocksPath);
       
-      Console.WriteLine(blocksPath);
-      
       foreach( string file in blocks )
       {
         
         if ( Path.GetFileName(file).StartsWith(block + "-"))
-          return new FileStream(file, FileMode.Open);
+          return new FileStream(file, FileMode.Open, FileAccess.Read);
       }
       
       throw new Exception(string.Format("Cant find the file for block {0} in path {1}", block, blocksPath));
     }
     
-    public void SaveFromBlocks( string basePath )
+    public bool[] GetBlockAvailability()
     {
-      Console.WriteLine("Saving from blocks");
+      bool[] availability = new bool[BlockIndex.Count];
       
+      for( int i=0;i<BlockIndex.Count;i++)
+        availability[i] = BlockIndex[i].Downloaded;
+      
+      return availability;
+    }
+    
+    public int[] GetAvailabilityNeededIntersection( bool[] availability )
+    {
+      var list = new List<int>();
+      
+      for ( int i=0;i<availability.Length;i++)
+        if ( availability[i] )
+          if ( !BlockIndex[i].Downloaded )
+            list.Add(i);
+      
+      return list.ToArray();
+    }
+    
+    public void SaveFromBlocks( string basePath )
+    {      
       if ( Files == null )
         throw new Exception("FileWad.Files is not set");
       if ( Files.Count == 0 )
@@ -181,6 +198,9 @@ namespace FuzzyHipster.Catalog
     /// <param name="basePath"></param>
     public void SaveFromBlocks( FileDescriptor file, string basePath )
     {
+      if ( File.Exists(file.LocalFilepath))
+        return;
+      
       const int bufferLength = 1024;
       var buffer = new byte[bufferLength];
       string blocksPath = GetBlocksPath();
@@ -188,12 +208,12 @@ namespace FuzzyHipster.Catalog
       if ( !Directory.Exists(basePath))
         Directory.CreateDirectory(basePath);
       
-      string filePath = Path.Combine(basePath, file.CatalogFilepath);
+      file.LocalFilepath = Path.Combine(basePath, file.CatalogFilepath);
       
-      if ( !Directory.Exists(Path.GetDirectoryName(filePath)))
-        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+      if ( !Directory.Exists(Path.GetDirectoryName(file.LocalFilepath)))
+        Directory.CreateDirectory(Path.GetDirectoryName(file.LocalFilepath));
       
-      using (var writer = new FileStream(filePath, FileMode.CreateNew))
+      using (var writer = new FileStream(file.LocalFilepath, FileMode.CreateNew))
       {
         for ( int block = file.StartBlock; block <= file.EndBlock; block++ )
         {
@@ -217,7 +237,7 @@ namespace FuzzyHipster.Catalog
         }
       }
       
-      byte[] hash = Hash.GetHash(filePath);
+      byte[] hash = Hash.GetHash(file.LocalFilepath);
       if ( !Hash.Compare(file.Hash, hash))
       {
         //File.Delete(filePath);
@@ -227,7 +247,6 @@ namespace FuzzyHipster.Catalog
     
     public void VerifyBlock( int block, string blockFilePath )
     {
-      return;
       var info = new FileInfo(blockFilePath);
 
       BlockIndexItem item = BlockIndex[block];
@@ -387,7 +406,6 @@ namespace FuzzyHipster.Catalog
         Length = info.Length
       };
       
-      Console.WriteLine(descriptor.ToString());
       Files.Add(descriptor);
       return info.Length;
     }
