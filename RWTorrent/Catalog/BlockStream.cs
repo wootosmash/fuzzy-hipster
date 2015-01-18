@@ -44,9 +44,7 @@ namespace FuzzyHipster.Catalog
       
       if ( CurrentStream != null )
         CloseStream();
-      
-      Console.WriteLine("{0} {1}", CurrentFile, fileOffset);
-      
+            
       OpenStream();
       CurrentStream.Seek(fileOffset, SeekOrigin.Begin);
     }

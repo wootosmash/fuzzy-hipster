@@ -107,9 +107,7 @@ namespace FuzzyHipster.Catalog
     /// <param name="block"></param>
     /// <returns></returns>
     public long GetBlockOffset( FileDescriptor file, int block )
-    {
-      Console.WriteLine(file.ToString() + " looking for block " + block);
-      
+    {      
       if ( file.EndBlock < block )
         return -1;
       if ( file.StartBlock > block )
@@ -150,8 +148,6 @@ namespace FuzzyHipster.Catalog
       string blocksPath = GetBlocksPath();
       string [] blocks = Directory.GetFiles(blocksPath);
       
-      Console.WriteLine(blocksPath);
-      
       foreach( string file in blocks )
       {
         
@@ -185,9 +181,7 @@ namespace FuzzyHipster.Catalog
     }
     
     public void SaveFromBlocks( string basePath )
-    {
-      Console.WriteLine("Saving from blocks");
-      
+    {      
       if ( Files == null )
         throw new Exception("FileWad.Files is not set");
       if ( Files.Count == 0 )
@@ -253,7 +247,6 @@ namespace FuzzyHipster.Catalog
     
     public void VerifyBlock( int block, string blockFilePath )
     {
-      return;
       var info = new FileInfo(blockFilePath);
 
       BlockIndexItem item = BlockIndex[block];
@@ -413,7 +406,6 @@ namespace FuzzyHipster.Catalog
         Length = info.Length
       };
       
-      Console.WriteLine(descriptor.ToString());
       Files.Add(descriptor);
       return info.Length;
     }

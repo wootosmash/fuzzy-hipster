@@ -74,7 +74,6 @@ namespace FuzzyHipster.Catalog
         var serialiserChannels = new XmlSerializer(typeof(Channel));
         foreach (string dir in Directory.GetDirectories(channelsPath))
         {
-          Console.WriteLine(dir);
           Channel channel = null;
           using (var reader = new StreamReader(string.Format(@"{0}\Index.xml", dir)))
           {
