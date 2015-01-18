@@ -13,27 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Client
+namespace Client.Views
 {
     /// <summary>
-    /// Interaction logic for MyListView.xaml
+    /// Interaction logic for KeysView.xaml
     /// </summary>
-    public partial class MyListView : UserControl
+    public partial class KeysView : UserControl
     {
-        public MyListView()
+        public KeysView()
         {
             InitializeComponent();
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            MyListViewModel svm = (MyListViewModel)MainWindowModel.CurrentView();
-            svm.Description = "ASdddddddddddddddd";
-        }
-
-        private void CreateChannel_Click(object sender, RoutedEventArgs e)
-        {
-           
         }
     }
 }

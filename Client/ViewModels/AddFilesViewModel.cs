@@ -37,7 +37,12 @@ namespace Client
 
         public string Channel
         {
-            get { return _channel.Name; }
+            get { 
+
+                MyListViewModel mylist = (MyListViewModel)MainWindowModel.GetModel(typeof(MyListViewModel));
+                return mylist.SelectedChannel.Name;
+                
+           }
         }
         
         private string _wadPath;
