@@ -28,8 +28,7 @@ namespace Client
     }
 
     protected override void OnStartup(StartupEventArgs e)
-    {
-      
+    {      
       base.OnStartup(e);
 
       var thread = new Thread(
