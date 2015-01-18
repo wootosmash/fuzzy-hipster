@@ -36,7 +36,7 @@ namespace Client
         new ThreadStart(
           delegate
           {
-            var catalog = Catalog.Load(".");
+            var catalog = Catalog.Load(@"E:\Temp\localhost-7892\");
             var rwt = new FuzzyHipster.MoustacheLayer(catalog);
             OnMoustacheLayerLoaded(new EventArgs());
             rwt.Start();

@@ -107,7 +107,7 @@ namespace FuzzyHipster.Catalog
     /// <param name="block"></param>
     /// <returns></returns>
     public long GetBlockOffset( FileDescriptor file, int block )
-    {      
+    {
       if ( file.EndBlock < block )
         return -1;
       if ( file.StartBlock > block )
@@ -181,7 +181,7 @@ namespace FuzzyHipster.Catalog
     }
     
     public void SaveFromBlocks( string basePath )
-    {      
+    {
       if ( Files == null )
         throw new Exception("FileWad.Files is not set");
       if ( Files.Count == 0 )
@@ -345,7 +345,7 @@ namespace FuzzyHipster.Catalog
         }
       }
       
-      Validate();      
+      Validate();
     }
     
     public override void Validate()
@@ -363,7 +363,7 @@ namespace FuzzyHipster.Catalog
         }
         
         if ( file.Length != len )
-          throw new Exception(string.Format("File descriptor length doesn't validate calculated={0}, expected={1}, descriptor={2}", 
+          throw new Exception(string.Format("File descriptor length doesn't validate calculated={0}, expected={1}, descriptor={2}",
                                             file.Length, len, file));
       }
       
@@ -400,11 +400,13 @@ namespace FuzzyHipster.Catalog
       var descriptor = new FileDescriptor()
       {
         Hash = Hash.GetHash(file),
-        CatalogFilepath = file.Substring(basePath.Length + 1),
+        CatalogFilepath = file.Substring(basePath.Length),
         LocalFilepath = file,
         IsAllocated = true,
         Length = info.Length
       };
+      if ( descriptor.CatalogFilepath.StartsWith(@"\"))
+        descriptor.CatalogFilepath = descriptor.CatalogFilepath.Substring(1);
       
       Files.Add(descriptor);
       return info.Length;
@@ -470,8 +472,8 @@ namespace FuzzyHipster.Catalog
       long blockSize = totalBytes / quantityDesired;
       int p = (int)Math.Pow(2, Math.Ceiling(Math.Log(blockSize)/Math.Log(2)));
       
-      if ( p < 1024 )
-        p = 1024;
+      if ( p < MoustacheLayer.Singleton.Settings.MinBlockSize )
+        p = MoustacheLayer.Singleton.Settings.MinBlockSize;
       
       return p;
     }

@@ -32,6 +32,7 @@ namespace FuzzyHipster
 		public int KeepAliveInterval { get; set; }
 		public int MaxTransmitRate { get; set; }
 		public int MaxReceiveRate { get; set; }
+		public int MinBlockSize { get; set; }
 
 		public Settings()
 		{
@@ -48,6 +49,7 @@ namespace FuzzyHipster
 			KeepAliveInterval = 1000 * 60 * 1; // 1 minute
 			MaxTransmitRate = 40000; //RateLimiter.UnlimitedRate;
 			MaxReceiveRate = 40000; //RateLimiter.UnlimitedRate;
+			MinBlockSize = 65536;
 		}
 		
 		public static Settings Load(string path)
