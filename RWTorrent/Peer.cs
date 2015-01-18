@@ -102,13 +102,7 @@ namespace FuzzyHipster
       NextConnectionAttempt = DateTime.MinValue;
       FailedConnectionAttempts = 0;
       OkToSendAt = DateTime.MaxValue;
-<<<<<<< HEAD
-      MaxBlockPacketSize = 40000;//MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
-      IsLocal = false;
-      LastConnection = DateTime.MinValue;
-      CatalogRecency = 0;
-      RateLimiter = new RateLimiter(RateLimiter.UnlimitedRate);//MoustacheLayer.Singleton.Settings.MaxReceiveRate);
-=======
+
       
       if ( MoustacheLayer.Singleton != null )
         MaxBlockPacketSize = MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
@@ -123,7 +117,7 @@ namespace FuzzyHipster
         RateLimiter = new RateLimiter(MoustacheLayer.Singleton.Settings.MaxReceiveRate);
       else
         RateLimiter = new RateLimiter(RateLimiter.UnlimitedRate);
->>>>>>> 1c979de73687ca20efc2907fa47abe06a5b76a93
+
     }
 
     
