@@ -427,6 +427,9 @@ namespace FuzzyHipster.Catalog
     {
       long size = 0;
       
+      if ( File.Exists(path))
+        return new FileInfo(path).Length;
+      
       if ( !Directory.Exists(path))
         return 0;
       

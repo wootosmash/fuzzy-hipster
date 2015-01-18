@@ -143,6 +143,7 @@ namespace FuzzyHipster
     void NetworkBlockReceived( object sender, BlockReceivedEventArgs e)
     {
       FileWad wad = Catalog.GetFileWad(e.FileWadId);
+
       if ( !wad.IsFullyDownloaded )
         Network.RequestBlocksAvailable(e.Peer, wad);
       else

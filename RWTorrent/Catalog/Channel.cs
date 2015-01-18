@@ -60,14 +60,9 @@ namespace FuzzyHipster.Catalog
       }
     }
     
-    bool published;
     public bool Published {
-      get {
-        return published;
-      }
-      set {
-        published = value;
-      }
+      get;
+      set;
     }
     
     public Channel()
