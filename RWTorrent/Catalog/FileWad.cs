@@ -7,6 +7,7 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 using FuzzyHipster.Crypto;
@@ -155,10 +156,32 @@ namespace FuzzyHipster.Catalog
       {
         
         if ( Path.GetFileName(file).StartsWith(block + "-"))
-          return new FileStream(file, FileMode.Open);
+          return new FileStream(file, FileMode.Open, FileAccess.Read);
       }
       
       throw new Exception(string.Format("Cant find the file for block {0} in path {1}", block, blocksPath));
+    }
+    
+    public bool[] GetBlockAvailability()
+    {
+      bool[] availability = new bool[BlockIndex.Count];
+      
+      for( int i=0;i<BlockIndex.Count;i++)
+        availability[i] = BlockIndex[i].Downloaded;
+      
+      return availability;
+    }
+    
+    public int[] GetAvailabilityNeededIntersection( bool[] availability )
+    {
+      var list = new List<int>();
+      
+      for ( int i=0;i<availability.Length;i++)
+        if ( availability[i] )
+          if ( !BlockIndex[i].Downloaded )
+            list.Add(i);
+      
+      return list.ToArray();
     }
     
     public void SaveFromBlocks( string basePath )

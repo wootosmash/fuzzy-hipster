@@ -24,9 +24,9 @@ namespace FuzzyHipster.Tests
 
       var wad = new FileWad();
       wad.Name = "Test WAD-" + DateTime.Now;
-      wad.Description = "Built from B";
-      wad.BlockSize = 4096;
-      wad.BuildFromPath( @"C:\temp\mendozaaaa");
+      wad.Description = "SINGLE FILE TEST";
+      wad.BlockSize = 1024;
+      wad.BuildFromPath( @"E:\temp\SingleFileTest");
       
       var chan = new Channel();
       chan.Name = "FOR";

@@ -147,6 +147,26 @@ namespace FuzzyHipster
       FailedConnectionAttempts = 0;
     }
     
+    public byte[] SymEncrypt( byte[] plaintext )
+    {
+      return plaintext;
+    }
+    
+    public byte[] SymDecrypt( byte[] cyphertext )
+    {
+      return cyphertext;
+    }
+    
+    public byte[] AsymEncrypt( byte[] plaintext )
+    {
+      return plaintext;
+    }
+    
+    public byte[] AsymDecrypt( byte[] cyphertext )
+    {
+      return cyphertext;
+    }
+    
     public override string ToString()
     {
       return string.Format("[Peer Id={0}, Name={1}, IPAddress={2}, Port={3} RxRate={4}]", Id, Name, IPAddress, Port, RateLimiter.CurrentRate);

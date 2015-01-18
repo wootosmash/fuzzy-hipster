@@ -70,10 +70,10 @@ namespace FuzzyHipster
             channel.Name = "Rof Chan";
             channel.Description = "A Rof Chan Channel";
             catalog.AddChannel(channel);
-            
-            wad.ChannelId = channel.Id;
-            catalog.AddFileWad(wad);
           }
+          
+          wad.ChannelId = catalog.Channels[0].Id;
+          catalog.AddFileWad(wad);
         }
         
         if ( key.Key == ConsoleKey.T )

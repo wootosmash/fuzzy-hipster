@@ -36,6 +36,9 @@ namespace FuzzyHipster.Tests
           byte[] decbytes = rsa.Decrypt(encbytes, true);
           
           Console.WriteLine(encoder.GetString(decbytes));
+          
+          Console.WriteLine(rsa.ToXmlString(false));
+          Console.WriteLine(rsa.ToXmlString(true));
         }
         finally
         {

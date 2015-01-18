@@ -22,7 +22,6 @@ namespace FuzzyHipster.Network
   public class NetMessage
   {
     public MessageType Type { get; set; }
-    public int Length { get; set; }
     
     public static NetMessage FromBytes( byte[] buffer)
     {
@@ -41,20 +40,13 @@ namespace FuzzyHipster.Network
       using ( var stream = new MemoryStream())
       {
         serializer.Serialize(stream, this);
-        byte[] buffer = stream.ToArray();
-        
-        Length = buffer.Length;
-        
-        stream.Position = 0;
-        serializer.Serialize(stream, this);
-        
         return stream.ToArray();
       }
     }
     
     public override string ToString()
     {
-      return string.Format("[NetMessage Type={0}, Length={1}]", Type, Length);
+      return string.Format("[NetMessage Type={0}]", Type);
     }
   }
   

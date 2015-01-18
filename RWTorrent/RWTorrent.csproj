@@ -72,8 +72,10 @@
     <Compile Include="Catalog\Channel.cs" />
     <Compile Include="Catalog\ChannelCollection.cs" />
     <Compile Include="Catalog\FileWadCollection.cs" />
+    <Compile Include="Catalog\KeyCollection.cs" />
     <Compile Include="Crypto\Hash.cs" />
     <Compile Include="Crypto\Key.cs" />
+    <Compile Include="Crypto\TransmitCrypto.cs" />
     <Compile Include="Network\BlockReceivedEventArgs.cs" />
     <Compile Include="Network\BlockRequestedEventArgs.cs" />
     <Compile Include="Network\BlockTransferManager.cs" />
