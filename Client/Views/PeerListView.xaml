@@ -62,10 +62,10 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Header="Bandwidth" Width="40"  DisplayMemberBinding="{Binding EstimatedBandwidth}">
+                    <GridViewColumn Header="Rate" Width="40"  DisplayMemberBinding="{Binding RateLimiter.CurrentRate}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding EstimatedBandwidth}" />
+                                <TextBlock Text="{Binding RateLimiter.CurrentRate}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

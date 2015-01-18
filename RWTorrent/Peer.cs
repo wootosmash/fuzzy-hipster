@@ -136,6 +136,8 @@ namespace FuzzyHipster
       OkToSendAt = peer.OkToSendAt;
       LastConnection = peer.LastConnection;
       IsLocal = peer.IsLocal;
+
+        
     }
     
     /// <summary>

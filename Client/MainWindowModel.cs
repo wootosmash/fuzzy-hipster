@@ -9,7 +9,7 @@ using FuzzyHipster.Network;
 
 namespace Client
 {
-    class MainWindowModel : ObservableObject
+    class MainWindowModel : ObservableObject<MainWindowModel>
     {
         #region Fields
 
@@ -34,12 +34,10 @@ namespace Client
             PageViewModelMap.Add(typeof(MyListViewModel).Name, new MyListViewModel());
             PageViewModelMap.Add(typeof(CatalogViewModel).Name, new CatalogViewModel());
             PageViewModelMap.Add(typeof(PeerListViewModel).Name, new PeerListViewModel());
-            
+
             PageViewModelMap.Add(typeof(AddFilesViewModel).Name, new AddFilesViewModel());
             PageViewModelMap.Add(typeof(NewChannelViewModel).Name, new NewChannelViewModel());
-
-
-
+            
             //
             XamlPageMenuDef.Add(PageViewModelMap[typeof(StartUpViewModel).Name]);
             XamlPageMenuDef.Add(PageViewModelMap[typeof(MyListViewModel).Name]);
@@ -75,6 +73,9 @@ namespace Client
             }
         }
 
+
+  
+
         public Dictionary<string,IPageViewModel> PageViewModelMap
         {
             get
@@ -93,13 +94,12 @@ namespace Client
 
 
 
-        public static void ChangeModel(Type classType)
+        public static void ChangeModelas(Type classType)
         {
 
             string item = classType.Name;
-
             MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
-           // mw.CurrentPageViewModel = model;
+
 
 
             if (!mw.PageViewModelMap.Keys.Contains(item))

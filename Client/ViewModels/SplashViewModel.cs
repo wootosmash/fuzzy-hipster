@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    class SplashViewModel : ObservableObject, IPageViewModel
+    class SplashViewModel : ObservableObject<SplashViewModel>, IPageViewModel
     {
 
         public string Name

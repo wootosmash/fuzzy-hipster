@@ -24,7 +24,7 @@ namespace FuzzyHipster.Tests
       string plaintext = "ROFL MY LOFL";
       string cyphertext = "";
       
-      using (var rsa = new RSACryptoServiceProvider(1024))
+      using ( var rsa = new RSACryptoServiceProvider(1024) )
       {
         try
         {

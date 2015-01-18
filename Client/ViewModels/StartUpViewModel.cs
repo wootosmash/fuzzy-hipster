@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    class StartUpViewModel : ObservableObject, IPageViewModel
+    class StartUpViewModel : ObservableObject<StartUpViewModel>, IPageViewModel
     {
         public string Name
         {

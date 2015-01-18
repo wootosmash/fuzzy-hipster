@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    class PeerListViewModel : ObservableObject, IPageViewModel
+    class PeerListViewModel : ObservableObject<PeerListViewModel>, IPageViewModel
     {
 
         public string Name

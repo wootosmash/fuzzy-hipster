@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 namespace Client
 {
-    class AddFilesViewModel : ObservableObject, IPageViewModel
+    class AddFilesViewModel : ObservableObject<AddFilesViewModel>, IPageViewModel
     {
         //
 
@@ -147,7 +147,7 @@ namespace Client
         {
             get
             {
-                return new RelayCommand(p => { MainWindowModel.ChangeModel(typeof (MyListViewModel)); });
+                return new RelayCommand(p => { MyListViewModel.View(); });
             }
         }
 
@@ -158,7 +158,7 @@ namespace Client
             FileWad myprog = new FileWad() { ChannelId = this.Channel.Id , BlockSize = 0, Name = WadName, Description = WadDescription };
             myprog.BuildFromPath(WadPath);
             MoustacheLayer.Singleton.Catalog.AddFileWad(myprog);
-            MainWindowModel.ChangeModel(typeof(MyListViewModel));
+            MyListViewModel.View();
         }
 
     }

@@ -81,6 +81,7 @@
     <Compile Include="Themes\OfficeStyleWindow.cs" />
     <Compile Include="ViewModels\AddFilesViewModel.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
+    <Compile Include="ViewModels\KeysViewModel.cs" />
     <Compile Include="ViewModels\NewChannelViewModel.cs" />
     <Compile Include="ViewModels\PeerListViewModel.cs" />
     <Compile Include="ViewModels\SplashViewModel.cs" />

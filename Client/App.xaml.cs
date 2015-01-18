@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Windows;
 
 using FuzzyHipster.Catalog;
-using FuzzyHipster.Catalog;
 using FuzzyHipster;
 
 
@@ -63,7 +62,8 @@ namespace Client
         {
             MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
             mw.Setup();
-            MainWindowModel.ChangeModel(typeof(CatalogViewModel));
+            //MainWindowModel.ChangeModel(typeof(CatalogViewModel));
+            CatalogViewModel.View();
         }));
     }  
 

@@ -10,7 +10,7 @@ using System.Windows;
 
 namespace Client
 {
-    class CatalogViewModel : ObservableObject, IPageViewModel
+    class CatalogViewModel : ObservableObject<CatalogViewModel>, IPageViewModel
     {
         //
         public string Name

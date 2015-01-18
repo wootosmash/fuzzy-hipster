@@ -5,7 +5,7 @@ using FuzzyHipster.Catalog;
 
 namespace Client
 {
-    class NewChannelViewModel : ObservableObject, IPageViewModel
+    class NewChannelViewModel : ObservableObject<NewChannelViewModel>, IPageViewModel
     {
 
 
@@ -52,13 +52,10 @@ namespace Client
         {
             get
             {
-
                 ICommand _changePageCommand = new RelayCommand(
                         p => SaveNewChannel(),
                         p => true);
-
-            
-
+                
                 return _changePageCommand;
             }
         }
@@ -67,7 +64,7 @@ namespace Client
         {
             get
             {
-                return new RelayCommand( p => { MainWindowModel.ChangeModel(typeof(MyListViewModel)); });
+                return new RelayCommand(p => { MyListViewModel.View(); });
             }
         }
 
@@ -89,7 +86,7 @@ namespace Client
             catalog.Channels.Add(newChannel);
             catalog.Save();
 
-            MainWindowModel.ChangeModel(typeof(MyListViewModel));
+            MyListViewModel.View();
         }
     }
 }

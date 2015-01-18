@@ -6,10 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Reflection;
+using System.Windows;
 
 namespace Client
 {
-    public abstract class ObservableObject : INotifyPropertyChanged
+    public abstract class ObservableObject<T> : INotifyPropertyChanged
     {
         #region Debugging Aides
 
@@ -58,6 +59,21 @@ namespace Client
             OnPropertyChanged(propertyName);
         }
 
+
+        public static void View()
+        {
+            Type t = typeof(T);
+            MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
+
+            if (!mw.PageViewModelMap.Keys.Contains(t.Name))
+            {
+                return;
+            }
+
+            mw.CurrentPageViewModel = mw.PageViewModelMap[t.Name];
+        }
+       
+
         /// <summary>
         /// Raised when a property on this object has a new value.
         /// </summary>
@@ -78,7 +94,6 @@ namespace Client
                 handler(this, e);
             }
         }
-
         #endregion // INotifyPropertyChanged Members
     }
 }

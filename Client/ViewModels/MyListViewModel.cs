@@ -9,7 +9,7 @@ using System.Windows.Input;
 
 namespace Client
 {
-    class MyListViewModel : ObservableObject, IPageViewModel
+    class MyListViewModel : ObservableObject<MyListViewModel>, IPageViewModel
     {
 
         public MyListViewModel()
