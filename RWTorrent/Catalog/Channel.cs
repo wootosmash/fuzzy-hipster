@@ -48,10 +48,34 @@ namespace FuzzyHipster.Catalog
       }
     }
     
+    
+    [NonSerialized()]
+    bool subscribed;
+    public bool Subscribed {
+      get {
+        return subscribed;
+      }
+      set {
+        subscribed = value;
+      }
+    }
+    
+    bool published;
+    public bool Published {
+      get {
+        return published;
+      }
+      set {
+        published = value;
+      }
+    }
+    
     public Channel()
     {
       Id = Guid.NewGuid();
       Wads = new List<FileWad>();
+      Subscribed = true;
+      Published = true;
     }
     
     /// <summary>

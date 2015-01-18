@@ -16,32 +16,56 @@ namespace FuzzyHipster.Tests
   [TestFixture]
   public class CryptoTest
   {
+    
+    
     [Test]
     public void SignAndVerifyTest()
     {
-//      CryptoTest crypto = new CryptoTest();
-//      RSAParameters privateKey = crypto.GenerateKeys("simlanghoff@gmail.com");
+      string plaintext = "ROFL MY LOFL";
+      string cyphertext = "";
+      
+      using (var rsa = new RSACryptoServiceProvider(1024))
+      {
+        try
+        {
+          var encoder = new UTF8Encoding();
+          byte[] encbytes = rsa.Encrypt(encoder.GetBytes(plaintext), true);
+          
+          Console.WriteLine(encoder.GetString(encbytes));
+          
+          byte[] decbytes = rsa.Decrypt(encbytes, true);
+          
+          Console.WriteLine(encoder.GetString(decbytes));
+        }
+        finally
+        {
+          rsa.PersistKeyInCsp = false;
+        }
+      }
+      
+      //      CryptoTest crypto = new CryptoTest();
+      //      RSAParameters privateKey = crypto.GenerateKeys("simlanghoff@gmail.com");
 //
-//      const string PlainText = "This is really sent by me, really!";
+      //      const string PlainText = "This is really sent by me, really!";
 //
-//      RSAParameters publicKey = crypto.GetPublicKey("simlanghoff@gmail.com");
+      //      RSAParameters publicKey = crypto.GetPublicKey("simlanghoff@gmail.com");
 //
-//      string encryptedText = Cryptograph.Encrypt(PlainText, publicKey);
+      //      string encryptedText = Cryptograph.Encrypt(PlainText, publicKey);
 //
-//      Console.WriteLine("This is the encrypted Text:" + "\n " + encryptedText);
+      //      Console.WriteLine("This is the encrypted Text:" + "\n " + encryptedText);
 //
-//      string decryptedText = Cryptograph.Decrypt(encryptedText, privateKey);
+      //      string decryptedText = Cryptograph.Decrypt(encryptedText, privateKey);
 //
-//      Console.WriteLine("This is the decrypted text: " + decryptedText);
+      //      Console.WriteLine("This is the decrypted text: " + decryptedText);
 //
-//      string messageToSign = encryptedText;
+      //      string messageToSign = encryptedText;
 //
-//      string signedMessage = Cryptograph.SignData(messageToSign, privateKey);
+      //      string signedMessage = Cryptograph.SignData(messageToSign, privateKey);
 //
-//      //// Is this message really, really, REALLY sent by me?
-//      bool success = Cryptograph.VerifyData(messageToSign, signedMessage, publicKey);
+      //      //// Is this message really, really, REALLY sent by me?
+      //      bool success = Cryptograph.VerifyData(messageToSign, signedMessage, publicKey);
 //
-//      Console.WriteLine("Is this message really, really, REALLY sent by me? " + success);
+      //      Console.WriteLine("Is this message really, really, REALLY sent by me? " + success);
       
     }
     
