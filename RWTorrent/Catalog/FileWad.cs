@@ -181,6 +181,9 @@ namespace FuzzyHipster.Catalog
     /// <param name="basePath"></param>
     public void SaveFromBlocks( FileDescriptor file, string basePath )
     {
+      if ( File.Exists(file.LocalFilepath))
+        return;
+      
       const int bufferLength = 1024;
       var buffer = new byte[bufferLength];
       string blocksPath = GetBlocksPath();
@@ -188,12 +191,12 @@ namespace FuzzyHipster.Catalog
       if ( !Directory.Exists(basePath))
         Directory.CreateDirectory(basePath);
       
-      string filePath = Path.Combine(basePath, file.CatalogFilepath);
+      file.LocalFilepath = Path.Combine(basePath, file.CatalogFilepath);
       
-      if ( !Directory.Exists(Path.GetDirectoryName(filePath)))
-        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+      if ( !Directory.Exists(Path.GetDirectoryName(file.LocalFilepath)))
+        Directory.CreateDirectory(Path.GetDirectoryName(file.LocalFilepath));
       
-      using (var writer = new FileStream(filePath, FileMode.CreateNew))
+      using (var writer = new FileStream(file.LocalFilepath, FileMode.CreateNew))
       {
         for ( int block = file.StartBlock; block <= file.EndBlock; block++ )
         {
@@ -217,7 +220,7 @@ namespace FuzzyHipster.Catalog
         }
       }
       
-      byte[] hash = Hash.GetHash(filePath);
+      byte[] hash = Hash.GetHash(file.LocalFilepath);
       if ( !Hash.Compare(file.Hash, hash))
       {
         //File.Delete(filePath);
