@@ -46,8 +46,8 @@ namespace FuzzyHipster
 			ThinkTimeGraceMilliseconds = 1000;
 			DefaultBlockQuantity = 100;
 			KeepAliveInterval = 1000 * 60 * 1; // 1 minute
-			MaxTransmitRate = RateLimiter.UnlimitedRate;
-			MaxReceiveRate = RateLimiter.UnlimitedRate;
+			MaxTransmitRate = 40000; //RateLimiter.UnlimitedRate;
+			MaxReceiveRate = 40000; //RateLimiter.UnlimitedRate;
 		}
 		
 		public static Settings Load(string path)
