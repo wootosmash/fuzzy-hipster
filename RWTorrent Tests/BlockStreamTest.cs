@@ -37,7 +37,7 @@ namespace FuzzyHipster.Tests
       
       Console.WriteLine("TEST");
       
-      for( int i=92;i<93;i++) // wad.BlockIndex.Count;i++)
+      for( int i=0;i<wad.BlockIndex.Count;i++)
       {
         using ( var stream = new BlockStream(wad))
         {

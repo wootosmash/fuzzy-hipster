@@ -227,6 +227,7 @@ namespace FuzzyHipster.Catalog
     
     public void VerifyBlock( int block, string blockFilePath )
     {
+      return;
       var info = new FileInfo(blockFilePath);
 
       BlockIndexItem item = BlockIndex[block];
