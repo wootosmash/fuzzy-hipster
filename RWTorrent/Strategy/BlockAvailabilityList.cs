@@ -37,6 +37,7 @@ namespace FuzzyHipster
 			const int MinPercentile = 0;
 			const int MaxPercentile = 100;
 			KeyValuePair<int, Peer[]> blockPeers;
+			
 			var histogram = new BlockAvailabilityHistogram(list[wad.Id]);
 			if (strategy == SearchStrategy.RareBlocks)
 				blockPeers = histogram.GetRandom(wad.GetBlockAvailability(), MinPercentile, RareBlockThreshold);

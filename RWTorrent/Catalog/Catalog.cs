@@ -191,10 +191,10 @@ namespace FuzzyHipster.Catalog
     {
       if ( Channels[channel.Id] == null )
   			Channels.Add(channel);
-			channel.Save();
 			
 			channel.Subscribed = true;
 			channel.Published = true;
+			channel.Save();
       
 			UpdateLastUpdated(channel.LastUpdated);
       OnNotifyChannel( new GenericEventArgs<Channel>(channel));
