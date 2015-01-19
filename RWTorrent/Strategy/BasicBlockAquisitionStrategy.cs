@@ -42,23 +42,32 @@ namespace FuzzyHipster
       
       foreach (var channel in Catalog.Channels.Find(SearchFilter.PartiallyDownloaded))
       {
+        Console.WriteLine("Block.Think()");
         if (!channel.Subscribed)
           continue;
         
         foreach( var wad in channel.Wads )
         {
+          Console.WriteLine("Block.Think(WAD)");
+          
           if ( wad.IsFullyDownloaded )
             continue;
           
           if ( WeDontKnowWhatsAvailable(wad))
           {
-            foreach (var peer in Peers.ToArray())
+            foreach (var peer in Network.ActivePeers.ToArray())
               Network.RequestBlocksAvailable(peer, channel.Wads[0]);
           }
           else
           {
             KeyValuePair<int, Peer[]> blockPeer = BlockAvailability.GetRandomBlockPeer(wad, BlockAvailability, BlockAvailabilityList.SearchStrategy.RareBlocks);
-            Network.RequestBlock(blockPeer.Value[MoustacheLayer.Singleton.Random.Next(0,blockPeer.Value.Length)], wad, blockPeer.Key);
+            
+            int i = MoustacheLayer.Singleton.Random.Next(0,blockPeer.Value.Length);
+            
+            Console.WriteLine("RequestBlock({0},{1},{2})", i, wad, blockPeer.Key );
+            var p = blockPeer.Value[i];
+            
+            Network.RequestBlock(p, wad, blockPeer.Key);
           }
         }
       }
@@ -71,7 +80,6 @@ namespace FuzzyHipster
     
     public bool WeDontKnowWhatsAvailable(FileWad wad)
     {
-      Console.WriteLine("WeDontKnowWhatsAvailable()");
       DateTime timeout = DateTime.Now.AddSeconds(-BlockAvailabilityTimeout);
       
       if ( !BlockAvailability.ContainsKey(wad.Id))
@@ -127,7 +135,7 @@ namespace FuzzyHipster
     void CatalogNotifyFileWad(object sender, GenericEventArgs<FileWad> e)
     {
       if ( WeDontKnowWhatsAvailable(e.Value))
-        foreach (var peer in Network.ActivePeers)
+        foreach (var peer in Network.ActivePeers.ToArray())
           Network.RequestBlocksAvailable(peer, e.Value);
     }
   }
