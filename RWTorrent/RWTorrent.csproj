@@ -104,6 +104,7 @@
     <Compile Include="Strategy\BlockAvailabilityMatrix.cs" />
     <Compile Include="Strategy\CatalogManagementMoustacheStrategy.cs" />
     <Compile Include="Strategy\InformationServiceMoustacheStrategy.cs" />
+    <Compile Include="Strategy\KeepAliveMoustacheStrategy.cs" />
     <Compile Include="Strategy\MoustacheStrategy.cs" />
     <Compile Include="Todo.cs" />
     <Compile Include="Utility.cs" />

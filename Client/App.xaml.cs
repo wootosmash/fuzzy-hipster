@@ -9,6 +9,7 @@ using System.Windows;
 
 using FuzzyHipster.Catalog;
 using FuzzyHipster;
+using FuzzyHipster.Network;
 
 
 namespace Client
@@ -35,8 +36,13 @@ namespace Client
         new ThreadStart(
           delegate
           {
+            int port = RWNetwork.RWDefaultPort;
             var catalog = Catalog.Load(ConfigurationManager.AppSettings["CatalogPath"]);
             var rwt = new FuzzyHipster.MoustacheLayer(catalog);
+            if ( !int.TryParse(ConfigurationManager.AppSettings["Port"], out port))
+              port = RWNetwork.RWDefaultPort;
+            
+            rwt.Settings.Port = port;
             OnMoustacheLayerLoaded(new EventArgs());
             rwt.Start();
           }

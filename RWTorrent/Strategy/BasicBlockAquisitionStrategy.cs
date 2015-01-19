@@ -20,7 +20,6 @@ namespace FuzzyHipster
     
     BlockAvailabilityList BlockAvailability { get; set; }
     
-    
     public override void Install()
     {
       Network.BlockReceived += NetworkBlockReceived;

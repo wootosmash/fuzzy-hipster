@@ -27,8 +27,8 @@ namespace FuzzyHipster.Tests
     
     Peer localHostPeer2 = new Peer()
     {
-      IPAddress = "106.68.36.126",
-      Port = RWNetwork.RWDefaultPort, Name = "Al!!"
+      IPAddress = "127.0.0.1",
+      Port = RWNetwork.RWDefaultPort+1, Name = "Al!!"
     };
 
     
@@ -54,6 +54,8 @@ namespace FuzzyHipster.Tests
     [Test]
     public void PeerStatusMessageTest()
     {
+      var catalog = Catalog.Catalog.Load(".");
+      var stache = new MoustacheLayer(catalog);
       var network = new RWNetwork(localHostPeer2);
       
       network.Connect(localHostPeer);

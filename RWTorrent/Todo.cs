@@ -44,6 +44,7 @@ namespace FuzzyHipster
       // TODO: MoustacheLayer: Receiving the same block twice+
       // DONE: MoustacheLayer: Add events to Catalog eg. Catalog.NotifyWad
       // TODO: GUI: Subscribe to events on Catalog
+      // TODO: GUI: Include the channel in Catalog view
     }
   }
 }

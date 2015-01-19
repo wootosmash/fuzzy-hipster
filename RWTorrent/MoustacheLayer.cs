@@ -15,27 +15,7 @@ using FuzzyHipster.Network;
 
 namespace FuzzyHipster
 {
-  public abstract class MoustacheAction
-  {
-    public DateTime NextThink { get; set; }
-    public abstract void Think();
-  }
   
-  public class KeepAliveMoustacheAction : MoustacheAction
-  {
-    public override void Think()
-    {
-      MoustacheLayer.Singleton.Network.SendMyStatus(MoustacheLayer.Singleton.Network.ActivePeers.ToArray());
-      NextThink = DateTime.Now.AddMilliseconds(MoustacheLayer.Singleton.Settings.KeepAliveInterval);
-    }
-  }
-  // MoustacheAction
-  //   NextThink
-  //   Execute()
-  
-  // KeepAliveMoustacheAction
-  // RequestCatalogItems
-  // 
 
   
   
