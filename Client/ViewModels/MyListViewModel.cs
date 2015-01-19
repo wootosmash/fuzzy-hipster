@@ -15,23 +15,19 @@ namespace Client
 
         public MyListViewModel()
         {
-            MoustacheLayer.Singleton.Catalog.NotifyChannel+=Catalog_NotifyChannel;
+            MoustacheLayer.Singleton.Catalog.NotifyChannel += Catalog_NotifyChannel;
             MoustacheLayer.Singleton.Catalog.NotifyFileWad += Catalog_NotifyFileWad;
         }
 
         void Catalog_NotifyFileWad(object sender, GenericEventArgs<FileWad> e)
         {
-   
-             OnPropertyChanged("CatalogWads");
-           
+             OnPropertyChanged("Wads");  
         }
         
         void Catalog_NotifyChannel(object sender, FuzzyHipster.GenericEventArgs<Channel> e)
         {
 
-          
-            
-                OnPropertyChanged("Channels");
+            OnPropertyChanged("Channels");
             
         }
 
@@ -66,7 +62,7 @@ namespace Client
                     OnPropertyChanged("SelectedChannel");
                     OnPropertyChanged("IsChannelSelected");
                     OnPropertyChanged("WadVisibility");
-                    OnPropertyChanged("CatalogWads");
+                    OnPropertyChanged("Wads");
                 }
             }
         }
@@ -109,7 +105,7 @@ namespace Client
 
 
 
-        public List<FileWad> CatalogWads
+        public List<FileWad> Wads
         {
             get
             {
