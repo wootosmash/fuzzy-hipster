@@ -54,7 +54,8 @@ namespace FuzzyHipster
     {
       var dic = new Dictionary<int, int>(histogram);
       for (int i = 0; i < blocksToIgnore.Length; i++)
-        dic.Remove(i);
+        if ( blocksToIgnore[i] )
+          dic.Remove(i);
       
       if (dic.Count == 0)
         return new KeyValuePair<int, Peer[]>(-1, null);
