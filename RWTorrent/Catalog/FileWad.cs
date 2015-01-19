@@ -28,6 +28,7 @@ namespace FuzzyHipster.Catalog
     
     public long TotalSize { get; set; }
     
+    
     public FileDescriptorCollection Files { get; set; }
 
     public BlockIndexItemCollection BlockIndex { get; set; }

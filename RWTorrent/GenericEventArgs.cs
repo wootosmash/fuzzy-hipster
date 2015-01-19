@@ -10,7 +10,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using FuzzyHipster.Catalog;
-namespace FuzzyHipster.Network
+namespace FuzzyHipster
 {
 	public class GenericEventArgs<T> : EventArgs
 	{

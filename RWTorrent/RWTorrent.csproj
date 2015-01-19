@@ -76,11 +76,11 @@
     <Compile Include="Crypto\Hash.cs" />
     <Compile Include="Crypto\Key.cs" />
     <Compile Include="Crypto\TransmitCrypto.cs" />
+    <Compile Include="GenericEventArgs.cs" />
     <Compile Include="Network\BlockReceivedEventArgs.cs" />
     <Compile Include="Network\BlockRequestedEventArgs.cs" />
     <Compile Include="Network\BlockTransferManager.cs" />
     <Compile Include="Network\BlockTransferStartedEventArgs.cs" />
-    <Compile Include="Network\GenericEventArgs.cs" />
     <Compile Include="Network\IPSniffer.cs" />
     <Compile Include="Network\MessageComposite.cs" />
     <Compile Include="Network\NetMessage.cs" />
@@ -98,6 +98,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MoustacheLayer.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Strategy\BasicBlockAquisitionStrategy.cs" />
+    <Compile Include="Strategy\BlockAvailabilityHistogram.cs" />
+    <Compile Include="Strategy\BlockAvailabilityList.cs" />
+    <Compile Include="Strategy\BlockAvailabilityMatrix.cs" />
+    <Compile Include="Strategy\CatalogManagementMoustacheStrategy.cs" />
+    <Compile Include="Strategy\InformationServiceMoustacheStrategy.cs" />
+    <Compile Include="Strategy\MoustacheStrategy.cs" />
     <Compile Include="Todo.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
@@ -108,6 +115,7 @@
     <Folder Include="Catalog" />
     <Folder Include="Network" />
     <Folder Include="Crypto" />
+    <Folder Include="Strategy" />
     <Folder Include="UI" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

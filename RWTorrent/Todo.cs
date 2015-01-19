@@ -21,7 +21,7 @@ namespace FuzzyHipster
       // TODO: GUI: Add WAD Count to Channel view
       // TODO: GUI: Add Network.RateLimiter.Rate to the status bar at the bottom
       // TODO: Packet sniff to confirm encryption
-      // TODO: GUI: Add a settings file
+      // TODO: GUI: Add a settings window
       // TODO: GUI: Make it load/save the catalog path from the registry
       // TODO: GUI: Add right click 'context' menu to channels/wads
       // TODO: GUI: Make it so when you select one of the channels in the My Channels - show list of WADs
@@ -36,10 +36,14 @@ namespace FuzzyHipster
       // TODO: MoustacheLayer: Add non-contiguous blocks capability
       // TODO: MoustacheLayer: Add fileWad lists
       // TODO: MoustacheLayer: Add downloaded %
+      // TODO: MoustacheLayer: Add Keying to the channels
+      // TODO: MoustacheLayer: Add sub-channels
       // TODO: GUI: Add add gui %
       // TODO: GUI: Add a 'clear' catalog button
       // TODO: GUI: Add a window that redirects Console.Out to a text window for debugging purposes
       // TODO: MoustacheLayer: Receiving the same block twice+
+      // DONE: MoustacheLayer: Add events to Catalog eg. Catalog.NotifyWad
+      // TODO: GUI: Subscribe to events on Catalog
     }
   }
 }

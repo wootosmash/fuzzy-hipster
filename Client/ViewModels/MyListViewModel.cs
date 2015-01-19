@@ -14,10 +14,10 @@ namespace Client
 
         public MyListViewModel()
         {
-            MoustacheLayer.Singleton.Network.NewChannel += Network_NewChannel;
+            MoustacheLayer.Singleton.Catalog.NotifyChannel += Catalog_NotifyChannel;
         }
 
-        void Network_NewChannel(object sender, FuzzyHipster.Network.GenericEventArgs<Channel> e)
+        void Catalog_NotifyChannel(object sender, FuzzyHipster.GenericEventArgs<Channel> e)
         {
             OnPropertyChanged("Channels");
         }

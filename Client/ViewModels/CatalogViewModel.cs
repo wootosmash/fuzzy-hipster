@@ -24,7 +24,7 @@ namespace Client
 
        
 
-        void Network_NewWad(object sender, FuzzyHipster.Network.GenericEventArgs<FileWad> e)
+        void Catalog_NotifyWad(object sender, FuzzyHipster.GenericEventArgs<FileWad> e)
         {
             OnPropertyChanged("Channels");
 

@@ -43,7 +43,7 @@ namespace Client
             OnPropertyChanged("Peers");
         }
 
-        void Network_PeerConnected(object sender, FuzzyHipster.Network.GenericEventArgs<Peer> e)
+        void Network_PeerConnected(object sender, FuzzyHipster.GenericEventArgs<Peer> e)
         {
             OnPropertyChanged("Peers");
         }
