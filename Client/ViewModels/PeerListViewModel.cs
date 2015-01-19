@@ -24,17 +24,11 @@ namespace Client
         {
             
            MoustacheLayer.Singleton.Network.PeerConnected += Network_PeerConnected;
-
            MoustacheLayer.Singleton.Network.PeerConnectFailed += Network_PeerConnected;
-
            MoustacheLayer.Singleton.Network.PeerDisconnected += Network_PeerConnected;
-
            MoustacheLayer.Singleton.Network.NewPeer += Network_PeerConnected;
 
-           //// MoustacheLayer.Singleton.Network. += Network_PeerConnected;
-
-
-            FuzzyHipster.MoustacheLayer.Singleton.HeartBeat.Elapsed += HeartBeat_Elapsed;
+           FuzzyHipster.MoustacheLayer.Singleton.HeartBeat.Elapsed += HeartBeat_Elapsed;
 
         }
 
