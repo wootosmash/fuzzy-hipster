@@ -18,8 +18,11 @@ namespace FuzzyHipster.Crypto
   /// Description of Key.
   /// </summary>
   [Serializable()]
-  public abstract class Key
+  public abstract class Key 
   {
+    public Guid Id { get; set; }
+    public string Name { get; set; }
+    
     public Key()
     {
     }

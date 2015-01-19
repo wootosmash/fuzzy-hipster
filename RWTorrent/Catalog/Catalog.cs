@@ -15,7 +15,7 @@ using System.Xml.Serialization;
 using FuzzyHipster.Crypto;
 namespace FuzzyHipster.Catalog
 {
-  
+
   
   public class Catalog : CatalogItem
   {    
@@ -38,6 +38,30 @@ namespace FuzzyHipster.Catalog
       get; set; 
     }
 
+    public event EventHandler<GenericEventArgs<FileWad>> NotifyFileWad;
+    protected virtual void OnNotifyFileWad(GenericEventArgs<FileWad> e)
+    {
+      var handler = NotifyFileWad;
+      if (handler != null)
+        handler(this, e);
+    }
+
+    public event EventHandler<GenericEventArgs<Channel>> NotifyChannel;
+    protected virtual void OnNotifyChannel(GenericEventArgs<Channel> e)
+    {
+      var handler = NotifyChannel;
+      if (handler != null)
+        handler(this, e);
+    }
+
+    public event EventHandler<GenericEventArgs<Key>> NotifyKey;
+    protected virtual void OnNotifyKey(GenericEventArgs<Key> e)
+    {
+      var handler = NotifyKey;
+      if (handler != null)
+        handler(this, e);
+    }
+    
     public Catalog()
     {
       Id = Guid.NewGuid();
@@ -141,7 +165,7 @@ namespace FuzzyHipster.Catalog
       return null;
     }
     
-    public void AddFileWad( FileWad wad )
+    public FileWad AddFileWad( FileWad wad )
     {
       var channel = Channels.Find( x => x.Id == wad.ChannelId );
       
@@ -159,21 +183,27 @@ namespace FuzzyHipster.Catalog
       } 
 
       UpdateLastUpdated( wad.LastUpdated );
+      OnNotifyFileWad( new GenericEventArgs<FileWad>(wad));
+      return wad;
     }
     
-    public void AddChannel( Channel channel )
+    public Channel AddChannel( Channel channel )
     {
       if ( Channels[channel.Id] == null )
   			Channels.Add(channel);
 			channel.Save();
       
 			UpdateLastUpdated(channel.LastUpdated);
+      OnNotifyChannel( new GenericEventArgs<Channel>(channel));
+      return channel;
     }
     
-    public void AddKey( Key key )
+    public Key AddKey( Key key )
     {
       Keys.Add(key);
       Keys.Save();
+      OnNotifyKey(new GenericEventArgs<Key>(key));
+      return key;
     }
     
     public override void Validate()
@@ -187,6 +217,7 @@ namespace FuzzyHipster.Catalog
     }
 
   }
+
 }
 
 

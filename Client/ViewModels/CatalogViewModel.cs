@@ -24,12 +24,14 @@ namespace Client
         }
 
 
+
         public CatalogViewModel()
+
         {
-            FuzzyHipster.MoustacheLayer.Singleton.Network.NewWad += Network_NewWad;
+            FuzzyHipster.MoustacheLayer.Singleton.Catalog.NotifyFileWad += Catalog_NotifyFileWad;
         }
 
-        void Network_NewWad(object sender, FuzzyHipster.Network.GenericEventArgs<FileWad> e)
+        void Catalog_NotifyFileWad(object sender, GenericEventArgs<FileWad> e)
         {
             OnPropertyChanged("Wads");
         }

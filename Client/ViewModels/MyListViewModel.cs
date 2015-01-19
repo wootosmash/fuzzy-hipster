@@ -15,16 +15,18 @@ namespace Client
 
         public MyListViewModel()
         {
-            MoustacheLayer.Singleton.Network.NewChannel += Network_NewChannel;
-            MoustacheLayer.Singleton.Network.NewWad += Network_NewWad;
+
+            MoustacheLayer.Singleton.Catalog.NotifyChannel+=Catalog_NotifyChannel;
+
+            MoustacheLayer.Singleton.Catalog.NotifyFileWad += Catalog_NotifyFileWad;
         }
 
-        void Network_NewWad(object sender, FuzzyHipster.Network.GenericEventArgs<FileWad> e)
+        void Catalog_NotifyFileWad(object sender, GenericEventArgs<FileWad> e)
         {
             OnPropertyChanged("CatalogWads");
         }
-
-        void Network_NewChannel(object sender, FuzzyHipster.Network.GenericEventArgs<Channel> e)
+        
+        void Catalog_NotifyChannel(object sender, FuzzyHipster.GenericEventArgs<Channel> e)
         {
             OnPropertyChanged("Channels");
         }

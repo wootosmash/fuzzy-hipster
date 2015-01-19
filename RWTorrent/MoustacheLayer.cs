@@ -38,6 +38,13 @@ namespace FuzzyHipster
   // 
 
   
+  
+  
+  
+  
+  
+  
+  
   public class MoustacheLayer
   {
     public static MoustacheLayer Singleton { get; protected set; }
@@ -50,17 +57,11 @@ namespace FuzzyHipster
     public bool IsConnectedToGrid { get { return Network.ActivePeers.Count > 0; } }
     public Random Random { get; set; }
     
-    public List<MoustacheAction> HeartbeatActions { get; set; }
+    public List<MoustacheStrategy> Strategies { get; set; }
 
     Timer HeartbeatTimer = new Timer();
 
-    public Timer HeartBeat
-    {
-      get
-      {
-        return HeartbeatTimer;
-      }
-    }
+    public Timer HeartBeat { get{ return HeartbeatTimer; }}
     
     public MoustacheLayer( Catalog.Catalog catalog )
     {
@@ -68,7 +69,7 @@ namespace FuzzyHipster
       Random = new Random(DateTime.Now.Millisecond);
       Catalog = catalog;
       Settings = Settings.Load("settings.xml");
-      HeartbeatActions = new List<MoustacheAction>();
+      Strategies = new List<MoustacheStrategy>();
 
       Me = new Peer();
       Me.Port = Settings.Port;
@@ -84,63 +85,20 @@ namespace FuzzyHipster
       Network.PeerConnectFailed += NetworkPeerConnectFailed;
       
       Network.NewPeer += NetworkNewPeer;
-      Network.NewChannel += NetworkNewChannel;
-      Network.NewWad += NetworkNewWad;
       
-      Network.PeersRequested += NetworkPeersRequested;
-      Network.ChannelsRequested += NetworkChannelsRequested;
-      Network.WadsRequested += NetworkWadsRequested;
+      Strategies.Add( new InformationServiceMoustacheStrategy());
+      Strategies.Add( new CatalogManagementMoustacheStrategy());
+      Strategies.Add( new BasicBlockAquisitionStrategy());
       
-      Network.BlocksAvailableReceived += NetworkBlocksAvailableReceived;
-      Network.BlocksAvailableRequested += NetworkBlocksAvailableRequested;
-      
-      Network.BlockRequested += NetworkBlockRequested;
-      Network.BlockReceived += NetworkBlockReceived;
+      foreach( MoustacheStrategy strategy in Strategies )
+        strategy.Install();
       
       HeartbeatTimer = new Timer(Settings.HeartbeatInterval);
       HeartbeatTimer.Elapsed +=  HeartbeatElapsed;
       HeartbeatTimer.Start();
     }
     
-    void NetworkBlocksAvailableReceived( object sender, MessageComposite<BlocksAvailableNetMessage> e)
-    {
-      var wad = MoustacheLayer.Singleton.Catalog.GetFileWad(e.Value.FileWadId);
-      
-      var list = wad.GetAvailabilityNeededIntersection(e.Value.BlocksAvailable);
-      
-      // pick one at random and request it
-      if ( list.Length > 0 )
-      {
-        int index = list[MoustacheLayer.Singleton.Random.Next(0,list.Length)];
-        Network.RequestBlock(e.Peer, wad, index);
-      }
-    }
     
-    void NetworkBlocksAvailableRequested( object sender, MessageComposite<RequestBlocksAvailableNetMessage> e)
-    {
-      var wad = Catalog.GetFileWad(e.Value.FileWadId);
-      if ( wad == null )
-        return;
-      
-      Network.SendBlocksAvailable( e.Peer, wad );
-    }
-    
-    void NetworkBlockRequested( object sender, BlockRequestedEventArgs e)
-    {
-      Network.SendBlock( Catalog.GetFileWad(e.FileWadId), e.Block, e.Peer );
-    }
-    
-    void NetworkBlockReceived( object sender, BlockReceivedEventArgs e)
-    {
-      FileWad wad = Catalog.GetFileWad(e.FileWadId);
-
-      if ( !wad.IsFullyDownloaded )
-        Network.RequestBlocksAvailable(e.Peer, wad);
-      else
-        wad.SaveFromBlocks( Catalog.BasePath + @"\Files\" );
-      
-      wad.Save();
-    }
     
     void NetworkPeerConnected( object sender, GenericEventArgs<Peer> e)
     {
@@ -149,34 +107,11 @@ namespace FuzzyHipster
     
     void NetworkPeerConnectFailed( object sender, GenericEventArgs<Peer> e)
     {
+      // when a peer fails to connect we use an exponential backoff algorithm to connect next time
       e.Value.FailedConnectionAttempts++;
-      e.Value.NextConnectionAttempt = DateTime.Now.AddSeconds(Math.Pow(Settings.ConnectAttemptWaitTime, e.Value.FailedConnectionAttempts));
+      e.Value.NextConnectionAttempt = DateTime.Now.AddSeconds(Settings.ConnectAttemptWaitTime * Math.Pow(2, e.Value.FailedConnectionAttempts));
     }
     
-    void NetworkPeersRequested( object sender, MessageComposite<RequestPeersNetMessage> e )
-    {
-      var peers = new List<Peer>();
-      
-      foreach( var peer in Peers )
-        peers.Add(peer);
-      
-      Network.SendPeerList( peers.ToArray(), e.Peer );
-    }
-
-    void NetworkChannelsRequested( object sender, MessageComposite<RequestChannelsNetMessage> e )
-    {
-      Network.SendChannels( Catalog.Channels.ToArray(), e.Peer);
-    }
-
-    void NetworkWadsRequested( object sender, MessageComposite<RequestWadsNetMessage> e )
-    {
-      if ( Catalog.Channels[e.Value.ChannelGuid] == null )
-        return;
-      if ( Catalog.Channels[e.Value.ChannelGuid].Wads == null )
-        Network.SendWads( null, e.Peer);
-      else
-        Network.SendWads( Catalog.Channels[e.Value.ChannelGuid].Wads.ToArray(), e.Peer);
-    }
 
     
     void NetworkNewPeer( object sender, GenericEventArgs<Peer> e)
@@ -195,24 +130,6 @@ namespace FuzzyHipster
             Network.Connect(e.Value);
     }
     
-    void NetworkNewChannel( object sender, GenericEventArgs<Channel> e)
-    {
-      Catalog.AddChannel(e.Value);
-      
-      Peer[] peers = Network.ActivePeers.ToArray();
-      
-      foreach( Peer peer in peers )
-        Network.RequestWads( peer, 0, 30, e.Value.Id);
-    }
-    
-    void NetworkNewWad( object sender, GenericEventArgs<FileWad> e)
-    {
-      Catalog.AddFileWad(e.Value);
-      
-      foreach( var peer in Network.ActivePeers )
-        Network.RequestBlocksAvailable( peer, e.Value );
-      
-    }
     
     void HeartbeatElapsed(object sender, ElapsedEventArgs e)
     {
@@ -232,15 +149,6 @@ namespace FuzzyHipster
             Network.SendMyStatus( peer );
             //            Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
             Network.RequestChannels(peer, Catalog.LastUpdated, Settings.HeartbeatChannelRequestCount);
-            foreach( var channel in Catalog.Channels.ToArray() )
-            {
-              if ( channel.Wads != null && channel.Wads.Count > 0 )
-              {
-                foreach( var wad in channel.Wads.ToArray())
-                  if ( !wad.IsFullyDownloaded )
-                    Network.RequestBlocksAvailable(peer, channel.Wads[0]);
-              }
-            }
           }
           else
             Console.WriteLine("NOT OK TO SEND: " + peer.OkToSendAt);
@@ -254,6 +162,9 @@ namespace FuzzyHipster
               if ( peer.NextConnectionAttempt < DateTime.Now ) // wait is over
                 Network.Connect(peer);
         }
+        
+        foreach( var strategy in Strategies )
+          strategy.Think();
       }
       catch( Exception ex )
       {
@@ -263,7 +174,6 @@ namespace FuzzyHipster
     
     public void Start()
     {
-      Console.WriteLine("Starting " + Settings.Port);
       Network.StartListening(Settings.Port);
     }
   }
