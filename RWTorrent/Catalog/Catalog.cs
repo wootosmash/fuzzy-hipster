@@ -18,7 +18,7 @@ namespace FuzzyHipster.Catalog
 
   
   public class Catalog : CatalogItem
-  {    
+  {
     public string Namespace { get; set; }
 
     public string Description { get; set; }
@@ -35,7 +35,7 @@ namespace FuzzyHipster.Catalog
     
     [XmlIgnore()]
     public KeyCollection Keys {
-      get; set; 
+      get; set;
     }
 
     public event EventHandler<GenericEventArgs<FileWad>> NotifyFileWad;
@@ -87,7 +87,7 @@ namespace FuzzyHipster.Catalog
         using (var reader = new StreamReader( catalogEndPointPath ))
           catalog = (Catalog)serialiser.Deserialize(reader);
 
-        catalog.BasePath = basePath;        
+        catalog.BasePath = basePath;
         catalog.Keys = KeyCollection.Load(catalog.BasePath);
         
         string channelsPath = Path.Combine(basePath, @"Catalog\Channels");
@@ -158,9 +158,10 @@ namespace FuzzyHipster.Catalog
     public FileWad GetFileWad(Guid id)
     {
       foreach (var channel in Channels)
-        foreach (var wad in channel.Wads)
-          if (wad.Id == id)
-            return wad;
+        if ( channel.Wads != null )
+          foreach (var wad in channel.Wads)
+            if (wad.Id == id)
+              return wad;
       
       return null;
     }
@@ -180,7 +181,7 @@ namespace FuzzyHipster.Catalog
       {
         channel.Wads.Add(wad);
         wad.Save();
-      } 
+      }
 
       UpdateLastUpdated( wad.LastUpdated );
       OnNotifyFileWad( new GenericEventArgs<FileWad>(wad));
@@ -190,13 +191,13 @@ namespace FuzzyHipster.Catalog
     public Channel AddChannel( Channel channel )
     {
       if ( Channels[channel.Id] == null )
-  			Channels.Add(channel);
-			
-			channel.Subscribed = true;
-			channel.Published = true;
-			channel.Save();
+        Channels.Add(channel);
       
-			UpdateLastUpdated(channel.LastUpdated);
+      channel.Subscribed = true;
+      channel.Published = true;
+      channel.Save();
+      
+      UpdateLastUpdated(channel.LastUpdated);
       OnNotifyChannel( new GenericEventArgs<Channel>(channel));
       return channel;
     }
@@ -215,7 +216,7 @@ namespace FuzzyHipster.Catalog
     
     public override string ToString()
     {
-      return string.Format("[Catalog Namespace={0}, Description={1}, BasePath={2}, LastUpdated={3}, Channels.Count={4}]", 
+      return string.Format("[Catalog Namespace={0}, Description={1}, BasePath={2}, LastUpdated={3}, Channels.Count={4}]",
                            Namespace, Description, BasePath, LastUpdated, Channels.Count);
     }
 

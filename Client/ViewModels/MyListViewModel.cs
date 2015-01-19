@@ -109,7 +109,7 @@ namespace Client
         {
             get
             {
-                return _selectedChannel.Wads;
+              return _selectedChannel.Wads.ToList();
             }
 
         }
