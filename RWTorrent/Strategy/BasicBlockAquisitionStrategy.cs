@@ -71,16 +71,17 @@ namespace FuzzyHipster
     
     public bool WeDontKnowWhatsAvailable(FileWad wad)
     {
+      Console.WriteLine("WeDontKnowWhatsAvailable()");
       DateTime timeout = DateTime.Now.AddSeconds(-BlockAvailabilityTimeout);
       
       if ( !BlockAvailability.ContainsKey(wad.Id))
-        return false;
+        return true;
       
       foreach( var matrix in BlockAvailability[wad.Id] )
         if ( matrix.LastUpdated < timeout )
-          return false;
+          return true;
       
-      return true;
+      return false;
     }
 
     void NetworkBlocksAvailableReceived(object sender, MessageComposite<BlocksAvailableNetMessage> e)
