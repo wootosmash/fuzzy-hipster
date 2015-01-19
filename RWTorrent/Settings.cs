@@ -36,7 +36,7 @@ namespace FuzzyHipster
 
 		public Settings()
 		{
-			MaxActivePeers = 1;
+			MaxActivePeers = 5;
 			HeartbeatPeerRequestCount = 30;
 			HeartbeatChannelRequestCount = 3;
 			HeartbeatInterval = 10000;
