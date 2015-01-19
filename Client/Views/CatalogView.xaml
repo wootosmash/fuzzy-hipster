@@ -2,28 +2,15 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:local="clr-namespace:Client" 
              mc:Ignorable="d"
              d:DesignHeight="500" d:DesignWidth="700" Style="{StaticResource UserControl}">
     
 
     
     <Grid>
-        <ListView ItemsSource="{Binding Wads}" BorderBrush="{x:Null}">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Name" Width="auto" DisplayMemberBinding="{Binding Name}">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name}" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Description" Width="auto" DisplayMemberBinding="{Binding Description}" />
-                
-                </GridView>
-            </ListView.View>
-        </ListView>
 
+        <local:WadLayout    Wads="{Binding Wads, UpdateSourceTrigger=PropertyChanged}" />
     </Grid>
 </UserControl>

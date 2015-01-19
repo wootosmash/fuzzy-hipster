@@ -64,7 +64,7 @@ namespace Client
         {
             get
             {
-                return new RelayCommand(p => { MyListViewModel.View(); });
+                return new RelayCommand(p => { MyListViewModel.Instance.Render(); });
             }
         }
 
@@ -85,8 +85,7 @@ namespace Client
             };
             catalog.Channels.Add(newChannel);
             catalog.Save();
-
-            MyListViewModel.View();
+            MyListViewModel.Instance.Render();
         }
     }
 }

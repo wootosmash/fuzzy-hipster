@@ -35,13 +35,11 @@ namespace Client
         }
 
 
+
         public string ChannelName
         {
-            get { 
-
-                
+           get { 
                 return Channel.Name;
-                
            }
         }
 
@@ -147,7 +145,7 @@ namespace Client
         {
             get
             {
-                return new RelayCommand(p => { MyListViewModel.View(); });
+                return new RelayCommand(p => { MyListViewModel.Instance.Render(); });
             }
         }
 
@@ -158,7 +156,7 @@ namespace Client
             FileWad myprog = new FileWad() { ChannelId = this.Channel.Id , BlockSize = 0, Name = WadName, Description = WadDescription };
             myprog.BuildFromPath(WadPath);
             MoustacheLayer.Singleton.Catalog.AddFileWad(myprog);
-            MyListViewModel.View();
+            MyListViewModel.Instance.Render();
         }
 
     }

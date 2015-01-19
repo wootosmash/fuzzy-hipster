@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Client
@@ -15,6 +16,12 @@ namespace Client
         public MyListViewModel()
         {
             MoustacheLayer.Singleton.Network.NewChannel += Network_NewChannel;
+            MoustacheLayer.Singleton.Network.NewWad += Network_NewWad;
+        }
+
+        void Network_NewWad(object sender, FuzzyHipster.Network.GenericEventArgs<FileWad> e)
+        {
+            OnPropertyChanged("CatalogWads");
         }
 
         void Network_NewChannel(object sender, FuzzyHipster.Network.GenericEventArgs<Channel> e)
@@ -53,6 +60,8 @@ namespace Client
                     _selectedChannel = value;
                     OnPropertyChanged("SelectedChannel");
                     OnPropertyChanged("IsChannelSelected");
+                    OnPropertyChanged("WadVisibility");
+                    OnPropertyChanged("CatalogWads");
                 }
             }
         }
@@ -70,7 +79,13 @@ namespace Client
             }
         }
 
-
+        public Visibility WadVisibility
+        {
+            get
+            {
+                return SelectedChannel != null ? Visibility.Visible : Visibility.Hidden;
+            }
+        }
 
         string _description;
         public string Description
@@ -84,6 +99,17 @@ namespace Client
                     OnPropertyChanged("Description");
                 }
             }
+        }
+
+
+        private List<FileWad> _catalogWads = null;
+        public List<FileWad> CatalogWads
+        {
+            get
+            {
+                return _selectedChannel.Wads;
+            }
+
         }
 
         public ICommand AddFiles

@@ -59,19 +59,26 @@ namespace Client
             OnPropertyChanged(propertyName);
         }
 
+        public static T Instance
+        {
+            get
+            {
+                Type t = typeof(T);
+                MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
+                return (T) mw.PageViewModelMap[t.Name];
+            }
+        }
 
-        public static void View()
+        public void Render()
         {
             Type t = typeof(T);
             MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
-
-            if (!mw.PageViewModelMap.Keys.Contains(t.Name))
-            {
-                return;
-            }
-
             mw.CurrentPageViewModel = mw.PageViewModelMap[t.Name];
         }
+
+
+
+
        
 
         /// <summary>
@@ -95,5 +102,8 @@ namespace Client
             }
         }
         #endregion // INotifyPropertyChanged Members
+
+
+
     }
 }

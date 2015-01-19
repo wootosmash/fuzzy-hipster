@@ -28,7 +28,7 @@ namespace Client
         private void ChangeView_Click(object sender, RoutedEventArgs e)
         {
 
-            MyListViewModel.View();
+            MyListViewModel.Instance. Render();
         }
     }
 }

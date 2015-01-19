@@ -52,6 +52,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Net" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -92,6 +93,9 @@
     <Compile Include="Views\CatalogView.xaml.cs">
       <DependentUpon>CatalogView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Components\WadLayout.xaml.cs">
+      <DependentUpon>WadLayout.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\KeysView.xaml.cs">
       <DependentUpon>KeysView.xaml</DependentUpon>
     </Compile>
@@ -122,6 +126,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Layouts\WadsList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -143,6 +151,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CatalogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Components\WadLayout.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -250,6 +262,9 @@
     <Resource Include="Assets\logo-h-48.png" />
     <Resource Include="Assets\logo-h-512.png" />
     <Resource Include="Assets\splash1000-600.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ViewModels\Components\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

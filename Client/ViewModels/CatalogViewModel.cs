@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FuzzyHipster.Catalog;
 using FuzzyHipster;
 using System.Windows;
+using System.Diagnostics;
 
 
 namespace Client
@@ -22,32 +23,27 @@ namespace Client
 
         }
 
-       
+
+        public CatalogViewModel()
+        {
+            FuzzyHipster.MoustacheLayer.Singleton.Network.NewWad += Network_NewWad;
+        }
 
         void Network_NewWad(object sender, FuzzyHipster.Network.GenericEventArgs<FileWad> e)
         {
-            OnPropertyChanged("Channels");
-
-        } 
+            OnPropertyChanged("Wads");
+        }
 
         private List<FileWad> _wads = null;
         public List<FileWad> Wads
         {
             get
             {
-               // if (_wads != null)
-                //{
-                //    return _wads;
-              //  }
                 ChannelCollection Channels = FuzzyHipster.MoustacheLayer.Singleton.Catalog.Channels;
                 _wads = new List<FileWad>();
 
                 foreach (Channel s in Channels)
                 {
-                    //if (s.Wads == null)
-                    //{
-                    // MessageBox.Show("Asdasdasd");
-                    //}
                     _wads.AddRange(s.Wads);
                 }
 
@@ -63,9 +59,6 @@ namespace Client
                 return Wads.Count;
             }
         }
-
-
-
 
 
     }

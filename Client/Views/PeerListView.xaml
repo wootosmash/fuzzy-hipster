@@ -30,10 +30,10 @@
                     </GridViewColumn>
 
 
-                    <GridViewColumn Width="130" Header="IPAddress" TextBlock.TextAlignment="Left"  DisplayMemberBinding="{Binding IPAddress}">
+                    <GridViewColumn Width="130" Header="IPAddress" TextBlock.TextAlignment="Left"  DisplayMemberBinding="{Binding IPAddress, UpdateSourceTrigger=PropertyChanged}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding IPAddress}" />
+                                <TextBox Text="{Binding IPAddress,UpdateSourceTrigger=PropertyChanged}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

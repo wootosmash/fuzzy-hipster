@@ -1,8 +1,9 @@
-﻿<UserControl x:Class="Client.MyListView"
+﻿<UserControl
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Client" x:Class="Client.MyListView" 
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="700" Style="{StaticResource UserControl}">
     <Grid>
@@ -10,21 +11,21 @@
             <RowDefinition Height="27"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="7"/>
-            <RowDefinition Height="100"/>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="150"/>
+
         </Grid.RowDefinitions>
 
         <ToolBarTray Grid.Row="0" Width="auto" HorizontalAlignment="Stretch" Background="{StaticResource TitleBarBackgroundBrush}">
             <ToolBar HorizontalAlignment="Right" Height="27"
-		     Band="0" Width="auto" BandIndex="0" Background="{StaticResource TitleBarBackgroundBrush}">
-                <Button x:Name="CreateChannel" Command="{Binding NewChannel}" CommandParameter="{Binding }" Content="Create Channel" Height="22" VerticalAlignment="Top" Width="auto"/>
-                <Separator></Separator>
-                <Button Command="{Binding AddFiles}" IsEnabled="{Binding IsChannelSelected, UpdateSourceTrigger=PropertyChanged}" CommandParameter="{Binding }" Content="Add Files to Channel" Height="22" VerticalAlignment="Top"    Background="{StaticResource TitleBarBackgroundBrush}"/>
+				Band="0" Width="auto" BandIndex="0" Background="{StaticResource TitleBarBackgroundBrush}">
+                <Button x:Name="CreateChannel" Command="{Binding NewChannel}" CommandParameter="{Binding ''}" Content="Create Channel" Height="22" VerticalAlignment="Top" Width="auto"/>
+                <Separator/>
+                <Button Command="{Binding AddFiles}" IsEnabled="{Binding IsChannelSelected, UpdateSourceTrigger=PropertyChanged}" CommandParameter="{Binding ''}" Content="Add Files to Channel" Height="22" VerticalAlignment="Top"    Background="{StaticResource TitleBarBackgroundBrush}"/>
             </ToolBar>
 
         </ToolBarTray>
 
-        <ListView Grid.Row="1" ItemsSource="{Binding Channels, UpdateSourceTrigger=PropertyChanged}" Grid.RowSpan="1" SelectedItem="{Binding SelectedChannel}" >
+        <ListView  Grid.Row="1" ItemsSource="{Binding Channels, UpdateSourceTrigger=PropertyChanged}" Grid.RowSpan="1" SelectedItem="{Binding SelectedChannel}" >
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Name" Width="auto" DisplayMemberBinding="{Binding Name}">
@@ -47,9 +48,10 @@
         </ListView>
 
 
-        <GridSplitter Grid.Row="2" Grid.Column="1" Margin="2,2,2,2" Width="auto" Height="3"  Background="{StaticResource TitleBarBackgroundBrush}" VerticalAlignment="Center" HorizontalAlignment="Stretch" ResizeDirection="Rows" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" />
 
+        <GridSplitter Grid.Row="2"  Grid.Column="1" Margin="2,2,2,2" Width="auto" Height="3"  Background="{StaticResource TitleBarBackgroundBrush}" VerticalAlignment="Center" HorizontalAlignment="Stretch" ResizeDirection="Rows" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" />
 
-  
+       
+        <local:WadLayout  Grid.Row="3"  Wads="{Binding CatalogWads, UpdateSourceTrigger=PropertyChanged}" />
     </Grid>
 </UserControl>
