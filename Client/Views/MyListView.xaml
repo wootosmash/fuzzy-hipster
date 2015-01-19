@@ -52,6 +52,6 @@
         <GridSplitter Grid.Row="2"  Grid.Column="1" Margin="2,2,2,2" Width="auto" Height="3"  Background="{StaticResource TitleBarBackgroundBrush}" VerticalAlignment="Center" HorizontalAlignment="Stretch" ResizeDirection="Rows" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" />
 
        
-        <local:WadLayout  Grid.Row="3"  Wads="{Binding CatalogWads, UpdateSourceTrigger=PropertyChanged}" />
+        <local:WadLayout Grid.Row="3"  Wads="{Binding CatalogWads, UpdateSourceTrigger=PropertyChanged}" />
     </Grid>
 </UserControl>

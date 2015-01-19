@@ -15,23 +15,26 @@ namespace Client
 
         public MyListViewModel()
         {
-
             MoustacheLayer.Singleton.Catalog.NotifyChannel+=Catalog_NotifyChannel;
-
             MoustacheLayer.Singleton.Catalog.NotifyFileWad += Catalog_NotifyFileWad;
         }
 
         void Catalog_NotifyFileWad(object sender, GenericEventArgs<FileWad> e)
         {
-            OnPropertyChanged("CatalogWads");
+   
+             OnPropertyChanged("CatalogWads");
+           
         }
         
         void Catalog_NotifyChannel(object sender, FuzzyHipster.GenericEventArgs<Channel> e)
         {
-            OnPropertyChanged("Channels");
+
+          
+            
+                OnPropertyChanged("Channels");
+            
         }
 
-        
         public string Name
         {
             get
@@ -92,7 +95,7 @@ namespace Client
         string _description;
         public string Description
         {
-            get{return _description;}
+            get { return _description; }
             set
             {
                 if (value != _description)
@@ -102,14 +105,15 @@ namespace Client
                 }
             }
         }
+        
 
 
-        private List<FileWad> _catalogWads = null;
+
         public List<FileWad> CatalogWads
         {
             get
             {
-                return _selectedChannel.Wads;
+                return MoustacheLayer.Singleton.Catalog.Channels.First(x => x.Id == _selectedChannel.Id ).Wads;
             }
 
         }
