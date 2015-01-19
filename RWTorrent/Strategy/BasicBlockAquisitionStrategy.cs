@@ -62,6 +62,9 @@ namespace FuzzyHipster
           {
             KeyValuePair<int, Peer[]> blockPeer = BlockAvailability.GetRandomBlockPeer(wad, BlockAvailability, BlockAvailabilityList.SearchStrategy.RareBlocks);
             
+            if ( blockPeer.Key < 0 || blockPeer.Value.Length == 0 )
+              continue; // skip this WAD
+            
             int i = MoustacheLayer.Singleton.Random.Next(0,blockPeer.Value.Length);
             
             Console.WriteLine("RequestBlock({0},{1},{2})", i, wad, blockPeer.Key );
