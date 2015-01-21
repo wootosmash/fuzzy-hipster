@@ -351,6 +351,9 @@ namespace FuzzyHipster.Catalog
     
     public override void Validate()
     {
+      if ( !VerifySignature())
+        throw new Exception("Signature verfication failed");
+      
       CheckIfFullyDownloaded();
       
       foreach( var file in Files )

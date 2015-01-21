@@ -46,30 +46,25 @@ namespace FuzzyHipster.Tests
       }
 
       
-      //      CryptoTest crypto = new CryptoTest();
-      //      RSAParameters privateKey = crypto.GenerateKeys("simlanghoff@gmail.com");
-//
-      //      const string PlainText = "This is really sent by me, really!";
-//
-      //      RSAParameters publicKey = crypto.GetPublicKey("simlanghoff@gmail.com");
-//
-      //      string encryptedText = Cryptograph.Encrypt(PlainText, publicKey);
-//
-      //      Console.WriteLine("This is the encrypted Text:" + "\n " + encryptedText);
-//
-      //      string decryptedText = Cryptograph.Decrypt(encryptedText, privateKey);
-//
-      //      Console.WriteLine("This is the decrypted text: " + decryptedText);
-//
-      //      string messageToSign = encryptedText;
-//
-      //      string signedMessage = Cryptograph.SignData(messageToSign, privateKey);
-//
-      //      //// Is this message really, really, REALLY sent by me?
-      //      bool success = Cryptograph.VerifyData(messageToSign, signedMessage, publicKey);
-//
-      //      Console.WriteLine("Is this message really, really, REALLY sent by me? " + success);
       
+    }
+    
+    [Test]
+    public void KeyTest()
+    {
+      string s = "Some string";
+      
+      AsymmetricKey k = AsymmetricKey.Create();
+      
+      byte[] buffer = k.SignData(s);      
+      
+      Console.WriteLine(Utility.ByteArrayToHexString(k.SignData(s)));
+      Console.WriteLine(Utility.ByteArrayToHexString(k.SignData(s)));
+      Console.WriteLine(Utility.ByteArrayToHexString(k.SignData(s)));
+      Console.WriteLine(Utility.ByteArrayToHexString(k.SignData(s)));
+     
+      
+      Assert.IsTrue(k.VerifySignature(buffer, s), Utility.ByteArrayToHexString( buffer));
     }
     
     [Test]

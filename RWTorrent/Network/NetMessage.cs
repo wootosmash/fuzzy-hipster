@@ -87,6 +87,7 @@ namespace FuzzyHipster.Network
   {
     public long Recency { get; set; }
     public int Count { get; set; }
+    public Guid[] Guids { get; set; }
 
     public RequestChannelsNetMessage()
     {
@@ -229,11 +230,31 @@ namespace FuzzyHipster.Network
     
     public KeyNetMessage()
     {
-      Type = MessageType.Key;
+      Type = MessageType.AsymmetricKeyHello;
     }
   }
   
-  public enum MessageType
+  /// <summary>
+  /// Can used to relay messages to other peers
+  /// </summary>
+  [Serializable()]
+  [StructLayout(LayoutKind.Sequential, Pack=1)]
+  public class RelayNetMessage : NetMessage
+  {
+    public Peer To { get; set; }
+    public Peer From { get; set; }
+    public byte[] Data { get; set; }
+    public int TimeToLive { get; set; }
+    
+    public RelayNetMessage()
+    {
+      Type = MessageType.Relay;
+      TimeToLive = MoustacheLayer.Singleton.Settings.DefaultRelayTimeToLive;
+    }
+  }
+  
+  
+  public enum MessageType : byte
   {
     Unknown = 0,
     Hello = 1,
@@ -261,6 +282,11 @@ namespace FuzzyHipster.Network
     StartBlockTransfer = 35,
     BlockTransferPacket = 36,
     
-    Key = 50
+    AsymmetricKeyHello = 50,
+    AsymmetricKeyAck = 51,
+    SymmetricKey = 52,
+    
+    Relay = 100,
+    Max = 255
   }
 }

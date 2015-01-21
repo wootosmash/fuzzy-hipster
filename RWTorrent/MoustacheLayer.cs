@@ -11,20 +11,11 @@ using System.Collections.Generic;
 using System.Timers;
 using FuzzyHipster.Catalog;
 using FuzzyHipster.Network;
+using FuzzyHipster.Strategy;
 
 
 namespace FuzzyHipster
 {
-  
-
-  
-  
-  
-  
-  
-  
-  
-  
   public class MoustacheLayer
   {
     public static MoustacheLayer Singleton { get; protected set; }
@@ -57,21 +48,26 @@ namespace FuzzyHipster
       Me.Name = Environment.MachineName;
       
       Peers = PeerCollection.Load(Catalog.BasePath);
-      Peers.ResetConnectionAttempts();
 
       Network = new RWNetwork(Me);
       
-      Network.PeerConnected += NetworkPeerConnected;
-      Network.PeerConnectFailed += NetworkPeerConnectFailed;
-      
-      Network.NewPeer += NetworkNewPeer;
-      
+      // respond to requests
       Strategies.Add( new InformationServiceMoustacheStrategy());
+      
+      // get new channels and updates to existing ones
       Strategies.Add( new CatalogManagementMoustacheStrategy());
+      
+      // get files
       Strategies.Add( new BasicBlockAquisitionStrategy());
       
+      // get peers and connect to new ones
+      Strategies.Add( new BasicPeerManagementMoustacheStrategy());
+      
+      // send out our status
+      Strategies.Add( new KeepAliveMoustacheStrategy());
+            
       foreach( MoustacheStrategy strategy in Strategies )
-        strategy.Install();
+        strategy.Enable();
       
       HeartbeatTimer = new Timer(Settings.HeartbeatInterval);
       HeartbeatTimer.Elapsed +=  HeartbeatElapsed;
@@ -80,35 +76,6 @@ namespace FuzzyHipster
     
     
     
-    void NetworkPeerConnected( object sender, GenericEventArgs<Peer> e)
-    {
-      e.Value.FailedConnectionAttempts = 0;
-    }
-    
-    void NetworkPeerConnectFailed( object sender, GenericEventArgs<Peer> e)
-    {
-      // when a peer fails to connect we use an exponential backoff algorithm to connect next time
-      e.Value.FailedConnectionAttempts++;
-      e.Value.NextConnectionAttempt = DateTime.Now.AddSeconds(Settings.ConnectAttemptWaitTime * Math.Pow(2, e.Value.FailedConnectionAttempts));
-    }
-    
-
-    
-    void NetworkNewPeer( object sender, GenericEventArgs<Peer> e)
-    {
-      // ignore an update to my own peer record
-      if ( e.Value.Id == Me.Id )
-        return;
-      if ( e.Value.Id == Guid.Empty )
-        return;
-      
-      Peers.RefreshPeer(e.Value);
-      
-      if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
-        if ( !Peers.Find(x => x.Id == e.Value.Id).IsConnected )
-          if ( e.Value.IPAddress != null && e.Value.Port > 0 )
-            Network.Connect(e.Value);
-    }
     
     
     void HeartbeatElapsed(object sender, ElapsedEventArgs e)
@@ -120,31 +87,9 @@ namespace FuzzyHipster
     {
       try
       {
-        // talk to connected peers and see if they've got anything for us
-        var peers = Network.ActivePeers.ToArray();
-        foreach( var peer in peers )
-        {
-          if ( peer.OkToSendAt <  DateTime.Now )
-          {
-            Network.SendMyStatus( peer );
-            //            Network.RequestPeers(peer, Settings.HeartbeatPeerRequestCount);
-            Network.RequestChannels(peer, Catalog.LastUpdated, Settings.HeartbeatChannelRequestCount);
-          }
-          else
-            Console.WriteLine("NOT OK TO SEND: " + peer.OkToSendAt);
-        }
-        
-        // see if we need some new peers
-        if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
-        {
-          foreach( var peer in Peers.ToArray() ) // for each peer that we're not connected to
-            if ( !peer.IsConnected ) // we're not connected
-              if ( peer.NextConnectionAttempt < DateTime.Now ) // wait is over
-                Network.Connect(peer);
-        }
-        
         foreach( var strategy in Strategies )
-          strategy.Think();
+          if ( strategy.Enabled )
+            strategy.Think();
       }
       catch( Exception ex )
       {

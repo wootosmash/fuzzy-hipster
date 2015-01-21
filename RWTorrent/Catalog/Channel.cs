@@ -12,6 +12,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using System.Xml.Serialization;
+using FuzzyHipster.Crypto;
 namespace FuzzyHipster.Catalog
 {
   
@@ -19,20 +20,11 @@ namespace FuzzyHipster.Catalog
   [Serializable()]
   public class Channel : CatalogItem, IEquatable<Channel>
   {
-    public string Name {
-      get;
-      set;
-    }
+    public string Name { get; set; }
 
-    public string Description {
-      get;
-      set;
-    }
-
-    public string PublicKey {
-      get;
-      set;
-    }
+    public string Description { get; set; }
+    
+    public string[] Tags { get; set; }
 
     [XmlIgnore()]
     [NonSerialized()]
@@ -96,7 +88,8 @@ namespace FuzzyHipster.Catalog
     
     public override void Validate()
     {
-      
+      if ( !VerifySignature() )
+        throw new Exception("Signature verification failed");
     }
     
     public void Save()

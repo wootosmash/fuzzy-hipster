@@ -99,6 +99,7 @@
     <Compile Include="MoustacheLayer.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Strategy\BasicBlockAquisitionStrategy.cs" />
+    <Compile Include="Strategy\BasicPeerManagementMoustacheStrategy.cs" />
     <Compile Include="Strategy\BlockAvailabilityHistogram.cs" />
     <Compile Include="Strategy\BlockAvailabilityList.cs" />
     <Compile Include="Strategy\BlockAvailabilityMatrix.cs" />

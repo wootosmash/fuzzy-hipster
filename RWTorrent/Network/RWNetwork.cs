@@ -15,13 +15,84 @@ using FuzzyHipster.Crypto;
 
 namespace FuzzyHipster.Network
 {
-  
+  public class NetworkSocket : IDisposable
+  {
+    public static int NextId{ get; set; }
+    
+    public int Id { get; set; }
+    Socket socket;
+    
+    public EndPoint RemoteEndPoint {
+      get { return socket.RemoteEndPoint; }
+    }
+    
+    public bool Connected {
+      get { return socket.Connected; }
+    }
+    
+    public NetworkSocket( AddressFamily addressFamily, SocketType socketType, ProtocolType protocol)
+    {
+      this.Id = NetworkSocket.NextId;
+      NextId ++;
+      socket = new Socket(addressFamily, socketType, protocol );
+    }
+    
+    public NetworkSocket( Socket socket )
+    {
+      this.Id = NetworkSocket.NextId;
+      NextId ++;
+      this.socket = socket;
+    }
+    
+    public int EndReceive( IAsyncResult ar )
+    {
+      return socket.EndReceive(ar);
+    }
+    
+    public IAsyncResult BeginReceive( byte[] buffer, int offset, int count, SocketFlags flags, AsyncCallback callback, object state)
+    {
+      Console.WriteLine("Size: {0}", count);
+      return socket.BeginReceive(buffer, offset, count, flags, callback, state);
+    }
+    
+    public IAsyncResult BeginConnect(EndPoint remoteEP, AsyncCallback callback, object state)
+    {
+      return socket.BeginConnect(remoteEP, callback, state);
+    }
+    
+    public void EndConnect(IAsyncResult asyncResult)
+    {
+      socket.EndConnect(asyncResult);
+    }
+    
+    public IAsyncResult BeginSend( byte[] buffer, int offset, int count, SocketFlags flags, AsyncCallback callback, object state )
+    {
+      return socket.BeginSend(buffer, 0, count, 0, callback, state);
+    }
+    
+    public int EndSend(IAsyncResult asyncResult)
+    {
+      return socket.EndSend(asyncResult);
+    }
+    
+    #region IDisposable implementation
+    public void Dispose()
+    {
+      socket.Dispose();
+    }
+    #endregion
+    
+    public override string ToString()
+    {
+      return string.Format("[NetworkSocket Id={1} Socket={0}]", Id, socket);
+    }
+  }
   
   public class RWNetwork
   {
     public const int RWDefaultPort = 7892;
     
-    public List<Peer> ActivePeers { get; set; }
+    public PeerCollection ActivePeers { get; set; }
     public IPEndPoint LocalEndPoint { get; set; }
     public Socket Listener { get; set; }
     public Peer Me { get; set; }
@@ -230,7 +301,7 @@ namespace FuzzyHipster.Network
     public RWNetwork(Peer me)
     {
       Me = me;
-      ActivePeers = new List<Peer>();
+      ActivePeers = new PeerCollection();
       InProgressTransfers = new SortedList<Guid, TransferManager>();
       
       if ( MoustacheLayer.Singleton != null )
@@ -238,6 +309,75 @@ namespace FuzzyHipster.Network
       else
         RateLimiter = new RateLimiter(RateLimiter.UnlimitedRate);
 
+    }
+    
+    /// <summary>
+    /// Connect to a peer
+    /// </summary>
+    /// <param name="peer"></param>
+    public void Connect( Peer peer )
+    {
+      if ( String.IsNullOrWhiteSpace(peer.IPAddress) )
+        return;
+      
+      try {
+        Log(string.Format("CONNECT: {0}", peer));
+        var state = new ReceiveStateObject();
+        peer.Socket = new NetworkSocket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        state.Peer = peer;
+        
+        IPEndPoint remoteEP = new IPEndPoint( IPAddress.Parse(peer.IPAddress), peer.Port);
+        peer.Socket.BeginConnect( remoteEP, ConnectCallback, state);
+      }
+      catch (Exception)
+      {
+        Log("CONNECT FAILED: {0}", peer);
+        peer.Socket.Dispose();
+        peer.Socket = null;
+        OnPeerConnectFailed( new GenericEventArgs<Peer>(peer) );
+      }
+    }
+    
+    void ConnectCallback( IAsyncResult result )
+    {
+      var connectState = result.AsyncState  as ReceiveStateObject;
+
+      try
+      {
+        connectState.Peer.Socket.EndConnect(result);
+        
+        SendHello(connectState.Peer, false); // server will send us a Key
+        OnPeerConnected(new GenericEventArgs<Peer>(connectState.Peer));
+        
+        // Create the state object.
+        var recvState = new ReceiveStateObject();
+        recvState.Peer = connectState.Peer;
+        recvState.Peer.LastConnection = DateTime.Now;
+        recvState.ExpectedLength = sizeof(int);
+        recvState.ExpectedMessage = MessageType.AsymmetricKeyHello;
+        recvState.WaitingLengthFrame = true;
+
+        //receiveSemaphore.Reset();
+        recvState.Peer.Socket.BeginReceive( recvState.Buffer.GetBuffer(), 0, recvState.ExpectedLength, 0,
+                                           new AsyncCallback(WaitMessageCallback), recvState);
+      }
+      catch( Exception ex )
+      {
+        Log(ex.ToString());
+        Disconnect(connectState.Peer, "Connect failed to " + connectState.Peer.IPAddress + " "  + connectState.Peer.Port);
+        OnPeerConnectFailed( new GenericEventArgs<Peer>( connectState.Peer) );
+      }
+    }
+    
+    public void Disconnect( Peer peer, string why )
+    {
+      Log(string.Format("DISCONNECT: {0} {1} {2} {3}", why, peer.Name, peer.IPAddress, peer.Id));
+      if ( peer.Socket != null )
+      {
+        peer.Socket.Dispose();
+        peer.Socket = null;
+      }
+      ActivePeers.Remove(peer);
     }
 
     /// <summary>
@@ -300,7 +440,7 @@ namespace FuzzyHipster.Network
         var peer = new Peer()
         {
           Id = Guid.Empty,
-          Socket = handler,
+          Socket = new NetworkSocket(handler),
           IPAddress = (handler.RemoteEndPoint as IPEndPoint).Address.ToString(),
           Port = 0,
           CatalogRecency = 0,
@@ -315,7 +455,8 @@ namespace FuzzyHipster.Network
         state.Peer.LastConnection = DateTime.Now;
         state.ExpectedLength = sizeof(int);
         state.WaitingLengthFrame = true;
-        state.ExpectedMessage = MessageType.PeerStatus;
+        state.ExpectedMessage = MessageType.AsymmetricKeyHello;
+        
         try
         {
           //receiveSemaphore.Reset();
@@ -323,7 +464,7 @@ namespace FuzzyHipster.Network
                                new AsyncCallback(WaitMessageCallback), state); // get the message size first
           
           
-          SendHello(state.Peer);
+          SendHello(state.Peer, true);
         }
         catch( Exception ex )
         {
@@ -366,7 +507,7 @@ namespace FuzzyHipster.Network
           
           if ( state.WaitingLengthFrame )
           {
-            state.ExpectedLength = BitConverter.ToInt32(state.Peer.SymDecrypt(state.Buffer.GetBuffer()), 0);
+            state.ExpectedLength = BitConverter.ToInt32(ReceiveBytes(state), 0);
             state.WaitingLengthFrame = false;
             if ( state.ExpectedLength <= state.Buffer.Capacity )
               BeginReceive( peer, state.Buffer.GetBuffer(), 0, state.ExpectedLength, state);
@@ -375,7 +516,7 @@ namespace FuzzyHipster.Network
           }
           else
           {
-            NetMessage message = NetMessage.FromBytes(state.Peer.SymDecrypt(state.Buffer.GetBuffer()));
+            NetMessage message = NetMessage.FromBytes(ReceiveBytes(state));
             
             if ( state.ExpectedMessage != MessageType.Unknown && message.Type != state.ExpectedMessage) // crappy connection
               Disconnect(state.Peer, string.Format("Didn't receive the message we expected {0}. Received {1}", state.ExpectedMessage, message.Type));
@@ -445,6 +586,9 @@ namespace FuzzyHipster.Network
           
         case MessageType.PeerStatus:
           var status = msg as PeerListNetMessage;
+          
+          if ( state.Peer.IsHandshaking )
+            SendMyStatus(state.Peer);
           
           state.Peer.CatalogRecency = status.Peers[0].CatalogRecency;
           state.Peer.Id = status.Peers[0].Id;
@@ -529,83 +673,74 @@ namespace FuzzyHipster.Network
 
           break;
           
-        case MessageType.Key:
-          var key = msg as KeyNetMessage;
+        case MessageType.AsymmetricKeyHello:
+          var hellokey = msg as KeyNetMessage;
           
-          if ( key.Key is SymmetricKey )
-            state.Peer.SymmetricKey = key.Key as SymmetricKey;
-          else if (key.Key is AsymmetricKey )
-            state.Peer.AsymmetricKey = key.Key as AsymmetricKey;
+          var asymmetricKey = hellokey.Key as AsymmetricKey;
+          if (asymmetricKey == null)
+            return;
           
-          OnKeyReceived( new MessageComposite<Key>(state.Peer, key.Key));
+          state.Peer.AsymmetricKey = asymmetricKey;
+          state.ExpectedMessage = MessageType.SymmetricKey;
+          
+          Send( new KeyNetMessage()
+               {
+                 Type = MessageType.AsymmetricKeyAck,
+                 Key = Me.AsymmetricKey
+               }, state.Peer);
+          
+          
+          OnKeyReceived( new MessageComposite<Key>(state.Peer, hellokey.Key));
+          break;
+          
+        case MessageType.AsymmetricKeyAck:
+          var ackkey = msg as KeyNetMessage;
+          
+          if ( ackkey.Key is AsymmetricKey )
+            state.Peer.AsymmetricKey = ackkey.Key as AsymmetricKey;
+          
+          state.ExpectedMessage = MessageType.PeerStatus;
+          Send( new KeyNetMessage()
+               {
+                 Type = MessageType.SymmetricKey,
+                 Key = Me.SymmetricKey
+               }, state.Peer);
+          
+          OnKeyReceived( new MessageComposite<Key>(state.Peer, ackkey.Key));
+          break;
+          
+        case MessageType.SymmetricKey:
+          var symkey = msg as KeyNetMessage;
+          
+          if ( symkey.Key is SymmetricKey )
+            state.Peer.SymmetricKey = symkey.Key as SymmetricKey;
+          else 
+            throw new Exception(string.Format("Received SymmetricKey KeyNetMessage but the key was not Symmetric. Key type {0}", symkey.Key.GetType()));
+          
+          if ( state.Peer.IsHandshaking )
+          {
+            state.ExpectedMessage = MessageType.PeerStatus;
+            SendMyStatus(state.Peer);
+          }
+          
+          OnKeyReceived( new MessageComposite<Key>(state.Peer, symkey.Key));
+          break;
+          
+        case MessageType.Relay:
+          var relay = msg as RelayNetMessage;
+          
+          if ( relay.To == Me )
+            ProcessMessage(NetMessage.FromBytes(relay.Data), new ReceiveStateObject(){Peer = relay.From});
+          else if ( relay.TimeToLive > 0 )
+          {
+            relay.TimeToLive--;
+            SendMessageViaRelay(relay, relay.To);
+          }
           break;
       }
     }
     
-    public void Connect( Peer peer )
-    {
-      if ( String.IsNullOrWhiteSpace(peer.IPAddress) )
-        return;
-      
-      try {
-        Log(string.Format("CONNECT: {0}", peer));
-        var state = new ReceiveStateObject();
-        peer.Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        state.Peer = peer;
-        
-        IPEndPoint remoteEP = new IPEndPoint( IPAddress.Parse(peer.IPAddress), peer.Port);
-        peer.Socket.BeginConnect( remoteEP, ConnectCallback, state);
-      }
-      catch (Exception)
-      {
-        Log("CONNECT FAILED: {0}", peer);
-        peer.Socket.Dispose();
-        peer.Socket = null;
-        OnPeerConnectFailed( new GenericEventArgs<Peer>(peer) );
-      }
-    }
     
-    void ConnectCallback( IAsyncResult result )
-    {
-      var connectState = result.AsyncState  as ReceiveStateObject;
-
-      try
-      {
-        connectState.Peer.Socket.EndConnect(result);
-        
-        SendHello(connectState.Peer);
-        OnPeerConnected(new GenericEventArgs<Peer>(connectState.Peer));
-        
-        // Create the state object.
-        var recvState = new ReceiveStateObject();
-        recvState.Peer = connectState.Peer;
-        recvState.Peer.LastConnection = DateTime.Now;
-        recvState.ExpectedLength = sizeof(int);
-        recvState.ExpectedMessage = MessageType.PeerStatus;
-        recvState.WaitingLengthFrame = true;
-
-        //receiveSemaphore.Reset();
-        recvState.Peer.Socket.BeginReceive( recvState.Buffer.GetBuffer(), 0, recvState.ExpectedLength, 0,
-                                           new AsyncCallback(WaitMessageCallback), recvState);
-      }
-      catch( Exception ex )
-      {
-        Log(ex.ToString());
-        Disconnect(connectState.Peer, "Connect failed to " + connectState.Peer.IPAddress + " "  + connectState.Peer.Port);
-        OnPeerConnectFailed( new GenericEventArgs<Peer>( connectState.Peer) );
-      }
-    }
-    
-    public void Disconnect( Peer peer, string why )
-    {
-      Log(string.Format("DISCONNECT: {0} {1} {2} {3}", why, peer.Name, peer.IPAddress, peer.Id));
-      if ( peer.Socket != null )
-      {
-        peer.Socket.Dispose();
-        peer.Socket = null;
-      }
-      ActivePeers.Remove(peer);
-    }
     
     
     
@@ -616,6 +751,15 @@ namespace FuzzyHipster.Network
       msg.Count = count;
       Send(msg, peer);
 
+    }
+    
+    public void RequestChannel( Peer peer, Guid guid )
+    {
+      var msg = new RequestChannelsNetMessage();
+      msg.Recency = 0;
+      msg.Count = 1;
+      msg.Guids = new [] {guid};
+      Send(msg, peer);
     }
 
     
@@ -653,11 +797,21 @@ namespace FuzzyHipster.Network
 
     }
     
-    public void SendHello( Peer to )
+    public void SendHello( Peer to, bool sendSymmetricKey )
     {
-      SendMyStatus(to);
       SendKey(to, Me.AsymmetricKey.GetPublicKey());
-      SendKey(to, Me.SymmetricKey);
+      
+      if ( sendSymmetricKey )
+      {
+        if ( Me.SymmetricKey == null )
+          Me.SymmetricKey = SymmetricKey.Create();
+        Send( new KeyNetMessage()
+             {
+               Type = MessageType.SymmetricKey,
+               Key = Me.SymmetricKey
+             }, to);
+        to.SymmetricKey = Me.SymmetricKey;
+      }
     }
 
     public void SendMyStatus( params Peer[] to )
@@ -754,12 +908,41 @@ namespace FuzzyHipster.Network
       Send(msg,to);
     }
 
+    /// <summary>
+    /// Sends data via relay. Need to know where the peer is
+    /// </summary>
+    public void SendMessageViaRelay( NetMessage msg, Peer to )
+    {
+      RelayNetMessage relay = msg as RelayNetMessage;
+      
+      if ( relay == null )
+      {
+        relay = new RelayNetMessage();
+        relay.Data = msg.ToBytes();
+        relay.From = Me;
+        relay.To = to;
+      }
+      
+      Send(relay, DetermineNextPeer(to));
+    }
+    
+    public Peer DetermineNextPeer( Peer toGetTo )
+    {
+      if ( ActivePeers.Contains(toGetTo))
+        return toGetTo;
+      
+      return ActivePeers.GetRandom();
+    }
+    
     public void Send( NetMessage msg, params Peer[] peers )
     {
       foreach( var peer in peers )
       {
+        if ( peer == null )
+          continue;
+        
         if ( !peer.IsConnected )
-          return;
+          SendMessageViaRelay(msg, peer);
         
         var state = new SendState();
         
@@ -772,8 +955,8 @@ namespace FuzzyHipster.Network
           byte[] buffer = msg.ToBytes();
           byte[] lengthBuffer = BitConverter.GetBytes(buffer.Length);
           
-          stream.Write(peer.SymEncrypt(lengthBuffer), 0, lengthBuffer.Length);
-          stream.Write(peer.SymEncrypt(buffer), 0, buffer.Length);
+          stream.Write(SendBytes(lengthBuffer, state), 0, lengthBuffer.Length);
+          stream.Write(SendBytes(buffer, state), 0, buffer.Length);
           
           try
           {
@@ -811,8 +994,28 @@ namespace FuzzyHipster.Network
     void Log( string format, params object [] args )
     {
       string str = string.Format(format, args );
-      Console.WriteLine("{0} {1}", Me.Id, str);
-      Debug.Print("{0} {1}", Me.Id, str);
+      Console.WriteLine(str);
+      Debug.Print(str);
+    }
+    
+    byte[] ReceiveBytes( ReceiveStateObject state )
+    {      
+      Console.WriteLine("Expected: " + state.ExpectedLength);
+      if ( state.Peer.SymmetricKey != null )
+        return state.Peer.SymmetricKey.Decrypt(state.Buffer.GetBuffer(), (int)state.ExpectedLength);
+      else
+        return state.Buffer.GetBuffer();
+    }
+    
+    byte[] SendBytes( byte[] buffer, SendState state )
+    {
+      if ( state.Peer.SymmetricKey != null )
+      {
+        Console.WriteLine("ENCRYPTO");
+        return state.Peer.SymmetricKey.Encrypt(buffer, buffer.Length);
+      }
+      else
+        return buffer;
     }
   }
   

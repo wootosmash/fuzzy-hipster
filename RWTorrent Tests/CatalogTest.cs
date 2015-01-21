@@ -28,7 +28,7 @@ namespace FuzzyHipster.Tests
         Id = Guid.NewGuid(),
         Name = "Rofl", 
         Description = "ROFL MAYO", 
-        PublicKey = "..." 
+        PublicKey = null 
       };
       
       long blockSize = FileWad.EstimateBlockSize(100, FileWad.CalculatePathSize(@"C:\temp\chuck"));

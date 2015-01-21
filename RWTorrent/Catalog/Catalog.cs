@@ -12,11 +12,11 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using System.Xml.Serialization;
+using FuzzyHipster.Catalog;
 using FuzzyHipster.Crypto;
+using FuzzyHipster.Network;
 namespace FuzzyHipster.Catalog
 {
-
-  
   public class Catalog : CatalogItem
   {
     public string Namespace { get; set; }
@@ -25,8 +25,6 @@ namespace FuzzyHipster.Catalog
 
     public string BasePath { get; set; }
     
-    public long LastUpdated { get; set; }
-
     [XmlIgnore()]
     public ChannelCollection Channels {
       get;
@@ -35,6 +33,14 @@ namespace FuzzyHipster.Catalog
     
     [XmlIgnore()]
     public KeyCollection Keys {
+      get; set;
+    }
+    
+    /// <summary>
+    /// Combined collection of every wad
+    /// </summary>
+    [XmlIgnore()]
+    public FileWadAggregateCollection FileWads {
       get; set;
     }
 
@@ -62,11 +68,20 @@ namespace FuzzyHipster.Catalog
         handler(this, e);
     }
     
+    public event EventHandler<MessageComposite<CatalogItem>> ItemVerifyFail;
+    protected virtual void OnItemVerifyFail(MessageComposite<CatalogItem> e)
+    {
+      var handler = ItemVerifyFail;
+      if (handler != null)
+        handler(this, e);
+    }
+    
     public Catalog()
     {
       Id = Guid.NewGuid();
       Channels = new ChannelCollection();
       Keys = new KeyCollection();
+      FileWads = new FileWadAggregateCollection();
     }
 
 
@@ -113,6 +128,7 @@ namespace FuzzyHipster.Catalog
               var wad = FileWad.Load( file);
               wad.Validate();
               channel.Wads.Add(wad);
+              catalog.FileWads.Add(wad.Id, wad);
             }
           }
         }
@@ -142,11 +158,10 @@ namespace FuzzyHipster.Catalog
     public FileWad[] GetFileWadsByFileHash( byte[] hash )
     {
       var wads = new List<FileWad>();
-      foreach( var s in Channels )
-        foreach( var wad in s.Wads )
-          foreach( var file in wad.Files )
-            if ( Hash.Compare( file.Hash, hash ))
-              wads.Add( wad );
+      foreach( var wad in FileWads.Values )
+        foreach( var file in wad.Files )
+          if ( Hash.Compare( file.Hash, hash ))
+            wads.Add( wad );
       return wads.ToArray();
     }
     
@@ -157,12 +172,8 @@ namespace FuzzyHipster.Catalog
 
     public FileWad GetFileWad(Guid id)
     {
-      foreach (var channel in Channels)
-        if ( channel.Wads != null )
-          foreach (var wad in channel.Wads)
-            if (wad.Id == id)
-              return wad;
-      
+      if ( FileWads.ContainsKey(id))
+        return FileWads[id];      
       return null;
     }
     
@@ -179,6 +190,7 @@ namespace FuzzyHipster.Catalog
       // wad doesn't exist
       if ( channel.Wads.Find(x => x.Id == wad.Id) == null )
       {
+        FileWads.Add(wad.Id, wad);
         channel.Wads.Add(wad);
         wad.Save();
       }
@@ -189,7 +201,7 @@ namespace FuzzyHipster.Catalog
     }
     
     public Channel AddChannel( Channel channel )
-    {
+    {        
       if ( Channels[channel.Id] == null )
         Channels.Add(channel);
       
@@ -210,6 +222,17 @@ namespace FuzzyHipster.Catalog
       return key;
     }
     
+    public bool Verify( Peer sender, CatalogItem item )
+    {
+      if ( item.Signature != null && !item.VerifySignature())
+      {
+        OnItemVerifyFail( new MessageComposite<CatalogItem>( sender, item ));
+        return false;
+      }
+      
+      return true;
+    }
+    
     public override void Validate()
     {
     }
@@ -220,6 +243,18 @@ namespace FuzzyHipster.Catalog
                            Namespace, Description, BasePath, LastUpdated, Channels.Count);
     }
 
+  }
+  
+  public class FileWadAggregateCollection : SortedList<Guid, FileWad>
+  {
+    public FileWad GetRandom()
+    {
+      if ( Count == 0 )
+        return null;
+      
+      int index = MoustacheLayer.Singleton.Random.Next(0, Count);
+      return this.Values[index];
+    }
   }
 
 }

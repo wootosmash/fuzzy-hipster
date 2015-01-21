@@ -36,14 +36,13 @@ namespace FuzzyHipster
     }
 
     [XmlIgnore()]
-    public Socket Socket {
+    public NetworkSocket Socket {
       get { return socket; }
       set { socket = value; }
     }
     [NonSerialized()]
-    Socket socket;
-
-
+    NetworkSocket socket;
+        
     // network statistics
     public DateTime NextConnectionAttempt { get; set; }
     public int FailedConnectionAttempts { get; set; }
@@ -62,6 +61,14 @@ namespace FuzzyHipster
     public int EstimatedTxBandwidth { get; set; }
     public DateTime LastConnection { get; set; }
     public bool IsLocal { get; set; }
+    
+    public bool IsHandshaking 
+    {
+      get
+      {
+        return (Id == Guid.Empty);
+      }
+    }
     
     [NonSerialized()]
     RateLimiter rateLimiter;
@@ -128,7 +135,6 @@ namespace FuzzyHipster
       NextConnectionAttempt = DateTime.MinValue;
       FailedConnectionAttempts = 0;
       OkToSendAt = DateTime.MaxValue;
-
       
       if ( MoustacheLayer.Singleton != null )
         MaxBlockPacketSize = MoustacheLayer.Singleton.Settings.DefaultMaxBlockPacketSize;
@@ -145,6 +151,7 @@ namespace FuzzyHipster
         RateLimiter = new RateLimiter(RateLimiter.UnlimitedRate);
       
       AsymmetricKey = AsymmetricKey.Create();
+      MoustacheLayer.Singleton.Catalog.AddKey(AsymmetricKey);
     }
 
     
@@ -163,8 +170,6 @@ namespace FuzzyHipster
       OkToSendAt = peer.OkToSendAt;
       LastConnection = peer.LastConnection;
       IsLocal = peer.IsLocal;
-
-        
     }
     
     /// <summary>
@@ -174,43 +179,11 @@ namespace FuzzyHipster
     {
       NextConnectionAttempt = DateTime.MinValue;
       FailedConnectionAttempts = 0;
-    }
-    
-    public byte[] SymEncrypt( byte[] plaintext )
-    {
-      if ( SymmetricKey != null )
-        return SymmetricKey.Encrypt(plaintext);
-      else
-        return plaintext;
-    }
-    
-    public byte[] SymDecrypt( byte[] cyphertext )
-    {
-      if ( SymmetricKey != null )
-        return SymmetricKey.Decrypt(cyphertext);
-      else
-        return cyphertext;
-    }
-    
-    public byte[] AsymEncrypt( byte[] plaintext )
-    {
-      if ( AsymmetricKey != null )
-        return AsymmetricKey.Encrypt(plaintext);
-      else
-        return plaintext;
-    }
-    
-    public byte[] AsymDecrypt( byte[] cyphertext )
-    {
-      if ( AsymmetricKey != null )
-        return AsymmetricKey.Decrypt(cyphertext);
-      else
-        return cyphertext;
-    }
+    }       
     
     public override string ToString()
     {
-      return string.Format("[Peer Id={0}, Name={1}, IPAddress={2}, Port={3} RxRate={4}]", Id, Name, IPAddress, Port, RateLimiter.CurrentRate);
+      return string.Format("[Peer Id={0}, Socket={5}, Name={1}, IPAddress={2}, Port={3} RxRate={4}]", Id, Name, IPAddress, Port, RateLimiter.CurrentRate, Socket);
     }
 
     

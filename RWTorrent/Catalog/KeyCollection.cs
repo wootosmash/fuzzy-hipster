@@ -3,8 +3,6 @@
  * User: Al
  * Date: 18/01/2015
  * Time: 7:33 PM
- * 
- * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
 using System.Collections.Generic;
@@ -14,11 +12,16 @@ using FuzzyHipster.Crypto;
 
 namespace FuzzyHipster.Catalog
 {
-  /// <summary>
-  /// Description of KeyCollection.
-  /// </summary>
   public class KeyCollection : List<Key>
   {
+    public bool IsWriteable( CatalogItem item )
+    {
+      var k = Find( x => x.Id == item.PublicKey.Id ) as AsymmetricKey;
+      if ( k == null )
+        return false;
+      return k.IsPrivate;
+    }
+    
     public static KeyCollection Load( string basePath )
     {
       var col = new KeyCollection();
@@ -41,7 +44,6 @@ namespace FuzzyHipster.Catalog
 
       return col;
     }
-    
     
     public void Save()
     {
