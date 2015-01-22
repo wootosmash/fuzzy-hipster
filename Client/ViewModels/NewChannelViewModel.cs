@@ -83,6 +83,8 @@ namespace Client
                 Description = this.ChannelDescription
             };
 
+            //TODO: new channelsigning.
+
            // newChannel.Sign(MoustacheLayer.Singleton.Me.AsymmetricKey);
             MoustacheLayer.Singleton.Catalog.AddChannel(newChannel);
             MyListViewModel.Instance.Render();
