@@ -38,8 +38,6 @@ namespace FuzzyHipster.Network
         s.SendTo(data, ipe);
         s.SendTo(data, ipe);
         
-        Console.WriteLine("SENT");
-
         int length = 0;
         do
         {

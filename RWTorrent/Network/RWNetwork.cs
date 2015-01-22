@@ -51,7 +51,6 @@ namespace FuzzyHipster.Network
     
     public IAsyncResult BeginReceive( byte[] buffer, int offset, int count, SocketFlags flags, AsyncCallback callback, object state)
     {
-      Console.WriteLine("Size: {0}", count);
       return socket.BeginReceive(buffer, offset, count, flags, callback, state);
     }
     
@@ -329,6 +328,7 @@ namespace FuzzyHipster.Network
         Log(string.Format("CONNECT: {0}", peer));
         var state = new ReceiveStateObject();
         peer.Socket = new NetworkSocket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        peer.SymmetricKey = null; // we have no agreement!
         state.Peer = peer;
         
         IPEndPoint remoteEP = new IPEndPoint( IPAddress.Parse(peer.IPAddress), peer.Port);
@@ -514,7 +514,7 @@ namespace FuzzyHipster.Network
           if ( state.WaitingLengthFrame )
           {
             state.ExpectedLength = BitConverter.ToInt32(ReceiveBytes(state), 0);
-            state.WaitingLengthFrame = false;
+            state.WaitForData();
             if ( state.ExpectedLength <= 0 )
               Disconnect(state.Peer, "Expected Length was a garbage value!");
             else if ( state.ExpectedLength > state.Buffer.Capacity )
@@ -531,8 +531,7 @@ namespace FuzzyHipster.Network
             else
             {
               state.ExpectedMessage = MessageType.Unknown;
-              state.ExpectedLength = sizeof(int);
-              state.WaitingLengthFrame = true; // waiting for the message size
+              state.WaitForLength(); // waiting for the message size
               
               OnNetMessageReceived(new GenericEventArgs<NetMessage>(message));
               ProcessMessage(message, state);
@@ -558,8 +557,6 @@ namespace FuzzyHipster.Network
       // will halt if the data is coming in too fast
       peer.RateLimiter.Limit();
       RateLimiter.Limit();
-      
-      
       peer.Socket.BeginReceive( buffer, position, count, 0,
                                new AsyncCallback(WaitMessageCallback), state);
     }
@@ -570,6 +567,98 @@ namespace FuzzyHipster.Network
       
       switch( msg.Type )
       {
+        case MessageType.AsymmetricKeyHello:
+          var hellokey = msg as KeyNetMessage;
+          
+          var asymmetricKey = hellokey.Key as AsymmetricKey;
+          if (asymmetricKey == null)
+            return;
+          
+          state.Peer.AsymmetricKey = asymmetricKey;
+          state.ExpectedMessage = MessageType.SymmetricKey;
+          
+          Send( new KeyNetMessage()
+               {
+                 Type = MessageType.AsymmetricKeyAck,
+                 Key = Me.AsymmetricKey
+               }, state.Peer);
+          
+          
+          OnKeyReceived( new MessageComposite<Key>(state.Peer, hellokey.Key));
+          break;
+          
+        case MessageType.AsymmetricKeyAck:
+          var ackkey = msg as KeyNetMessage;
+          
+          if ( ackkey.Key is AsymmetricKey )
+            state.Peer.AsymmetricKey = ackkey.Key as AsymmetricKey;
+          else
+            throw new Exception(string.Format("Received Asymmetric KeyNetMessage but the key was not Asymmetric. Key type is '{0}'", ackkey.Key));
+          
+          if ( Me.SymmetricKey == null )
+            Me.SymmetricKey = SymmetricKey.Create();
+          
+          state.ExpectedMessage = MessageType.PeerStatus;
+          Send( new KeyNetMessage()
+               {
+                 Type = MessageType.SymmetricKey,
+                 Key = Me.SymmetricKey
+               }, state.Peer);
+          
+          state.Peer.SymmetricKey = Me.SymmetricKey;
+          state.WaitForLength();
+          OnKeyReceived( new MessageComposite<Key>(state.Peer, ackkey.Key));
+          break;
+          
+        case MessageType.SymmetricKey:
+          var symkey = msg as KeyNetMessage;
+          
+          if ( symkey.Key is SymmetricKey )
+          {
+            state.Peer.SymmetricKey = symkey.Key as SymmetricKey;
+            state.WaitForLength(); // resets the length size to 16 bytes. Min int size encrypted!
+          }
+          else
+            throw new Exception(string.Format("Received SymmetricKey KeyNetMessage but the key was not Symmetric. Key type is '{0}'", symkey.Key));
+          
+          if ( state.Handshaking )
+          {
+            state.ExpectedMessage = MessageType.PeerStatus;
+            state.Handshaking = false;
+            SendMyStatus(state.Peer);
+          }
+          
+          OnKeyReceived( new MessageComposite<Key>(state.Peer, symkey.Key));
+          break;
+          
+        case MessageType.PeerStatus:
+          var status = msg as PeerListNetMessage;
+          
+          if ( state.Handshaking )
+          {
+            state.Handshaking = false;
+            SendMyStatus(state.Peer);
+          }
+          
+          state.Peer.CatalogRecency = status.Peers[0].CatalogRecency;
+          state.Peer.Id = status.Peers[0].Id;
+          state.Peer.Name = status.Peers[0].Name;
+          state.Peer.PeerCount = status.Peers[0].PeerCount;
+          state.Peer.Uptime = status.Peers[0].Uptime;
+          state.Peer.IPAddress = (state.Peer.Socket.RemoteEndPoint as IPEndPoint).Address.ToString();
+          state.Peer.Port = status.Peers[0].Port;
+          
+          DateTime okToSend = DateTime.Now.AddMilliseconds(MoustacheLayer.Singleton.Settings.ThinkTimeGraceMilliseconds);
+          if ( state.Peer.OkToSendAt > okToSend )
+            state.Peer.OkToSendAt = okToSend;
+          
+          if ( !ActivePeers.Contains(state.Peer))
+            ActivePeers.Add(state.Peer);
+          
+          OnNewPeer(new GenericEventArgs<Peer>(state.Peer));
+          
+          break;
+          
         case MessageType.Hello:
           break;
           
@@ -592,30 +681,6 @@ namespace FuzzyHipster.Network
           OnWadsRequested(new MessageComposite<RequestWadsNetMessage>(state.Peer, wads));
           break;
           
-        case MessageType.PeerStatus:
-          var status = msg as PeerListNetMessage;
-          
-          if ( state.Peer.IsHandshaking )
-            SendMyStatus(state.Peer);
-          
-          state.Peer.CatalogRecency = status.Peers[0].CatalogRecency;
-          state.Peer.Id = status.Peers[0].Id;
-          state.Peer.Name = status.Peers[0].Name;
-          state.Peer.PeerCount = status.Peers[0].PeerCount;
-          state.Peer.Uptime = status.Peers[0].Uptime;
-          state.Peer.IPAddress = (state.Peer.Socket.RemoteEndPoint as IPEndPoint).Address.ToString();
-          state.Peer.Port = status.Peers[0].Port;
-          
-          DateTime okToSend = DateTime.Now.AddMilliseconds(MoustacheLayer.Singleton.Settings.ThinkTimeGraceMilliseconds);
-          if ( state.Peer.OkToSendAt > okToSend )
-            state.Peer.OkToSendAt = okToSend;
-          
-          if ( !ActivePeers.Contains(state.Peer))
-            ActivePeers.Add(state.Peer);
-          
-          OnNewPeer(new GenericEventArgs<Peer>(state.Peer));
-          
-          break;
           
         case MessageType.Peers:
           var peerList = msg as PeerListNetMessage;
@@ -681,64 +746,7 @@ namespace FuzzyHipster.Network
 
           break;
           
-        case MessageType.AsymmetricKeyHello:
-          var hellokey = msg as KeyNetMessage;
           
-          var asymmetricKey = hellokey.Key as AsymmetricKey;
-          if (asymmetricKey == null)
-            return;
-          
-          state.Peer.AsymmetricKey = asymmetricKey;
-          state.ExpectedMessage = MessageType.SymmetricKey;
-          
-          Send( new KeyNetMessage()
-               {
-                 Type = MessageType.AsymmetricKeyAck,
-                 Key = Me.AsymmetricKey
-               }, state.Peer);
-          
-          
-          OnKeyReceived( new MessageComposite<Key>(state.Peer, hellokey.Key));
-          break;
-          
-        case MessageType.AsymmetricKeyAck:
-          var ackkey = msg as KeyNetMessage;
-          
-          if ( ackkey.Key is AsymmetricKey )
-            state.Peer.AsymmetricKey = ackkey.Key as AsymmetricKey;
-          else
-            throw new Exception(string.Format("Received Asymmetric KeyNetMessage but the key was not Asymmetric. Key type is '{0}'", ackkey.Key));
-          
-          if ( Me.SymmetricKey == null )
-            Me.SymmetricKey = SymmetricKey.Create();
-          
-          state.ExpectedMessage = MessageType.PeerStatus;
-          Send( new KeyNetMessage()
-               {
-                 Type = MessageType.SymmetricKey,
-                 Key = Me.SymmetricKey
-               }, state.Peer);
-          
-          state.Peer.SymmetricKey = Me.SymmetricKey;
-          OnKeyReceived( new MessageComposite<Key>(state.Peer, ackkey.Key));
-          break;
-          
-        case MessageType.SymmetricKey:
-          var symkey = msg as KeyNetMessage;
-          
-          if ( symkey.Key is SymmetricKey )
-            state.Peer.SymmetricKey = symkey.Key as SymmetricKey;
-          else
-            throw new Exception(string.Format("Received SymmetricKey KeyNetMessage but the key was not Symmetric. Key type is '{0}'", symkey.Key));
-          
-          if ( state.Peer.IsHandshaking )
-          {
-            state.ExpectedMessage = MessageType.PeerStatus;
-            SendMyStatus(state.Peer);
-          }
-          
-          OnKeyReceived( new MessageComposite<Key>(state.Peer, symkey.Key));
-          break;
           
         case MessageType.Relay:
           var relay = msg as RelayNetMessage;
@@ -967,10 +975,13 @@ namespace FuzzyHipster.Network
         {
           
           byte[] buffer = msg.ToBytes();
-          byte[] lengthBuffer = BitConverter.GetBytes(buffer.Length);
+          buffer = SendBytes(buffer, state);
           
-          stream.Write(SendBytes(lengthBuffer, state), 0, lengthBuffer.Length);
-          stream.Write(SendBytes(buffer, state), 0, buffer.Length);
+          byte[] lengthBuffer = BitConverter.GetBytes(buffer.Length);
+          lengthBuffer = SendBytes(lengthBuffer, state);
+          
+          stream.Write(lengthBuffer, 0, lengthBuffer.Length);
+          stream.Write(buffer, 0, buffer.Length);
           
           try
           {
@@ -1014,7 +1025,6 @@ namespace FuzzyHipster.Network
     
     byte[] ReceiveBytes( ReceiveStateObject state )
     {
-      Console.WriteLine("Expected: " + state.ExpectedLength);
       if ( state.Peer.SymmetricKey != null )
         return state.Peer.SymmetricKey.Decrypt(state.Buffer.GetBuffer(), (int)state.ExpectedLength);
       else
@@ -1023,13 +1033,16 @@ namespace FuzzyHipster.Network
     
     byte[] SendBytes( byte[] buffer, SendState state )
     {
+      byte [] sendBytes;
+      
       if ( state.Peer.SymmetricKey != null )
       {
-        Console.WriteLine("ENCRYPTO");
-        return state.Peer.SymmetricKey.Encrypt(buffer, buffer.Length);
+        sendBytes = state.Peer.SymmetricKey.Encrypt(buffer, buffer.Length);
       }
       else
-        return buffer;
+        sendBytes = buffer;
+      
+      return sendBytes;
     }
   }
   
