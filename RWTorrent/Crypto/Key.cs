@@ -8,28 +8,39 @@
  */
 using System;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace FuzzyHipster.Crypto
 {
   /// <summary>
   /// Description of Key.
   /// </summary>
+  [XmlInclude(typeof(AsymmetricKey))]
+  [XmlInclude(typeof(SymmetricKey))]
   [Serializable()]
-  public abstract class Key 
+  public abstract class Key : IEquatable<Key>
   {
     public Guid Id { get; set; }
     public string Name { get; set; }
     
     public Key()
     {
+      Id = Guid.NewGuid();
     }
 
-    public abstract byte[] Encrypt( byte[] plaintext );
-    public abstract byte[] Decrypt( byte[] cyphertext );
+    public abstract byte[] Encrypt( byte[] plaintext, int length );
+    public abstract byte[] Decrypt( byte[] cyphertext, int length );
     
+    #region IEquatable implementation
+    public bool Equals(Key other)
+    {
+      return other.Id == Id;
+    }
+    #endregion
   }
   
   [Serializable()]
@@ -40,9 +51,13 @@ namespace FuzzyHipster.Crypto
     
     public bool IsPrivate { get { return String.IsNullOrWhiteSpace(PrivateString); }}
     
-    public override byte[] Encrypt( byte[] plaintext )
+    public AsymmetricKey()
     {
-      using (var rsa = new RSACryptoServiceProvider(1024))
+    }
+    
+    public override byte[] Encrypt( byte[] plaintext, int length )
+    {
+      using (var rsa = new RSACryptoServiceProvider())
       {
         try
         {
@@ -56,17 +71,67 @@ namespace FuzzyHipster.Crypto
       }
     }
     
-    public override byte[] Decrypt( byte[] cyphertext )
+    public override byte[] Decrypt( byte[] cyphertext, int length )
     {
       if ( String.IsNullOrWhiteSpace(PrivateString))
         throw new Exception("This is key does not contain the private parameters to be able to decrypt this message");
+      
+      using (var rsa = new RSACryptoServiceProvider())
+      {
+        try
+        {
+          rsa.FromXmlString(PrivateString);
+          return rsa.Decrypt(cyphertext, true);
+        }
+        finally
+        {
+          rsa.PersistKeyInCsp = false;
+        }
+      }
+    }
+    
+    public byte[] SignData( object obj )
+    {
+      if ( String.IsNullOrWhiteSpace(PrivateString))
+        throw new Exception("This is key does not contain the private parameters to be able to sign this message");
       
       using (var rsa = new RSACryptoServiceProvider(1024))
       {
         try
         {
           rsa.FromXmlString(PrivateString);
-          return rsa.Decrypt(cyphertext, true);
+          
+          var serializer = new BinaryFormatter();
+          using ( var stream = new MemoryStream())
+          {
+            serializer.Serialize(stream, obj);
+            return rsa.SignData(stream.GetBuffer(), new SHA512CryptoServiceProvider());
+          }
+        }
+        finally
+        {
+          rsa.PersistKeyInCsp = false;
+        }
+      }
+    }
+    
+    public bool VerifySignature( byte[] signature, object obj )
+    {
+      if ( String.IsNullOrWhiteSpace(PublicString))
+        throw new Exception("This is key does not contain the public parameters to be able to verify this signature");
+      
+      using (var rsa = new RSACryptoServiceProvider(1024))
+      {
+        try
+        {
+          rsa.FromXmlString(PublicString);
+          
+          var serializer = new BinaryFormatter();
+          using ( var stream = new MemoryStream())
+          {
+            serializer.Serialize(stream, obj);
+            return rsa.VerifyData(stream.GetBuffer(), new SHA512CryptoServiceProvider(), signature);
+          }
         }
         finally
         {
@@ -109,24 +174,31 @@ namespace FuzzyHipster.Crypto
 
     private static SymmetricAlgorithm _cryptoService = new AesCryptoServiceProvider();
 
-    public override byte[] Encrypt(byte[] plaintext)
+    public override byte[] Encrypt(byte[] plaintext, int length)
     {
-      return Transform(plaintext, _cryptoService.CreateEncryptor(Key, Vector));
+      _cryptoService.Padding = PaddingMode.Zeros;
+      _cryptoService.BlockSize = 128;
+      _cryptoService.Mode = CipherMode.ECB;
+      return Transform(plaintext, length, _cryptoService.CreateEncryptor(Key, Vector));
     }
 
-    public override byte[] Decrypt(byte[] cyphertext)
+    public override byte[] Decrypt(byte[] cyphertext, int length)
     {
-      return Transform(cyphertext, _cryptoService.CreateDecryptor(Key, Vector));
+      _cryptoService.Padding = PaddingMode.Zeros;
+      _cryptoService.BlockSize = 128;
+      _cryptoService.Mode = CipherMode.ECB;
+      
+      return Transform(cyphertext, length, _cryptoService.CreateDecryptor(Key, Vector));
     }
 
-    private byte[] Transform(byte[] buffer, ICryptoTransform cryptoTransform)
+    private byte[] Transform(byte[] buffer, int length, ICryptoTransform cryptoTransform)
     {
       using(var stream = new MemoryStream())
       {
         using (var cryptoStream = new CryptoStream(stream, cryptoTransform, CryptoStreamMode.Write))
         {
 
-          cryptoStream.Write(buffer, 0, buffer.Length);
+          cryptoStream.Write(buffer, 0, length);
           cryptoStream.FlushFinalBlock();
 
           return stream.ToArray();

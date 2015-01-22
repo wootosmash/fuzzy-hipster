@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows.Input;
 using FuzzyHipster.Catalog;
+using FuzzyHipster;
 
 namespace Client
 {
@@ -74,17 +75,16 @@ namespace Client
 
 
             //TODO: VALIDATION?
-
-            Catalog catalog = FuzzyHipster.MoustacheLayer.Singleton.Catalog;
+          
             Channel newChannel = new Channel()
             {
                 Id = Guid.NewGuid(),
                 Name = this.ChannelName,
-                Description = this.ChannelDescription,
-                PublicKey = "..."
+                Description = this.ChannelDescription
             };
-            catalog.Channels.Add(newChannel);
-            catalog.Save();
+
+            newChannel.Sign(MoustacheLayer.Singleton.Me.AsymmetricKey);
+            MoustacheLayer.Singleton.Catalog.AddChannel(newChannel);
             MyListViewModel.Instance.Render();
         }
     }

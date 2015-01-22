@@ -6,14 +6,28 @@ using System.IO;
 using System.Net.Sockets;
 using System.Xml.Serialization;
 using System.Linq;
+using FuzzyHipster.Network;
 
 namespace FuzzyHipster
 {
   public class PeerCollection : List<Peer>
   {
-    public Peer FindBySocket( Socket socket )
+    /// <summary>
+    /// Whats the calculated maximum peer count for all the peers we're connected to?
+    /// </summary>
+    public int MaximumPeerListSize 
+    {
+      get; protected set; 
+    }
+    
+    public Peer FindBySocket( NetworkSocket socket )
     {
       return this.FirstOrDefault(x => x.Socket == socket);
+    }
+    
+    public Peer FindByIPAddress( string ipAddress, int port )
+    {
+      return this.FirstOrDefault(x => x.IPAddress == ipAddress && x.Port == port);
     }
     
     public Peer GetRandom()
@@ -36,15 +50,24 @@ namespace FuzzyHipster
         else
           Add(peer);
       }
+      if ( !String.IsNullOrWhiteSpace(peer.IPAddress))
+      {
+        myPeer = FindByIPAddress(peer.IPAddress, peer.Port);
+        if ( myPeer != null )
+          myPeer.UpdateFromCopy(peer);
+        else
+          Add(peer);
+      }
       else if (Contains(peer))
       {
-        myPeer = this.Find( x => x.Id == peer.Id);
+        myPeer = Find( x => x.Id == peer.Id);
         myPeer.UpdateFromCopy(peer);
       }
       else
         Add(peer);
       
       Save();
+      CalculateMaximumPeerListSize();
     }
     
     public static PeerCollection Load( string basePath )
@@ -106,6 +129,15 @@ namespace FuzzyHipster
     {
       foreach( var peer in this )
         peer.ResetConnectionAttempts();
+    }
+    
+    private void CalculateMaximumPeerListSize()
+    {
+      foreach( Peer p in this )
+      {
+        if ( MaximumPeerListSize < p.PeerCount )
+          MaximumPeerListSize = p.PeerCount;
+      }
     }
     
   }

@@ -12,7 +12,8 @@ using System.Linq;
 using System.Timers;
 using FuzzyHipster.Catalog;
 using FuzzyHipster.Network;
-namespace FuzzyHipster
+
+namespace FuzzyHipster.Strategy
 {
   public class BasicBlockAquisitionStrategy : MoustacheStrategy
   {

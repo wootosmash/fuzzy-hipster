@@ -7,7 +7,7 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
-namespace FuzzyHipster
+namespace FuzzyHipster.Strategy
 {
   public class KeepAliveMoustacheStrategy : MoustacheStrategy
   {
@@ -27,6 +27,9 @@ namespace FuzzyHipster
     public override void Think()
     {
       DateTime now = DateTime.Now;
+      if ( now > NextThink )
+        return;
+      
       foreach( var peer in MoustacheLayer.Singleton.Network.ActivePeers.ToArray())
         if ( peer.OkToSendAt > now )
           MoustacheLayer.Singleton.Network.SendMyStatus(peer);

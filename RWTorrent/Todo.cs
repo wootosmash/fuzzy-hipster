@@ -38,6 +38,7 @@ namespace FuzzyHipster
       // TODO: MoustacheLayer: Add downloaded %
       // TODO: MoustacheLayer: Add Keying to the channels
       // TODO: MoustacheLayer: Add sub-channels
+      // TODO: 
       // TODO: GUI: Add add gui %
       // TODO: GUI: Add a 'clear' catalog button
       // TODO: GUI: Add a window that redirects Console.Out to a text window for debugging purposes
@@ -45,6 +46,10 @@ namespace FuzzyHipster
       // DONE: MoustacheLayer: Add events to Catalog eg. Catalog.NotifyWad
       // TODO: GUI: Subscribe to events on Catalog
       // TODO: GUI: Include the channel in Catalog view
+      // TODO: GUI: Remove direct access to Channels collection for Adding new Channels
+      // TODO: MoustacheLayer: Add searching functionality both local and network
+      // TODO: MoustacheLayer: Implement smart logic where it slows down sends and fetching blocks if we prioritise on a channel
+      // TODO: Rename program to Moe and Catalog to Stache
     }
   }
 }

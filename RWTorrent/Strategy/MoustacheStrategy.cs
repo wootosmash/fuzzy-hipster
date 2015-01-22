@@ -41,6 +41,20 @@ namespace FuzzyHipster
 	      return MoustacheLayer.Singleton.Settings;
 	    }
 	  }
+	  
+	  public bool Enabled { get; set; }
+	  
+	  public void Enable()
+	  {
+	    Enabled = true;
+	    Install();
+	  }
+	  
+	  public void Disable()
+	  {
+	    Enabled = false;
+	    Uninstall();
+	  }
 
 		public abstract void Install();
 

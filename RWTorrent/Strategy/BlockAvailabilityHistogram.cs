@@ -63,6 +63,7 @@ namespace FuzzyHipster
       List<KeyValuePair<int, int>> myList = dic.ToList();
       myList.Sort((firstPair, nextPair) => firstPair.Value.CompareTo(nextPair.Value));
       
+      // FIXME: This isn't working on actual percentiles
       int min = (minPercentile * myList.Count) / 100;
       int max = (maxPercentile * myList.Count) / 100;
       int block = myList[MoustacheLayer.Singleton.Random.Next(min, max + 1)].Key;
