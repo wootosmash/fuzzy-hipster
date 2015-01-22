@@ -83,7 +83,7 @@ namespace Client
                 Description = this.ChannelDescription
             };
 
-            newChannel.Sign(MoustacheLayer.Singleton.Me.AsymmetricKey);
+           // newChannel.Sign(MoustacheLayer.Singleton.Me.AsymmetricKey);
             MoustacheLayer.Singleton.Catalog.AddChannel(newChannel);
             MyListViewModel.Instance.Render();
         }
