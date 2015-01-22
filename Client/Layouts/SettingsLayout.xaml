@@ -7,11 +7,13 @@
     </Style>
 
 
-    <Style x:Key="UserControl" TargetType="{x:Type UserControl}">
+    <Style x:Key="SettingsControlLayout" TargetType="{x:Type UserControl}">
         <Setter Property="Template">
             <Setter.Value>
+
                 <ControlTemplate TargetType="{x:Type UserControl}">
                     <Grid Background="White" Margin="0"  Grid.Row="1" Grid.RowSpan="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+                       
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="200" />
                             <ColumnDefinition Width="auto" MinWidth="2" />
@@ -19,33 +21,10 @@
                         </Grid.ColumnDefinitions>
 
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="30" />
+                            <RowDefinition Height="0" />
                             <RowDefinition Height="*"  />
                             <RowDefinition Height="20" />
                         </Grid.RowDefinitions>
-
-                        <Menu Grid.Row="0" Grid.ColumnSpan="3" VerticalContentAlignment="Bottom" Height="30" Background="{StaticResource TitleBarBackgroundBrush}" ClipToBounds="True" Foreground="#333333">
-                            <MenuItem Header="_File" VerticalAlignment="Bottom" VerticalContentAlignment="Bottom" Height="{Binding Height, 
-              RelativeSource={RelativeSource Mode=FindAncestor, 
-                                 AncestorType={x:Type Menu }}}">
-                                <MenuItem Header="_New..." />
-                                <Separator />
-                                <MenuItem Header="_Open..." />
-                                <Separator />
-                                <MenuItem Header="_Save" />
-                                <MenuItem Header="_Save As..." />
-                                <Separator />
-                                <MenuItem Header="_Exit" />
-                            </MenuItem>
-
-                            <MenuItem Header="_Tools" VerticalAlignment="Bottom" VerticalContentAlignment="Bottom" Height="{Binding Height, 
-             RelativeSource={RelativeSource Mode=FindAncestor, 
-                                 AncestorType={x:Type Menu }}}">
-
-                                <MenuItem Header="_Options"  Command="{Binding DataContext.RenderSettingsWindow, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"/>
-                                
-                            </MenuItem>
-                        </Menu>
 
                         <Border  Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0,0,1,0">
                             <ItemsControl ItemsSource="{Binding DataContext.XamlPageMenuDef, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}">
@@ -64,11 +43,6 @@
 
                         <GridSplitter Grid.Row="1" Grid.Column="1" Margin="2,0,2,0" Width="1" Background="#FFF0F0F0" VerticalAlignment="Stretch" HorizontalAlignment="Center" />
                         <ContentControl  Grid.Row="1" Grid.Column="2"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Content="{TemplateBinding Content}" />
-                        <StatusBar Background="#6997d3" Height="20px"  Foreground="white" VerticalContentAlignment="Bottom" VerticalAlignment="Bottom"  Grid.Row="4" Grid.ColumnSpan="3">
-                            <StatusBarItem>
-                                <TextBlock Text="XXX" ></TextBlock>
-                            </StatusBarItem>
-                        </StatusBar>
                     </Grid>
 
 

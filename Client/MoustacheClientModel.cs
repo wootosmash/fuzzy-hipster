@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using FuzzyHipster.Network;
+using FuzzyHipster;
 
 namespace Client
 {
-    class MainWindowModel : ObservableObject<MainWindowModel>
+    public class MoustacheClientModel : ObservableObject<MoustacheClientModel>
     {
         #region Fields
 
@@ -22,9 +23,15 @@ namespace Client
 
         #endregion
 
-        public MainWindowModel()
+ 
+        //public 
+
+      
+
+        public MoustacheClientModel()
         {
             CurrentPageViewModel = new SplashViewModel();
+
         }
 
         public void Setup()
@@ -62,6 +69,25 @@ namespace Client
             }
         }
 
+
+        public ICommand RenderSettingsWindow
+        {
+            get
+            {
+                return new RelayCommand(p => OpenSettings());
+            }
+        }
+
+private void OpenSettings()
+{
+
+       MoustacheClient.Instance.Settings.Show();
+       ConnectionViewModel.Instance.Render();
+}
+
+
+        
+
         public List<IPageViewModel> XamlPageMenuDef
         {
             get
@@ -88,7 +114,7 @@ namespace Client
         }
 
         //public static void ChangeModel(IPageViewModel model){
-        //    MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
+        //    MoustacheClientModel mw = MoustacheClient.Instance.Model;
         //    mw.CurrentPageViewModel = model;
         //}
 
@@ -98,7 +124,7 @@ namespace Client
         {
 
             string item = classType.Name;
-            MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
+            MoustacheClientModel mw = (MoustacheClientModel)Application.Current.MainWindow.DataContext;
 
 
 
@@ -114,24 +140,22 @@ namespace Client
 
         public static void ChangeModel(IPageViewModel model)
         {
-           
-            MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
 
-
+            MoustacheClientModel mw = (MoustacheClientModel)Application.Current.MainWindow.DataContext;
             mw.CurrentPageViewModel = model;
 
         }
 
         public static void RememberState(string key)
         {
-            MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
+            MoustacheClientModel mw = (MoustacheClientModel)Application.Current.MainWindow.DataContext;
             mw.PageViewModelMap.Add(key, mw.CurrentPageViewModel);
         }
 
 
         public static IPageViewModel CurrentView()
         {
-            MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
+            MoustacheClientModel mw = (MoustacheClientModel)Application.Current.MainWindow.DataContext;
             return mw.CurrentPageViewModel;
         }
 
@@ -139,7 +163,7 @@ namespace Client
 
         public static IPageViewModel GetModel(Type classType)
         {
-            MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
+            MoustacheClientModel mw = (MoustacheClientModel)Application.Current.MainWindow.DataContext;
             return mw.PageViewModelMap[classType.Name];
         }
 

@@ -109,7 +109,7 @@ namespace Client
         {
             get
             {
-                return MoustacheLayer.Singleton.Catalog.Channels.First(x => x.Id == _selectedChannel.Id ).Wads;
+                return _selectedChannel.Wads.ToList<FileWad>();
             }
 
         }
@@ -119,7 +119,7 @@ namespace Client
             get
             {
 
-                return new RelayCommand( p => MainWindowModel.ChangeModel(new AddFilesViewModel()) );
+                return new RelayCommand( p => MoustacheClientModel.ChangeModel(new AddFilesViewModel()) );
             }
         }
 
@@ -128,7 +128,7 @@ namespace Client
             get
             {
 
-               return  new RelayCommand( p => MainWindowModel.ChangeModel(new NewChannelViewModel()));
+               return  new RelayCommand( p => MoustacheClientModel.ChangeModel(new NewChannelViewModel()));
             }
         }
         

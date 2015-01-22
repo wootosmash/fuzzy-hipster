@@ -31,7 +31,7 @@ namespace Client
 
         private static void OnCurrentReadingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            
+            //as
         }
 
         public List<FileWad> Wads

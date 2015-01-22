@@ -64,15 +64,15 @@ namespace Client
             get
             {
                 Type t = typeof(T);
-                MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
+                MoustacheClientModel mw = MoustacheClient.Instance.Model;
                 return (T) mw.PageViewModelMap[t.Name];
             }
         }
 
-        public void Render()
+        public virtual void Render()
         {
             Type t = typeof(T);
-            MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
+            MoustacheClientModel mw = MoustacheClient.Instance.Model;
             mw.CurrentPageViewModel = mw.PageViewModelMap[t.Name];
         }
 
