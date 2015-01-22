@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace Client
     protected override void OnStartup(StartupEventArgs e)
     {      
       base.OnStartup(e);
-
+      
       var thread = new Thread(
         new ThreadStart(
           delegate
@@ -57,6 +58,8 @@ namespace Client
 
       thread.IsBackground = true;
       thread.Start();
+      
+      Dispatcher.UnhandledException += (sender, ex) => Debug.Print(ex.Exception.ToString());
     }
 
     void App_MoustacheLayerLoaded(object sender, EventArgs e)

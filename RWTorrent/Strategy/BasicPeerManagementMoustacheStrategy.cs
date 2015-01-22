@@ -26,7 +26,7 @@ namespace FuzzyHipster.Strategy
     {
       Network.PeerConnected += NetworkPeerConnected;
       Network.PeerConnectFailed += NetworkPeerConnectFailed;
-      Network.NewPeer += NetworkNewPeer;      
+      Network.NewPeer += NetworkNewPeer;
       Peers.ResetConnectionAttempts();
     }
 
@@ -34,7 +34,7 @@ namespace FuzzyHipster.Strategy
     {
       Network.PeerConnected -= NetworkPeerConnected;
       Network.PeerConnectFailed -= NetworkPeerConnectFailed;
-      Network.NewPeer -= NetworkNewPeer;      
+      Network.NewPeer -= NetworkNewPeer;
     }
 
     public override void Think()
@@ -43,9 +43,10 @@ namespace FuzzyHipster.Strategy
       if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
       {
         foreach( var peer in Peers.ToArray() ) // for each peer that we're not connected to
-          if ( !peer.IsConnected ) // we're not connected
-            if ( peer.NextConnectionAttempt < DateTime.Now ) // wait is over
-              Network.Connect(peer);
+          if ( peer.Enabled )
+            if ( !peer.IsConnected ) // we're not connected
+              if ( peer.NextConnectionAttempt < DateTime.Now ) // wait is over
+                Network.Connect(peer);
       }
       
       if ( Peers.Count < Settings.DesiredPeerListSize && Peers.Count < Peers.MaximumPeerListSize )
@@ -54,7 +55,7 @@ namespace FuzzyHipster.Strategy
         foreach( Peer p in Network.ActivePeers.ToArray())
         {
           Network.RequestPeers(p, peersToSend );
-        }        
+        }
       }
     }
     

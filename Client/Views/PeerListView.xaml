@@ -45,7 +45,7 @@
                     <GridViewColumn Width="130" Header="Host" TextBlock.TextAlignment="Left"  DisplayMemberBinding="{Binding HostAddress, UpdateSourceTrigger=PropertyChanged}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBox Text="{Binding HostAddress,UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBox Text="{Binding HostAddress}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

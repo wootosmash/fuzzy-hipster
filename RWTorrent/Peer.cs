@@ -42,7 +42,7 @@ namespace FuzzyHipster
     }
     [NonSerialized()]
     NetworkSocket socket;
-        
+    
     // network statistics
     public DateTime NextConnectionAttempt { get; set; }
     public int FailedConnectionAttempts { get; set; }
@@ -62,13 +62,16 @@ namespace FuzzyHipster
     public DateTime LastConnection { get; set; }
     public bool IsLocal { get; set; }
     
-    public bool IsHandshaking 
-    {
-      get
-      {
-        return (Id == Guid.Empty);
+    public bool Enabled {
+      get {
+        return enabled;
+      }
+      set {
+        enabled = value;
       }
     }
+    [NonSerialized()]
+    bool enabled = true;
     
     [NonSerialized()]
     RateLimiter rateLimiter;
@@ -179,7 +182,7 @@ namespace FuzzyHipster
     {
       NextConnectionAttempt = DateTime.MinValue;
       FailedConnectionAttempts = 0;
-    }       
+    }
     
     public override string ToString()
     {
