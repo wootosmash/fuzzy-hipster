@@ -81,7 +81,6 @@ namespace Client
                 Id = Guid.NewGuid(),
                 Name = this.ChannelName,
                 Description = this.ChannelDescription,
-                PublicKey = "..."
             };
             catalog.Channels.Add(newChannel);
             catalog.Save();

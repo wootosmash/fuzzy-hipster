@@ -75,6 +75,11 @@ namespace FuzzyHipster.Network
       return socket.EndSend(asyncResult);
     }
     
+    public void Disconnect()
+    {
+      socket.Disconnect(false);
+    }
+    
     #region IDisposable implementation
     public void Dispose()
     {
@@ -354,7 +359,7 @@ namespace FuzzyHipster.Network
         recvState.Peer = connectState.Peer;
         recvState.Peer.LastConnection = DateTime.Now;
         recvState.ExpectedLength = sizeof(int);
-        recvState.ExpectedMessage = MessageType.AsymmetricKeyHello;
+        recvState.ExpectedMessage = MessageType.AsymmetricKeyAck;
         recvState.WaitingLengthFrame = true;
 
         //receiveSemaphore.Reset();
@@ -374,6 +379,7 @@ namespace FuzzyHipster.Network
       Log(string.Format("DISCONNECT: {0} {1} {2} {3}", why, peer.Name, peer.IPAddress, peer.Id));
       if ( peer.Socket != null )
       {
+        peer.Socket.Disconnect();
         peer.Socket.Dispose();
         peer.Socket = null;
       }
@@ -464,7 +470,7 @@ namespace FuzzyHipster.Network
                                new AsyncCallback(WaitMessageCallback), state); // get the message size first
           
           
-          SendHello(state.Peer, true);
+          //SendHello(state.Peer, true);
         }
         catch( Exception ex )
         {
@@ -509,10 +515,12 @@ namespace FuzzyHipster.Network
           {
             state.ExpectedLength = BitConverter.ToInt32(ReceiveBytes(state), 0);
             state.WaitingLengthFrame = false;
-            if ( state.ExpectedLength <= state.Buffer.Capacity )
-              BeginReceive( peer, state.Buffer.GetBuffer(), 0, state.ExpectedLength, state);
-            else
+            if ( state.ExpectedLength <= 0 )
+              Disconnect(state.Peer, "Expected Length was a garbage value!");
+            else if ( state.ExpectedLength > state.Buffer.Capacity )
               Disconnect(state.Peer, "Expected Length is greater than the buffer capacity!");
+            else
+              BeginReceive( peer, state.Buffer.GetBuffer(), 0, state.ExpectedLength, state);
           }
           else
           {
@@ -698,8 +706,14 @@ namespace FuzzyHipster.Network
           
           if ( ackkey.Key is AsymmetricKey )
             state.Peer.AsymmetricKey = ackkey.Key as AsymmetricKey;
+          else
+            throw new Exception(string.Format("Received Asymmetric KeyNetMessage but the key was not Asymmetric. Key type is '{0}'", ackkey.Key));
+          
+          if ( Me.SymmetricKey == null )
+            Me.SymmetricKey = SymmetricKey.Create();
           
           state.ExpectedMessage = MessageType.PeerStatus;
+          state.Peer.SymmetricKey = Me.SymmetricKey;
           Send( new KeyNetMessage()
                {
                  Type = MessageType.SymmetricKey,
@@ -714,8 +728,8 @@ namespace FuzzyHipster.Network
           
           if ( symkey.Key is SymmetricKey )
             state.Peer.SymmetricKey = symkey.Key as SymmetricKey;
-          else 
-            throw new Exception(string.Format("Received SymmetricKey KeyNetMessage but the key was not Symmetric. Key type {0}", symkey.Key.GetType()));
+          else
+            throw new Exception(string.Format("Received SymmetricKey KeyNetMessage but the key was not Symmetric. Key type is '{0}'", symkey.Key));
           
           if ( state.Peer.IsHandshaking )
           {
@@ -999,7 +1013,7 @@ namespace FuzzyHipster.Network
     }
     
     byte[] ReceiveBytes( ReceiveStateObject state )
-    {      
+    {
       Console.WriteLine("Expected: " + state.ExpectedLength);
       if ( state.Peer.SymmetricKey != null )
         return state.Peer.SymmetricKey.Decrypt(state.Buffer.GetBuffer(), (int)state.ExpectedLength);
