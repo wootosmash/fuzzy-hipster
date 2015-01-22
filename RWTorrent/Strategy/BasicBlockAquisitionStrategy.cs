@@ -43,14 +43,11 @@ namespace FuzzyHipster.Strategy
       
       foreach (var channel in Catalog.Channels.Find(SearchFilter.PartiallyDownloaded))
       {
-        Console.WriteLine("Block.Think()");
         if (!channel.Subscribed)
           continue;
         
         foreach( var wad in channel.Wads )
         {
-          Console.WriteLine("Block.Think(WAD)");
-          
           if ( wad.IsFullyDownloaded )
             continue;
           
@@ -68,7 +65,6 @@ namespace FuzzyHipster.Strategy
             
             int i = MoustacheLayer.Singleton.Random.Next(0,blockPeer.Value.Length);
             
-            Console.WriteLine("RequestBlock({0},{1},{2})", i, wad, blockPeer.Key );
             var p = blockPeer.Value[i];
             
             Network.RequestBlock(p, wad, blockPeer.Key);

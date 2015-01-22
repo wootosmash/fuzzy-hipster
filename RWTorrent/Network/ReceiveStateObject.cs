@@ -26,6 +26,24 @@ namespace FuzzyHipster.Network
 
     public MemoryStream Buffer = new MemoryStream(BufferSize);
     
+    public bool Handshaking = true;
+    
+    public void WaitForLength()
+    {
+      if ( Peer == null )
+        ExpectedLength = 4;
+      else if ( Peer.SymmetricKey != null )
+        ExpectedLength = 16;
+      else 
+        ExpectedLength = 4;
+      WaitingLengthFrame = true;
+    }
+    
+    public void WaitForData()
+    {
+      WaitingLengthFrame = false;
+    }
+    
     public override string ToString()
     {
       return string.Format("[ReceiveStateObject Peer={0}, WaitingLengthFrame={1}, ExpectedLength={2}, Buffer={3}]", Peer, WaitingLengthFrame, ExpectedLength, Buffer);
