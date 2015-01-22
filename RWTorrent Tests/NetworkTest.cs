@@ -24,6 +24,7 @@ namespace FuzzyHipster.Tests
       IPAddress = "127.0.0.1",
       Port = RWNetwork.RWDefaultPort, Name = "FAXX!!"
     };
+
     
     Peer localHostPeer2 = new Peer()
     {

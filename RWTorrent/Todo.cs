@@ -17,6 +17,7 @@ namespace FuzzyHipster
   {
     public Todo()
     {
+     
       // TODO: GUI: Add blocks, size and file count to the WADs view
       // TODO: GUI: Add WAD Count to Channel view
       // TODO: GUI: Add Network.RateLimiter.Rate to the status bar at the bottom

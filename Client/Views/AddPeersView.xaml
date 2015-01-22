@@ -1,0 +1,51 @@
+﻿<UserControl x:Class="Client.AddPeersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+                 d:DesignHeight="500" d:DesignWidth="700" Style="{StaticResource CentralSingle}">
+    <Grid>
+        <StackPanel VerticalAlignment="Center">
+
+
+            <Label Content="Add Peer" FontSize="36"/>
+
+            <Separator Margin="10"></Separator>
+
+
+            <Label>Name</Label>
+            <TextBox x:Name="PeerName" Margin="5"  Height="22" TextWrapping="Wrap" Text="{Binding PeerName ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   Width="auto" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="100"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.ColumnSpan="1">
+                    <Label>IP Address or Domain</Label>
+                    <TextBox x:Name="IPAddress" Margin="5"  Height="22" TextWrapping="Wrap" Text="{Binding IPAddress ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   Width="auto" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <Label>Port</Label>
+                    <TextBox x:Name="Port" Margin="5"  Height="22" TextWrapping="Wrap" Text="{Binding Port ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   Width="auto" />
+                    <WrapPanel>
+                        <TextBlock Text="Default:" FontStyle="Italic"/>
+                        <TextBlock Text="{Binding DefaultPort}" FontStyle="Italic"/>
+                    </WrapPanel>
+                </StackPanel>
+            </Grid>
+            <WrapPanel HorizontalAlignment="Right">
+                <Button
+                     Command="{Binding AddPeer}" CommandParameter="{Binding }"
+                    Padding="5" x:Name="AddPeer"  Margin="5" Height="27" Content="Add Peer" HorizontalContentAlignment="Center" HorizontalAlignment="Right" BorderBrush="{x:Null}" />
+                <Button
+                     Command="{Binding Cancel}" CommandParameter="{Binding }"
+                    Padding="5" x:Name="CancelCreate"  Margin="5" Height="27" Content="Cancel" HorizontalContentAlignment="Center" HorizontalAlignment="Right" BorderBrush="{x:Null}" />
+            </WrapPanel>
+
+        </StackPanel>
+
+    </Grid>
+</UserControl>

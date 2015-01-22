@@ -39,6 +39,11 @@
         </DataTemplate>
 
 
+        <DataTemplate DataType="{x:Type local:AddPeersViewModel}">
+            <local:AddPeersView />
+        </DataTemplate>
+
+
 
     </Window.Resources>
 

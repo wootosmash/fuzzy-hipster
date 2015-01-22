@@ -93,6 +93,7 @@
     <Compile Include="SettingsWindowModel.cs" />
     <Compile Include="Themes\OfficeStyleWindow.cs" />
     <Compile Include="ViewModels\AddFilesViewModel.cs" />
+    <Compile Include="ViewModels\AddPeersViewModel.cs" />
     <Compile Include="ViewModels\CatalogViewModel.cs" />
     <Compile Include="ViewModels\KeysViewModel.cs" />
     <Compile Include="ViewModels\NewChannelViewModel.cs" />
@@ -100,6 +101,9 @@
     <Compile Include="ViewModels\SplashViewModel.cs" />
     <Compile Include="Views\AddFilesView.xaml.cs">
       <DependentUpon>AddFilesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AddPeersView.xaml.cs">
+      <DependentUpon>AddPeersView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\CatalogView.xaml.cs">
       <DependentUpon>CatalogView.xaml</DependentUpon>
@@ -170,6 +174,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\AddFilesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AddPeersView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

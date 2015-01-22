@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Client
 {
@@ -52,6 +53,17 @@ namespace Client
 
         }
 
+
+        public ICommand AddPeerView
+        {
+            get
+            {
+
+               return  new RelayCommand( p => MoustacheClientModel.ChangeModel(new AddPeersViewModel()));
+            }
+        }
+
+        
 
     }
 }
