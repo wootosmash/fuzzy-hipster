@@ -69,7 +69,6 @@ namespace FuzzyHipster.Catalog
       {
         if ( !BlockIndex[i].Downloaded )
         {
-          Console.WriteLine("Block {0} is not downloaded", i);
           downloaded = false;
           break;
         }

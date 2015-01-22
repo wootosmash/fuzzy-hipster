@@ -27,7 +27,7 @@ namespace FuzzyHipster
     
     public Peer FindByIPAddress( string ipAddress, int port )
     {
-      return this.FirstOrDefault(x => x.IPAddress == ipAddress && x.Port == port);
+      return this.FirstOrDefault(x => x.HostAddress == ipAddress && x.Port == port);
     }
     
     public Peer GetRandom()
@@ -50,9 +50,9 @@ namespace FuzzyHipster
         else
           Add(peer);
       }
-      if ( !String.IsNullOrWhiteSpace(peer.IPAddress))
+      if ( !String.IsNullOrWhiteSpace(peer.HostAddress))
       {
-        myPeer = FindByIPAddress(peer.IPAddress, peer.Port);
+        myPeer = FindByIPAddress(peer.HostAddress, peer.Port);
         if ( myPeer != null )
           myPeer.UpdateFromCopy(peer);
         else

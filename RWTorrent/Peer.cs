@@ -24,7 +24,7 @@ namespace FuzzyHipster
     public string Name { get; set; }
 
     // network properties
-    public string IPAddress { get; set; }
+    public string HostAddress { get; set; }
     public int Port { get; set; }
 
     public bool IsConnected {
@@ -165,7 +165,7 @@ namespace FuzzyHipster
       EstimatedRxBandwidth = peer.EstimatedRxBandwidth;
       EstimatedTxBandwidth = peer.EstimatedTxBandwidth;
       MaxBlockPacketSize = peer.MaxBlockPacketSize;
-      IPAddress = peer.IPAddress;
+      HostAddress = peer.HostAddress;
       Port = peer.Port;
       OkToSendAt = peer.OkToSendAt;
       LastConnection = peer.LastConnection;
@@ -183,7 +183,7 @@ namespace FuzzyHipster
     
     public override string ToString()
     {
-      return string.Format("[Peer Id={0}, Socket={5}, Name={1}, IPAddress={2}, Port={3} RxRate={4}]", Id, Name, IPAddress, Port, RateLimiter.CurrentRate, Socket);
+      return string.Format("[Peer Id={0}, Socket={5}, Name={1}, IPAddress={2}, Port={3} RxRate={4}]", Id, Name, HostAddress, Port, RateLimiter.CurrentRate, Socket);
     }
 
     

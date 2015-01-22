@@ -84,6 +84,7 @@
     <Compile Include="Network\IPSniffer.cs" />
     <Compile Include="Network\MessageComposite.cs" />
     <Compile Include="Network\NetMessage.cs" />
+    <Compile Include="Network\NetworkSocket.cs" />
     <Compile Include="Network\NewConnectionEventArgs.cs" />
     <Compile Include="Network\RateLimiter.cs" />
     <Compile Include="Network\ReceiveStateObject.cs" />

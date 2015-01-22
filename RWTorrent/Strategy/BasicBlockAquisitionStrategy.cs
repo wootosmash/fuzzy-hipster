@@ -46,6 +46,9 @@ namespace FuzzyHipster.Strategy
         if (!channel.Subscribed)
           continue;
         
+        if ( channel.Wads == null )
+          continue;
+        
         foreach( var wad in channel.Wads )
         {
           if ( wad.IsFullyDownloaded )

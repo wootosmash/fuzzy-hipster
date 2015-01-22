@@ -59,7 +59,7 @@ namespace Client
         {
             Peer p = new Peer()
             {
-                IPAddress = IPAddress,
+                HostAddress = IPAddress,
                 Port = Port,
                 Name = PeerName
             };

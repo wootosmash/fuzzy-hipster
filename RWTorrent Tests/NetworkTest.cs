@@ -21,14 +21,14 @@ namespace FuzzyHipster.Tests
   {
     Peer localHostPeer = new Peer()
     {
-      IPAddress = "127.0.0.1",
+      HostAddress = "127.0.0.1",
       Port = RWNetwork.RWDefaultPort, Name = "FAXX!!"
     };
 
     
     Peer localHostPeer2 = new Peer()
     {
-      IPAddress = "127.0.0.1",
+      HostAddress = "127.0.0.1",
       Port = RWNetwork.RWDefaultPort+1, Name = "Al!!"
     };
 

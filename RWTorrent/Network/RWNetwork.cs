@@ -15,82 +15,7 @@ using FuzzyHipster.Crypto;
 
 namespace FuzzyHipster.Network
 {
-  public class NetworkSocket : IDisposable
-  {
-    public static int NextId{ get; set; }
-    
-    public int Id { get; set; }
-    Socket socket;
-    
-    public EndPoint RemoteEndPoint {
-      get { return socket.RemoteEndPoint; }
-    }
-    
-    public bool Connected {
-      get { return socket.Connected; }
-    }
-    
-    public NetworkSocket( AddressFamily addressFamily, SocketType socketType, ProtocolType protocol)
-    {
-      this.Id = NetworkSocket.NextId;
-      NextId ++;
-      socket = new Socket(addressFamily, socketType, protocol );
-    }
-    
-    public NetworkSocket( Socket socket )
-    {
-      this.Id = NetworkSocket.NextId;
-      NextId ++;
-      this.socket = socket;
-    }
-    
-    public int EndReceive( IAsyncResult ar )
-    {
-      return socket.EndReceive(ar);
-    }
-    
-    public IAsyncResult BeginReceive( byte[] buffer, int offset, int count, SocketFlags flags, AsyncCallback callback, object state)
-    {
-      return socket.BeginReceive(buffer, offset, count, flags, callback, state);
-    }
-    
-    public IAsyncResult BeginConnect(EndPoint remoteEP, AsyncCallback callback, object state)
-    {
-      return socket.BeginConnect(remoteEP, callback, state);
-    }
-    
-    public void EndConnect(IAsyncResult asyncResult)
-    {
-      socket.EndConnect(asyncResult);
-    }
-    
-    public IAsyncResult BeginSend( byte[] buffer, int offset, int count, SocketFlags flags, AsyncCallback callback, object state )
-    {
-      return socket.BeginSend(buffer, 0, count, 0, callback, state);
-    }
-    
-    public int EndSend(IAsyncResult asyncResult)
-    {
-      return socket.EndSend(asyncResult);
-    }
-    
-    public void Disconnect()
-    {
-      socket.Disconnect(false);
-    }
-    
-    #region IDisposable implementation
-    public void Dispose()
-    {
-      socket.Dispose();
-    }
-    #endregion
-    
-    public override string ToString()
-    {
-      return string.Format("[NetworkSocket Id={1} Socket={0}]", Id, socket);
-    }
-  }
+  
   
   public class RWNetwork
   {
@@ -321,17 +246,24 @@ namespace FuzzyHipster.Network
     /// <param name="peer"></param>
     public void Connect( Peer peer )
     {
-      if ( String.IsNullOrWhiteSpace(peer.IPAddress) )
+      if ( String.IsNullOrWhiteSpace(peer.HostAddress) )
         return;
       
       try {
         Log(string.Format("CONNECT: {0}", peer));
+        
+        IPAddress [] addresses = Dns.GetHostAddresses(peer.HostAddress);
+        
+        if ( addresses.Length == 0 )
+          throw new Exception("No address");
+        
+        IPEndPoint remoteEP = new IPEndPoint( addresses[0], peer.Port);
+        
         var state = new ReceiveStateObject();
         peer.Socket = new NetworkSocket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         peer.SymmetricKey = null; // we have no agreement!
         state.Peer = peer;
         
-        IPEndPoint remoteEP = new IPEndPoint( IPAddress.Parse(peer.IPAddress), peer.Port);
         peer.Socket.BeginConnect( remoteEP, ConnectCallback, state);
       }
       catch (Exception)
@@ -369,14 +301,14 @@ namespace FuzzyHipster.Network
       catch( Exception ex )
       {
         Log(ex.ToString());
-        Disconnect(connectState.Peer, "Connect failed to " + connectState.Peer.IPAddress + " "  + connectState.Peer.Port);
+        Disconnect(connectState.Peer, "Connect failed to " + connectState.Peer.HostAddress + " "  + connectState.Peer.Port);
         OnPeerConnectFailed( new GenericEventArgs<Peer>( connectState.Peer) );
       }
     }
     
     public void Disconnect( Peer peer, string why )
     {
-      Log(string.Format("DISCONNECT: {0} {1} {2} {3}", why, peer.Name, peer.IPAddress, peer.Id));
+      Log(string.Format("DISCONNECT: {0} {1} {2} {3}", why, peer.Name, peer.HostAddress, peer.Id));
       if ( peer.Socket != null )
       {
         peer.Socket.Disconnect();
@@ -447,7 +379,7 @@ namespace FuzzyHipster.Network
         {
           Id = Guid.Empty,
           Socket = new NetworkSocket(handler),
-          IPAddress = (handler.RemoteEndPoint as IPEndPoint).Address.ToString(),
+          HostAddress = (handler.RemoteEndPoint as IPEndPoint).Address.ToString(),
           Port = 0,
           CatalogRecency = 0,
           PeerCount = 0,
@@ -645,7 +577,7 @@ namespace FuzzyHipster.Network
           state.Peer.Name = status.Peers[0].Name;
           state.Peer.PeerCount = status.Peers[0].PeerCount;
           state.Peer.Uptime = status.Peers[0].Uptime;
-          state.Peer.IPAddress = (state.Peer.Socket.RemoteEndPoint as IPEndPoint).Address.ToString();
+          state.Peer.HostAddress = (state.Peer.Socket.RemoteEndPoint as IPEndPoint).Address.ToString();
           state.Peer.Port = status.Peers[0].Port;
           
           DateTime okToSend = DateTime.Now.AddMilliseconds(MoustacheLayer.Singleton.Settings.ThinkTimeGraceMilliseconds);
@@ -686,7 +618,7 @@ namespace FuzzyHipster.Network
           var peerList = msg as PeerListNetMessage;
           
           foreach( var peer in peerList.Peers )
-            if ( !String.IsNullOrWhiteSpace(peer.IPAddress))
+            if ( !String.IsNullOrWhiteSpace(peer.HostAddress))
               OnNewPeer(new GenericEventArgs<Peer>(peer));
           break;
           
@@ -964,7 +896,8 @@ namespace FuzzyHipster.Network
           continue;
         
         if ( !peer.IsConnected )
-          SendMessageViaRelay(msg, peer);
+          continue;
+        //          SendMessageViaRelay(msg, peer);
         
         var state = new SendState();
         

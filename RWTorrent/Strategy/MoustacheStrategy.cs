@@ -52,8 +52,8 @@ namespace FuzzyHipster
 	  
 	  public void Disable()
 	  {
-	    Enabled = false;
 	    Uninstall();
+	    Enabled = false;
 	  }
 
 		public abstract void Install();

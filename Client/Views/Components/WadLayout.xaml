@@ -28,10 +28,18 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Header="Blocks" Width="auto" DisplayMemberBinding="{Binding IsFullyDownloaded, UpdateSourceTrigger=PropertyChanged}">
+                    <GridViewColumn Header="Complete" Width="auto" DisplayMemberBinding="{Binding IsFullyDownloaded, UpdateSourceTrigger=PropertyChanged}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding IsFullyDownloaded, UpdateSourceTrigger=PropertyChanged}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                  
+                    <GridViewColumn Header="Files" Width="auto" DisplayMemberBinding="{Binding Files.Count, UpdateSourceTrigger=PropertyChanged}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Files.Count, UpdateSourceTrigger=PropertyChanged}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
