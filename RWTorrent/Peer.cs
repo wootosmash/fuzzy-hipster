@@ -186,7 +186,7 @@ namespace FuzzyHipster
     
     public override string ToString()
     {
-      return string.Format("[Peer Id={0}, Socket={5}, Name={1}, IPAddress={2}, Port={3} RxRate={4}]", Id, Name, HostAddress, Port, RateLimiter.CurrentRate, Socket);
+      return string.Format("[Peer Id={0}, Socket={5}, Name={1}, HostAddress={2}, Port={3} RxRate={4}]", Id, Name, HostAddress, Port, RateLimiter.CurrentRate, Socket);
     }
 
     

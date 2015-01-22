@@ -123,7 +123,7 @@ namespace FuzzyHipster
       MinBlockSize = 65536;
       DesiredPeerListSize = MaxActivePeers * 2; // 2 times maximum active peers
       DefaultAdvertisementMoratorium = 100;
-      CatalogThinkInterval = 120;
+      CatalogThinkInterval = 120000;
       CatalogThinkRequestSize = 10;
       DefaultRelayTimeToLive = 1; // can send it one hop
       UseEncryption = true;

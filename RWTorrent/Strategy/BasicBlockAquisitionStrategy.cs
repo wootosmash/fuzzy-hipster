@@ -8,6 +8,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Timers;
 using FuzzyHipster.Catalog;
@@ -56,15 +57,20 @@ namespace FuzzyHipster.Strategy
           
           if ( WeDontKnowWhatsAvailable(wad))
           {
+            Debug.Print("We don't know whats available for {0}", wad);
             foreach (var peer in Network.ActivePeers.ToArray())
               Network.RequestBlocksAvailable(peer, channel.Wads[0]);
           }
           else
           {
+            Debug.Print("Looking around for blocks", wad);
             KeyValuePair<int, Peer[]> blockPeer = BlockAvailability.GetRandomBlockPeer(wad, BlockAvailability, BlockAvailabilityList.SearchStrategy.RareBlocks);
             
             if ( blockPeer.Key < 0 || blockPeer.Value.Length == 0 )
-              continue; // skip this WAD
+            {
+              Debug.Print("No blocks or no peers");
+              continue; // skip this WAD, no block or no peers
+            }
             
             int i = MoustacheLayer.Singleton.Random.Next(0,blockPeer.Value.Length);
             

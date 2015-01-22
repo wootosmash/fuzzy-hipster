@@ -352,7 +352,7 @@ namespace FuzzyHipster.Network
         }
 
       } catch (Exception e) {
-        Console.WriteLine(e.ToString());
+        Log(e.ToString());
       }
     }
 
@@ -406,7 +406,7 @@ namespace FuzzyHipster.Network
         }
         catch( Exception ex )
         {
-          Console.WriteLine(ex);
+          Log(ex);
         }
       }
     }
@@ -480,7 +480,7 @@ namespace FuzzyHipster.Network
       catch( Exception ex )
       {
         Disconnect(peer, "Exception in WaitMessageCallback");
-        Console.WriteLine(ex);
+        Log(ex);
       }
     }
     
@@ -945,8 +945,13 @@ namespace FuzzyHipster.Network
       catch (Exception e)
       {
         Disconnect(state.Peer, "Send failed");
-        Console.WriteLine(e);
+        Log(e);
       }
+    }
+    
+    void Log( Exception ex )
+    {
+      Log(ex.ToString());
     }
     
     void Log( string format, params object [] args )
