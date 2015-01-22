@@ -201,7 +201,7 @@ namespace FuzzyHipster.Catalog
     }
     
     public Channel AddChannel( Channel channel )
-    {        
+    {              
       if ( Channels[channel.Id] == null )
         Channels.Add(channel);
       
