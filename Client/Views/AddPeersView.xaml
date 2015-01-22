@@ -24,7 +24,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.ColumnSpan="1">
                     <Label>IP Address or Domain</Label>
-                    <TextBox x:Name="IPAddress" Margin="5"  Height="22" TextWrapping="Wrap" Text="{Binding IPAddress ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   Width="auto" />
+                    <TextBox x:Name="MyPeerIPAddress" Margin="5"  Height="22" TextWrapping="Wrap" Text="{Binding PeerIPAddress ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   Width="auto" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="2">

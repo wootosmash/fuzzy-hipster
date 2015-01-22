@@ -24,7 +24,7 @@ namespace Client
         }
 
 
-        public string IPAddress
+        public string PeerIPAddress
         {
             get;
             set;
@@ -59,7 +59,7 @@ namespace Client
         {
             Peer p = new Peer()
             {
-                HostAddress = IPAddress,
+                HostAddress = PeerIPAddress,
                 Port = Port,
                 Name = PeerName
             };
