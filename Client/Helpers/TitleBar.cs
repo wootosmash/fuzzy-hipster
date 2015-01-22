@@ -98,9 +98,14 @@ namespace Client.Controls
         void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Window window = this.TemplatedParent as Window;
-            if (window != null)
+            if (window != null && window.GetType() == typeof(MoustacheClient))
             {
                 window.Close();
+            }
+
+            if (window != null && window.GetType() == typeof(SettingsWindow))
+            {
+                window.Hide();
             }
         }
 

@@ -34,8 +34,6 @@ namespace Client
             _channel = null;
         }
 
-
-
         public string ChannelName
         {
            get { 
@@ -48,7 +46,7 @@ namespace Client
             get
             {
 
-                MyListViewModel mylist = (MyListViewModel)MainWindowModel.GetModel(typeof(MyListViewModel));
+                MyListViewModel mylist = (MyListViewModel)MoustacheClientModel.GetModel(typeof(MyListViewModel));
                 return mylist.SelectedChannel;
 
             }

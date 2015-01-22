@@ -27,7 +27,12 @@ namespace Client
         }
 
 
-        public static readonly DependencyProperty WadsProp = DependencyProperty.Register("Wads", typeof(List<FileWad>), typeof(WadLayout), new PropertyMetadata(default(List<FileWad>)));
+        public static readonly DependencyProperty WadsProp = DependencyProperty.Register("Wads", typeof(List<FileWad>), typeof(WadLayout), new PropertyMetadata(default(List<FileWad>), new PropertyChangedCallback(OnCurrentReadingChanged)));
+
+        private static void OnCurrentReadingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            //as
+        }
 
         public List<FileWad> Wads
         {

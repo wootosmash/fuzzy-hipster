@@ -52,9 +52,7 @@ namespace Client
 
       MoustacheLayerLoaded += App_MoustacheLayerLoaded;
 
-      MainWindow app = new MainWindow();
-      MainWindowModel context = new MainWindowModel();
-      app.DataContext = context;
+      MoustacheClient app = MoustacheClient.Instance;
       app.Show();
 
       thread.IsBackground = true;
@@ -65,9 +63,7 @@ namespace Client
     {
         Dispatcher.Invoke(new Action(delegate()
         {
-            MainWindowModel mw = (MainWindowModel)Application.Current.MainWindow.DataContext;
-            mw.Setup();
-            //MainWindowModel.ChangeModel(typeof(CatalogViewModel));
+            MoustacheClient.Instance.Model.Setup();
             CatalogViewModel.Instance.Render();
         }));
     }  

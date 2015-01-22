@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="Client.ConnectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="650" Style="{StaticResource SettingsControlLayout}">
+    <Grid Margin="20">
+
+        <StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Heartbeat control group  start -->
+                    <StackPanel Grid.ColumnSpan="1">
+                       <Label>HeartBeat (ms)</Label>
+                       <TextBox Height="27" Text="{Binding HeartBeat}"  />
+                        <TextBlock TextWrapping="Wrap" FontStyle="Italic">How often the client performs checks / updates /internal operations</TextBlock>
+                    </StackPanel>
+                <!-- Heartbeat control group  end -->
+            
+            </Grid>
+        </StackPanel>
+
+    </Grid>
+</UserControl>

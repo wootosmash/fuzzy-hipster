@@ -15,23 +15,22 @@ namespace Client
 
         public MyListViewModel()
         {
-
-            MoustacheLayer.Singleton.Catalog.NotifyChannel+=Catalog_NotifyChannel;
-
+            MoustacheLayer.Singleton.Catalog.NotifyChannel += Catalog_NotifyChannel;
             MoustacheLayer.Singleton.Catalog.NotifyFileWad += Catalog_NotifyFileWad;
         }
 
         void Catalog_NotifyFileWad(object sender, GenericEventArgs<FileWad> e)
         {
-            OnPropertyChanged("CatalogWads");
+             OnPropertyChanged("Wads");  
         }
         
         void Catalog_NotifyChannel(object sender, FuzzyHipster.GenericEventArgs<Channel> e)
         {
+
             OnPropertyChanged("Channels");
+            
         }
 
-        
         public string Name
         {
             get
@@ -63,7 +62,7 @@ namespace Client
                     OnPropertyChanged("SelectedChannel");
                     OnPropertyChanged("IsChannelSelected");
                     OnPropertyChanged("WadVisibility");
-                    OnPropertyChanged("CatalogWads");
+                    OnPropertyChanged("Wads");
                 }
             }
         }
@@ -92,7 +91,7 @@ namespace Client
         string _description;
         public string Description
         {
-            get{return _description;}
+            get { return _description; }
             set
             {
                 if (value != _description)
@@ -102,14 +101,15 @@ namespace Client
                 }
             }
         }
+        
 
 
-        private List<FileWad> _catalogWads = null;
-        public List<FileWad> CatalogWads
+
+        public List<FileWad> Wads
         {
             get
             {
-              return _selectedChannel.Wads.ToList();
+                return _selectedChannel.Wads.ToList<FileWad>();
             }
 
         }
@@ -119,7 +119,7 @@ namespace Client
             get
             {
 
-                return new RelayCommand( p => MainWindowModel.ChangeModel(new AddFilesViewModel()) );
+                return new RelayCommand( p => MoustacheClientModel.ChangeModel(new AddFilesViewModel()) );
             }
         }
 
@@ -128,7 +128,7 @@ namespace Client
             get
             {
 
-               return  new RelayCommand( p => MainWindowModel.ChangeModel(new NewChannelViewModel()));
+               return  new RelayCommand( p => MoustacheClientModel.ChangeModel(new NewChannelViewModel()));
             }
         }
         

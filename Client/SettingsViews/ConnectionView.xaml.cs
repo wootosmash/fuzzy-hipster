@@ -16,24 +16,13 @@ using System.Windows.Shapes;
 namespace Client
 {
     /// <summary>
-    /// Interaction logic for MyListView.xaml
+    /// Interaction logic for ConnectionView.xaml
     /// </summary>
-    public partial class MyListView : UserControl
+    public partial class ConnectionView : UserControl
     {
-        public MyListView()
+        public ConnectionView()
         {
             InitializeComponent();
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            MyListViewModel svm = (MyListViewModel)MoustacheClientModel.CurrentView();
-            svm.Description = "ASdddddddddddddddd";
-        }
-
-        private void CreateChannel_Click(object sender, RoutedEventArgs e)
-        {
-           
         }
     }
 }

@@ -9,7 +9,7 @@
                 <ResourceDictionary Source="WindowStyles.xaml"/>
                 <ResourceDictionary Source="Layouts/LeftRight.xaml"/>
                 <ResourceDictionary Source="Layouts/CentralSingle.xaml"/>
-  
+                <ResourceDictionary Source="Layouts/SettingsLayout.xaml"/>
  
                 
             </ResourceDictionary.MergedDictionaries>
