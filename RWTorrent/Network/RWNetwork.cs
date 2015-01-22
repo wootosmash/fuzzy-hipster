@@ -713,13 +713,13 @@ namespace FuzzyHipster.Network
             Me.SymmetricKey = SymmetricKey.Create();
           
           state.ExpectedMessage = MessageType.PeerStatus;
-          state.Peer.SymmetricKey = Me.SymmetricKey;
           Send( new KeyNetMessage()
                {
                  Type = MessageType.SymmetricKey,
                  Key = Me.SymmetricKey
                }, state.Peer);
           
+          state.Peer.SymmetricKey = Me.SymmetricKey;
           OnKeyReceived( new MessageComposite<Key>(state.Peer, ackkey.Key));
           break;
           

@@ -55,6 +55,9 @@ namespace FuzzyHipster.Catalog
     
     public bool VerifySignature()
     {
+      if ( Signature == null ) 
+        return true;
+      
       // this could all go horribly wrong if its not syncro'd
       lock (this)
       {
