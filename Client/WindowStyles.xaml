@@ -38,8 +38,10 @@
         </LinearGradientBrush.GradientStops>
     </LinearGradientBrush>
 
-    <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#f9f9f9" />
-
+    <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#ffffff" />
+    <SolidColorBrush x:Key="ContextMenu" Color="#f1f1f1" />
+    
+    
     <SolidColorBrush x:Key="BorderBrush" Color="#6593CF" />
     <SolidColorBrush x:Key="TabTextBrush" Color="#4971A3" />
 

@@ -76,6 +76,23 @@ namespace Client
             mw.CurrentPageViewModel = mw.PageViewModelMap[t.Name];
         }
 
+        private bool _isActive;
+        public bool IsActive
+        {
+            get
+            {
+                return _isActive;
+            }
+            set
+            {
+                _isActive = value;
+                OnPropertyChanged("IsActive");
+            }
+        }
+
+
+
+
 
 
 

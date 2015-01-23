@@ -67,7 +67,7 @@ namespace Client
         Dispatcher.Invoke(new Action(delegate()
         {
             MoustacheClient.Instance.Model.Setup();
-            CatalogViewModel.Instance.Render();
+            MyListViewModel.Instance.Render();
         }));
     }  
 

@@ -178,7 +178,14 @@ private void OpenSettings()
             {
                 if (_currentPageViewModel != value)
                 {
+
+                    if (_currentPageViewModel != null)
+                    {
+                        _currentPageViewModel.IsActive = false;
+                    }
                     _currentPageViewModel = value;
+                    _currentPageViewModel.IsActive = true;
+
                     OnPropertyChanged("CurrentPageViewModel");
                 }
             }

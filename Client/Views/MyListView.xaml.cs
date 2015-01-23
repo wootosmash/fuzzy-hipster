@@ -35,5 +35,10 @@ namespace Client
         {
            
         }
+
+        private void ToolBar_Loaded(object sender, RoutedEventArgs e)
+        {
+           // toolbar.Overflo OverflowMode = "Never";
+        }
     }
 }

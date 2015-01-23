@@ -61,8 +61,13 @@ namespace Client
                     _selectedChannel = value;
                     OnPropertyChanged("SelectedChannel");
                     OnPropertyChanged("IsChannelSelected");
+                    OnPropertyChanged("IsChannelSelectedCollapsed");
                     OnPropertyChanged("WadVisibility");
                     OnPropertyChanged("Wads");
+
+                    WadsColumn = "300";
+                    OnPropertyChanged("WadsColumn");
+
                 }
             }
         }
@@ -79,6 +84,39 @@ namespace Client
                 return true;
             }
         }
+
+        public Visibility IsChannelSelectedCollapsed
+        {
+            get
+            {
+                if (SelectedChannel == null)
+                {
+                    return Visibility.Collapsed;
+                }
+
+                return Visibility.Visible;
+            }
+        }
+
+
+        private string _wadsColumn = "0";
+        public string WadsColumn
+        {
+            get
+            {
+                return _wadsColumn;
+            }
+            set
+            {
+                _wadsColumn = value;
+            }
+        }
+
+
+        
+
+
+        
 
         public Visibility WadVisibility
         {
