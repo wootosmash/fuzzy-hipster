@@ -104,7 +104,9 @@
     <Compile Include="Strategy\BlockAvailabilityHistogram.cs" />
     <Compile Include="Strategy\BlockAvailabilityList.cs" />
     <Compile Include="Strategy\BlockAvailabilityMatrix.cs" />
+    <Compile Include="Strategy\BlockAvailabilityStrategy.cs" />
     <Compile Include="Strategy\CatalogManagementMoustacheStrategy.cs" />
+    <Compile Include="Strategy\StreamingBlockAquisitionStrategy.cs" />
     <Compile Include="Strategy\InformationServiceMoustacheStrategy.cs" />
     <Compile Include="Strategy\KeepAliveMoustacheStrategy.cs" />
     <Compile Include="Strategy\MoustacheStrategy.cs" />

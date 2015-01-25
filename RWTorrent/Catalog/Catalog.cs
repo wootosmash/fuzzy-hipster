@@ -43,6 +43,28 @@ namespace FuzzyHipster.Catalog
     public FileWadAggregateCollection FileWads {
       get; set;
     }
+    
+    /// <summary>
+    /// When theres an update to a block index item
+    /// </summary>
+    public event EventHandler<GenericEventArgs<BlockIndexItem>> NotifyBlockIndexItem;
+    protected virtual void OnNotifyBlockIndexItem(GenericEventArgs<BlockIndexItem> e)
+    {
+      var handler = NotifyBlockIndexItem;
+      if (handler != null)
+        handler(this, e);
+    }
+
+    /// <summary>
+    /// When there's an update to a file descriptor
+    /// </summary>
+    public event EventHandler<GenericEventArgs<FileDescriptor>> NotifyFileDescriptor;
+    protected virtual void OnNotifyFileDescriptor(GenericEventArgs<FileDescriptor> e)
+    {
+      var handler = NotifyFileDescriptor;
+      if (handler != null)
+        handler(this, e);
+    }
 
     public event EventHandler<GenericEventArgs<FileWad>> NotifyFileWad;
     protected virtual void OnNotifyFileWad(GenericEventArgs<FileWad> e)

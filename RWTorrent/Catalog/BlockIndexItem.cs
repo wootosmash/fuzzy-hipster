@@ -15,22 +15,22 @@ using System.Xml.Serialization;
 namespace FuzzyHipster
 {
   [Serializable()]
-	public class BlockIndexItem
-	{
-	  public byte[] Hash {
-			get;
-			set;
-		}
+  public class BlockIndexItem
+  {
+    public byte[] Hash {
+      get;
+      set;
+    }
 
-		public long Length {
-			get;
-			set;
-		}
+    public long Length {
+      get;
+      set;
+    }
 
-	  [NonSerialized()]
+    [NonSerialized()]
     bool downloaded;
     
-		public bool Downloaded {
+    public bool Downloaded {
       get {
         return downloaded;
       }
@@ -38,7 +38,20 @@ namespace FuzzyHipster
         downloaded = value;
       }
     }
-	}
+    
+    [NonSerialized()]
+    bool downloading;
+    
+    [XmlIgnore()]
+    public bool Downloading {
+      get {
+        return downloading;
+      }
+      set {
+        downloading = value;
+      }
+    }
+  }
 }
 
 

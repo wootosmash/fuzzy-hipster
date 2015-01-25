@@ -60,6 +60,12 @@ namespace FuzzyHipster.Network
     {
       Type = MessageType.RequestPeers;
     }
+    
+    public override string ToString()
+    {
+      return string.Format("[RequestPeersNetMessage Count={0}]", Count);
+    }
+
   }
   
   
@@ -154,11 +160,15 @@ namespace FuzzyHipster.Network
       Type = MessageType.RequestBlock;
     }
     
+    public override string ToString()
+    {
+      return string.Format("[RequestBlockNetMessage FileWadId={0}, Block={1}]", FileWadId, Block);
+    }
   }
   
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack=1)]
-  public class StartBlockTransferNetMessage : NetMessage
+  public class StartBlockTransferRequestNetMessage : NetMessage
   {
     public Guid TransferId { get; set; }
     public Guid FileWadId { get; set; }
@@ -166,17 +176,38 @@ namespace FuzzyHipster.Network
     public int TotalPackets { get; set; }
     public int BlockSize { get; set; }
     
-    public StartBlockTransferNetMessage()
+    public StartBlockTransferRequestNetMessage()
     {
-      Type = MessageType.StartBlockTransfer;
+      Type = MessageType.StartBlockTransferRequest;
     }
     
     public override string ToString()
     {
-      return string.Format("[StartBlockTransferNetMessage TransferId={0}, FileWadId={1}, Block={2}, TotalPackets={3}, BlockSize={4}]", TransferId, FileWadId, Block, TotalPackets, BlockSize);
+      return string.Format("[StartBlockTransferRequestNetMessage TransferId={0}, FileWadId={1}, Block={2}, TotalPackets={3}, BlockSize={4}]", TransferId, FileWadId, Block, TotalPackets, BlockSize);
     }
 
   }
+  
+  [Serializable()]
+  [StructLayout(LayoutKind.Sequential, Pack=1)]
+  public class StartBlockTransferAcknowledgementNetMessage : NetMessage
+  {
+    public Guid TransferId { get; set; }
+    public Guid FileWadId { get; set; }
+    public int Block { get; set; }
+    public bool Accept { get; set; }
+    
+    public StartBlockTransferAcknowledgementNetMessage()
+    {
+      Type = MessageType.StartBlockTransferAck;
+    }
+    
+    public override string ToString()
+    {
+      return string.Format("[StartBlockAcknowledgementTransferNetMessage TransferId={0}, FileWadId={1}, Block={2}]", TransferId, FileWadId, Block );
+    }
+
+  }  
   
   [Serializable()]
   [StructLayout(LayoutKind.Sequential, Pack=1)]
@@ -207,6 +238,11 @@ namespace FuzzyHipster.Network
     {
       Type = MessageType.RequestBlocksAvailable;
     }
+
+    public override string ToString()
+    {
+      return string.Format("[RequestBlocksAvailableNetMessage FileWadId={0}]", FileWadId);
+    }
   }
   
   [Serializable()]
@@ -220,6 +256,12 @@ namespace FuzzyHipster.Network
     {
       Type = MessageType.BlocksAvailable;
     }
+    
+    public override string ToString()
+    {
+      return string.Format("[BlocksAvailableNetMessage FileWadId={0}, BlocksAvailable={1}]", FileWadId, BlocksAvailable);
+    }
+
   }
 
   [Serializable()]
@@ -279,8 +321,9 @@ namespace FuzzyHipster.Network
     RequestBlocksAvailable = 32,
     BlocksAvailable = 33,
     
-    StartBlockTransfer = 35,
-    BlockTransferPacket = 36,
+    StartBlockTransferRequest = 35,
+    StartBlockTransferAck = 36,
+    BlockTransferPacket = 37,
     
     AsymmetricKeyHello = 50,
     AsymmetricKeyAck = 51,

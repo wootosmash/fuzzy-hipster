@@ -42,6 +42,12 @@ namespace FuzzyHipster
 	    }
 	  }
 	  
+	  public BlockAvailabilityList BlockAvailability {
+	    get {
+	      return MoustacheLayer.Singleton.BlockAvailability;
+	    }
+	  }
+	  
 	  public bool Enabled { get; set; }
 	  
 	  public void Enable()

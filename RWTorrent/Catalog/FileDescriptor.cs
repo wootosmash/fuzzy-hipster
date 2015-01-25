@@ -73,13 +73,46 @@ namespace FuzzyHipster.Catalog
         isAllocated = value;
       }
     }
+
+    public void BuildLocalFilePath()
+    {
+      if ( String.IsNullOrWhiteSpace(LocalFilepath))
+        LocalFilepath = Path.Combine(MoustacheLayer.Singleton.Catalog.BasePath, CatalogFilepath);
+      
+      if ( !Directory.Exists(Path.GetDirectoryName(LocalFilepath)))
+        Directory.CreateDirectory(Path.GetDirectoryName(LocalFilepath));
+    }
     
     public void AllocateFile()
     {
+      BuildLocalFilePath();
+      
       using (FileStream file = File.Create(LocalFilepath)) {
         file.SetLength(Length);
       }
       IsAllocated = true;
+    }
+    
+    public void WriteBlock( string blockPath, int startPosition)
+    {
+      byte [] buffer = new byte[1024];
+      
+      if ( !IsAllocated )
+        AllocateFile();
+      
+      using (var file = new FileStream( LocalFilepath, FileMode.Open, FileAccess.Write, FileShare.ReadWrite))
+      {
+        file.Seek(startPosition, SeekOrigin.Begin);
+        using (var block = new FileStream(blockPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+        {
+          int bytesRead = block.Read(buffer, 0, buffer.Length);
+          do
+          {
+            file.Write(buffer, 0, bytesRead);
+            bytesRead = block.Read(buffer, 0, buffer.Length);
+          } while ( bytesRead > 0 );
+        }
+      }
     }
     
     /// <summary>

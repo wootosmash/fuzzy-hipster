@@ -19,7 +19,7 @@ namespace FuzzyHipster.Network
 			set;
 		}
 
-		public Guid FileWadId {
+		public FileWad FileWad {
 			get;
 			set;
 		}
@@ -29,11 +29,11 @@ namespace FuzzyHipster.Network
 			set;
 		}
 
-		public BlockReceivedEventArgs(Peer peer, Guid fileWadId, int block)
+		public BlockReceivedEventArgs(Peer peer, FileWad fileWad, int block)
 		{
 			this.Peer = peer;
 			this.Block = block;
-			this.FileWadId = fileWadId;
+			this.FileWad = fileWad;
 		}
 	}
 }

@@ -29,28 +29,31 @@ namespace FuzzyHipster
         Add(matrix);
     }
 
-    public void Add(BlockAvailabilityMatrix matrix)
+    public void Add( params BlockAvailabilityMatrix [] matrixes)
     {
-      for (int i = 0; i < matrix.BlockAvailability.Length; i++)
+      foreach( var matrix in matrixes )
       {
-        if (matrix.BlockAvailability[i])
+        for (int i = 0; i < matrix.BlockAvailability.Length; i++)
         {
-          if ( histogram.ContainsKey(i))
-            histogram[i]++;
-          else
-            histogram.Add(i,1);
+          if (matrix.BlockAvailability[i])
+          {
+            if ( histogram.ContainsKey(i))
+              histogram[i]++;
+            else
+              histogram.Add(i,1);
+          }
         }
       }
     }
-
+    
     /// <summary>
-    /// Gets a random block based on the percentiles passed and the list of blocks to ignore
+    /// Gets a random block vector based on the percentiles passed and the list of blocks to ignore
     /// </summary>
     /// <param name="blocksToIgnore"></param>
     /// <param name="minPercentile"></param>
     /// <param name="maxPercentile"></param>
     /// <returns></returns>
-    public KeyValuePair<int, Peer[]> GetRandom(bool[] blocksToIgnore, int minPercentile, int maxPercentile)
+    public BlockVector GetRandom(bool[] blocksToIgnore, int minPercentile, int maxPercentile)
     {
       var dic = new Dictionary<int, int>(histogram);
       for (int i = 0; i < blocksToIgnore.Length; i++)
@@ -58,7 +61,7 @@ namespace FuzzyHipster
           dic.Remove(i);
       
       if (dic.Count == 0)
-        return new KeyValuePair<int, Peer[]>(-1, null);
+        return new BlockVector(-1, new PeerCollection());
       
       List<KeyValuePair<int, int>> myList = dic.ToList();
       myList.Sort((firstPair, nextPair) => firstPair.Value.CompareTo(nextPair.Value));
@@ -69,13 +72,13 @@ namespace FuzzyHipster
       int block = myList[MoustacheLayer.Singleton.Random.Next(min, max + 1)].Key;
       
       // build a list of peers that have the block
-      var peers = new List<Peer>();
+      var peers = new PeerCollection();
       foreach (var matrix in list) {
         if (matrix.BlockAvailability[block])
           peers.Add(matrix.Peer);
       }
       
-      return new KeyValuePair<int, Peer[]>(block, peers.ToArray());
+      return new BlockVector(block, peers);
     }
   }
 }
