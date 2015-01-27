@@ -26,11 +26,6 @@ namespace Client
         private static MoustacheClient instance;
         
 
-        private SettingsWindow _settings;
-        public SettingsWindow Settings
-        {
-            get { return _settings; }
-        }
 
 
         private MoustacheClientModel _model;
@@ -55,16 +50,13 @@ namespace Client
             }
         }
 
-        //ObservableCollection<Channel> _channels;
-        //UserSettings settings;
-
         public MoustacheClient()
         {
             InitializeComponent();
 
             _model = new MoustacheClientModel();
             DataContext = _model;
-            _settings = new SettingsWindow();
+            
             
         }
 

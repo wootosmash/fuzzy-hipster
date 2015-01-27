@@ -8,6 +8,16 @@
              x:Name="WadList">
     <Grid Margin="0">
         <ListView Margin="0" BorderThickness="0,0,0,0" ItemsSource="{Binding Wads, ElementName=WadList}"  BorderBrush="{x:Null}">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Remove"
+             />
+                </ContextMenu>
+            </ListView.ContextMenu>
+
+            <!--Command="{Binding RemoveItem}"
+            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.SelectedItem}"-->
+
             <ListView.View>
                 <GridView x:Name="a" >
 

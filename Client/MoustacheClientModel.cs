@@ -78,13 +78,21 @@ namespace Client
             }
         }
 
-private void OpenSettings()
-{
+        private void OpenSettings()
+        {
 
-       MoustacheClient.Instance.Settings.Show();
-       CoreViewModel.Instance.Render();
-}
+               _settings = new SettingsWindow();
+               MoustacheClient.Instance.Model.Settings.Show();
+               CoreViewModel.Instance.Render();
+        }
 
+
+        private SettingsWindow _settings;
+        public SettingsWindow Settings
+        {
+            get { return _settings; }
+        }
+       
 
         
 

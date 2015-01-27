@@ -48,8 +48,7 @@ namespace Client
             rwt.Start();
           }
          )
-       );     
-
+       );
 
       MoustacheLayerLoaded += App_MoustacheLayerLoaded;
 

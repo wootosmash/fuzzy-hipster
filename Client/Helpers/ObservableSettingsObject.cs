@@ -13,7 +13,7 @@ namespace Client
         public override void Render()
         {
             Type t = typeof(T);
-            SettingsWindowModel mw = MoustacheClient.Instance.Settings.Model;
+            SettingsWindowModel mw = MoustacheClient.Instance.Model.Settings.Model;
             mw.CurrentPageViewModel = mw.PageViewModelMap[t.Name];
         }
 
@@ -23,7 +23,7 @@ namespace Client
             get
             {
                 Type t = typeof(T);
-                SettingsWindowModel mw = MoustacheClient.Instance.Settings.Model;
+                SettingsWindowModel mw = MoustacheClient.Instance.Model.Settings.Model;
                 return (T)mw.PageViewModelMap[t.Name];
             }
         }
