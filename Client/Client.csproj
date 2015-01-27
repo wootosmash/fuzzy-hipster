@@ -84,8 +84,19 @@
     <Compile Include="LongToMBConverter.cs" />
     <Compile Include="MoustacheClientModel.cs" />
     <Compile Include="SettingsModels\ConnectionViewModel.cs" />
+    <Compile Include="SettingsModels\CoreViewModel.cs" />
+    <Compile Include="SettingsViews\Components\IntProperty.xaml.cs">
+      <DependentUpon>IntProperty.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SettingsViews\Components\SettingsComponent.cs" />
+    <Compile Include="SettingsViews\Components\StringProperty.xaml.cs">
+      <DependentUpon>StringProperty.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SettingsViews\ConnectionView.xaml.cs">
       <DependentUpon>ConnectionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SettingsViews\CoreView.xaml.cs">
+      <DependentUpon>CoreView.xaml</DependentUpon>
     </Compile>
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
@@ -161,7 +172,19 @@
       <DependentUpon>MoustacheClient.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="SettingsViews\Components\IntProperty.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SettingsViews\Components\StringProperty.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="SettingsViews\ConnectionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SettingsViews\CoreView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

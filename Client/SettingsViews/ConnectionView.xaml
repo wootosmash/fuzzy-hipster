@@ -14,15 +14,15 @@
                     <ColumnDefinition Width="10"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                
+
                 <!-- Heartbeat control group  start -->
-                    <StackPanel Grid.ColumnSpan="1">
-                       <Label>HeartBeat (ms)</Label>
-                       <TextBox Height="27" Text="{Binding HeartBeat}"  />
-                        <TextBlock TextWrapping="Wrap" FontStyle="Italic">How often the client performs checks / updates /internal operations</TextBlock>
-                    </StackPanel>
+                <StackPanel Grid.ColumnSpan="1">
+                    <Label>HeartBeat (ms)</Label>
+                    <TextBox Height="27" Text="{Binding HeartBeat}"  />
+                    <TextBlock TextWrapping="Wrap" FontStyle="Italic">How often the client performs checks / updates /internal operations</TextBlock>
+                </StackPanel>
                 <!-- Heartbeat control group  end -->
-            
+
             </Grid>
         </StackPanel>
 

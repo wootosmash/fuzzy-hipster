@@ -1,0 +1,235 @@
+﻿<UserControl x:Class="Client.CoreView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             xmlns:local="clr-namespace:Client"
+             xmlns:SettingsComponent="clr-namespace:Client.Components"
+             d:DesignHeight="400" d:DesignWidth="650" Style="{StaticResource SettingsControlLayout}">
+    <Grid Margin="20">
+        <ScrollViewer Padding="0 0 20 0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty  
+                    SetProperty="MaxActivePeers" 
+                    Label="Max Active Peers" 
+                    Desc="" />
+                    <!-- SettingsComponent:IntProperty -->
+         
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty Grid.Column="2"
+                    SetProperty="ConnectAttemptWaitTime" 
+                    Label="Connect Wait Time" 
+                    Desc="Amount of seconds to wait between connect attempts to the same peer. Will be used in exponential backoff." />
+                    <!-- SettingsComponent:IntProperty -->
+                </Grid>
+
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty  
+                    SetProperty="HeartbeatInterval" 
+                    Label="HeartBeat(MS)" 
+                    Desc="How often to beat the heart" />
+                    <!-- SettingsComponent:IntProperty -->
+      
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty Grid.Column="2" 
+                    SetProperty="Port" 
+                    Label="Port" 
+                    Desc="What port to run the network traffic on" />
+                    <!-- SettingsComponent:IntProperty -->
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty  
+                    SetProperty="MaxActiveBlockTransfers" 
+                    Label="MaxActiveBlockTransfers" 
+                    Desc="Maximum number of active block transfers going on" />
+                    <!-- SettingsComponent:IntProperty -->
+
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty 
+                     Grid.Column="2"
+                    SetProperty="DefaultMaxBlockPacketSize" 
+                    Label="Max Block Size" 
+                    Desc="Maximum number of active block transfers going on" />
+                    <!-- SettingsComponent:IntProperty -->
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty  
+                    SetProperty="ThinkTimeGraceMilliseconds" 
+                    Label="Think Grace" 
+                    Desc="How much time to wait before thinking for a peer - gives them an oppourtunity to auth" />
+                    <!-- SettingsComponent:IntProperty -->
+
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty 
+                     Grid.Column="2"
+                    SetProperty="DefaultBlockQuantity" 
+                    Label="Default Block Quantity" 
+                    Desc="Default number of blocks to try and create when creating a WAD" />
+                    <!-- SettingsComponent:IntProperty -->
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty  
+                    SetProperty="KeepAliveInterval" 
+                    Label="Keep Alive" 
+                    Desc="How long between keep alive messages" />
+                    <!-- SettingsComponent:IntProperty -->
+
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty 
+                     Grid.Column="2"
+                    SetProperty="MaxTransmitRate" 
+                    Label="Max Transmit Rate" 
+                    Desc="Maximum rate to transmit packets at" />
+                    <!-- SettingsComponent:IntProperty -->
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty  
+                    SetProperty="MaxReceiveRate" 
+                    Label="Max Receive Rate" 
+                    Desc="Maximum rate to receive packets at" />
+                    <!-- SettingsComponent:IntProperty -->
+
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty 
+                     Grid.Column="2"
+                    SetProperty="MinBlockSize" 
+                    Label="Min Block Size" 
+                    Desc="Minimum block size to use when creating WADs" />
+                    <!-- SettingsComponent:IntProperty -->
+                </Grid>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty  
+                    SetProperty="DesiredPeerListSize" 
+                    Label="Desired Peer List Size" 
+                    Desc="How big do we want the known peers list to be?" />
+                    <!-- SettingsComponent:IntProperty -->
+
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty 
+                     Grid.Column="2"
+                    SetProperty="MaximumAgeOfPeerList" 
+                    Label="Maximum Age Of Peer List" 
+                    Desc="What should be the maximum age of the peer list?" />
+                    <!-- SettingsComponent:IntProperty -->
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty  
+                    SetProperty="DefaultAdvertisementMoratorium" 
+                    Label="Advertisement Moratorium" 
+                    Desc="Default number of seconds before the the catalog item can be advertised again" />
+                    <!-- SettingsComponent:IntProperty -->
+
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty 
+                     Grid.Column="2"
+                    SetProperty="CatalogThinkInterval" 
+                    Label="Catalog Think Intervalt" 
+                    Desc="Number of milliseconds  between catalog management tasks" />
+                    <!-- SettingsComponent:IntProperty -->
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty  
+                    SetProperty="CatalogThinkRequestSize" 
+                    Label="Catalog Think Request Size" 
+                    Desc="Number of items to request on a catalog think" />
+                    <!-- SettingsComponent:IntProperty -->
+
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty 
+                     Grid.Column="2"
+                    SetProperty="DefaultRelayTimeToLive" 
+                    Label="Relay Time To Live" 
+                    Desc="TTL for relay packets" />
+                    <!-- SettingsComponent:IntProperty -->
+                </Grid>
+          <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty  
+                    SetProperty="CatalogThinkRequestSize" 
+                    Label="Catalog Think Request Size" 
+                    Desc="Number of items to request on a catalog think" />
+                    <!-- SettingsComponent:IntProperty -->
+
+                    <!-- SettingsComponent:IntProperty -->
+                    <SettingsComponent:IntProperty 
+                     Grid.Column="2"
+                    SetProperty="DefaultRelayTimeToLive" 
+                    Label="Relay Time To Live" 
+                    Desc="TTL for relay packets" />
+                    <!-- SettingsComponent:IntProperty -->
+                </Grid>
+
+
+
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

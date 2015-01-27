@@ -82,7 +82,7 @@ private void OpenSettings()
 {
 
        MoustacheClient.Instance.Settings.Show();
-       ConnectionViewModel.Instance.Render();
+       CoreViewModel.Instance.Render();
 }
 
 

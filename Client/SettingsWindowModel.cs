@@ -31,8 +31,8 @@ namespace Client
             //Map views against declared type
 
             IPageViewModel ConnectionPage = AddPageInstance(new ConnectionViewModel(), true);
-
-            CurrentPageViewModel = ConnectionPage;
+            IPageViewModel CorePage = AddPageInstance(new CoreViewModel(), true);
+            CurrentPageViewModel = CorePage;
         }
 
 
