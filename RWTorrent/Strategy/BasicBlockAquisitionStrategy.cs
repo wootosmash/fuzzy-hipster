@@ -18,22 +18,18 @@ namespace FuzzyHipster.Strategy
 {
   public class BasicBlockAquisitionStrategy : MoustacheStrategy
   {
-    public const int BlockAvailabilityTimeout = 60 * 60; // seconds
-    
-    BlockAvailabilityList BlockAvailability { get; set; }
-    
     public override void Install()
     {
       Network.BlockReceived += NetworkBlockReceived;
-      Network.BlocksAvailableReceived += NetworkBlocksAvailableReceived;
+      Network.BlockTransferFailed += NetworkBlockTransferFailed;
       Catalog.NotifyFileWad += CatalogNotifyFileWad;
     }
 
     public override void Uninstall()
     {
       Network.BlockReceived -= NetworkBlockReceived;
-      Network.BlocksAvailableReceived -= NetworkBlocksAvailableReceived;
       Catalog.NotifyFileWad -= CatalogNotifyFileWad;
+      Network.BlockTransferFailed -= NetworkBlockTransferFailed;
     }
 
     public override void Think()
@@ -55,28 +51,25 @@ namespace FuzzyHipster.Strategy
           if ( wad.IsFullyDownloaded )
             continue;
           
-          if ( WeDontKnowWhatsAvailable(wad))
+          if ( BlockAvailability.WeDontKnowWhatsAvailable(wad))
           {
-            Debug.Print("We don't know whats available for {0}", wad);
+            Console.WriteLine("We don't know whats available for {0}", wad);
             foreach (var peer in Network.ActivePeers.ToArray())
               Network.RequestBlocksAvailable(peer, channel.Wads[0]);
           }
           else
           {
-            Debug.Print("Looking around for blocks", wad);
-            KeyValuePair<int, Peer[]> blockPeer = BlockAvailability.GetRandomBlockPeer(wad, BlockAvailability, BlockAvailabilityList.SearchStrategy.RareBlocks);
+            Console.WriteLine("Looking around for blocks");
+            BlockVector vector = BlockAvailability.GetBlockPeers(wad, BlockAvailabilityList.SearchStrategy.RandomRareBlock);
             
-            if ( blockPeer.Key < 0 || blockPeer.Value.Length == 0 )
+            if ( vector == null || !vector.IsValid )
             {
-              Debug.Print("No blocks or no peers");
+              Console.WriteLine("No blocks or no peers");
               continue; // skip this WAD, no block or no peers
             }
             
-            int i = MoustacheLayer.Singleton.Random.Next(0,blockPeer.Value.Length);
-            
-            var p = blockPeer.Value[i];
-            
-            Network.RequestBlock(p, wad, blockPeer.Key);
+            if ( !wad.BlockIndex[vector.Block].Downloading )
+              Network.RequestBlock(vector.Peers.GetRandom(), wad, vector.Block);
           }
         }
       }
@@ -84,68 +77,28 @@ namespace FuzzyHipster.Strategy
     
     public BasicBlockAquisitionStrategy()
     {
-      BlockAvailability = new BlockAvailabilityList();
     }
     
-    public bool WeDontKnowWhatsAvailable(FileWad wad)
-    {
-      DateTime timeout = DateTime.Now.AddSeconds(-BlockAvailabilityTimeout);
-      
-      if ( !BlockAvailability.ContainsKey(wad.Id))
-        return true;
-      
-      foreach( var matrix in BlockAvailability[wad.Id] )
-        if ( matrix.LastUpdated < timeout )
-          return true;
-      
-      return false;
-    }
-
-    void NetworkBlocksAvailableReceived(object sender, MessageComposite<BlocksAvailableNetMessage> e)
-    {
-      var wad = MoustacheLayer.Singleton.Catalog.GetFileWad(e.Value.FileWadId);
-      
-      List<BlockAvailabilityMatrix> availabilityList = null;
-      
-      if ( !BlockAvailability.ContainsKey(wad.Id))
-      {
-        availabilityList = new List<BlockAvailabilityMatrix>();
-        BlockAvailability.Add(wad.Id, availabilityList);
-      }
-      else
-        availabilityList = BlockAvailability[wad.Id];
-      
-      var matrix = availabilityList.Find(x => x.Peer == e.Peer );
-      
-      if ( matrix != null )
-      {
-        matrix.BlockAvailability = e.Value.BlocksAvailable;
-        matrix.LastUpdated = DateTime.Now;
-      }
-      else
-      {
-        matrix = new BlockAvailabilityMatrix()
-        {
-          BlockAvailability = e.Value.BlocksAvailable,
-          Peer = e.Peer,
-          LastUpdated = DateTime.Now
-        };
-        availabilityList.Add(matrix);
-      }
-    }
-
     void NetworkBlockReceived(object sender, BlockReceivedEventArgs e)
     {
-      FileWad wad = Catalog.GetFileWad(e.FileWadId);
-      if (wad.IsFullyDownloaded)
-        wad.SaveFromBlocks(Catalog.BasePath + @"\Files\");
+      if (e.FileWad.IsFullyDownloaded)
+        e.FileWad.SaveFromBlocks(Catalog.BasePath + @"\Files\");
     }
+    
+    void NetworkBlockTransferFailed(object sender, BlockTransferStartedEventArgs e)
+    {
+      Console.WriteLine("NET: Transfer Fail " + e.FileWad.Id + " " + e.Block);
+      // kills the availability matrix for a peer
+      BlockAvailability.Invalidate(e.Peer);
+    }
+    
     
     void CatalogNotifyFileWad(object sender, GenericEventArgs<FileWad> e)
     {
-      if ( WeDontKnowWhatsAvailable(e.Value))
+      if ( BlockAvailability.WeDontKnowWhatsAvailable(e.Value))
         foreach (var peer in Network.ActivePeers.ToArray())
           Network.RequestBlocksAvailable(peer, e.Value);
+      
     }
   }
 }

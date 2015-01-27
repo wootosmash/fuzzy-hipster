@@ -9,12 +9,10 @@ namespace FuzzyHipster.Network
 	{
 		public override void Execute()
 		{
-			var fileWad = MoustacheLayer.Singleton.Catalog.GetFileWad(FileWadId);
-			if (fileWad == null)
-				throw new Exception("Can't find file wad to save block to " + FileWadId);
-			fileWad.VerifyBlock(Block, TempFile);
-			fileWad.BlockIndex[Block].Downloaded = true;
-			fileWad.CatalogBlock(Block, TempFile);
+			FileWad.VerifyBlock(Block, TempFile);
+			FileWad.BlockIndex[Block].Downloading = false;
+			FileWad.BlockIndex[Block].Downloaded = true;
+			FileWad.CatalogBlock(Block, TempFile);
 		}
 	}
 }

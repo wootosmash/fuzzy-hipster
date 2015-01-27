@@ -113,7 +113,7 @@ namespace FuzzyHipster
       HeartbeatInterval = 10000;
       Port = RWNetwork.RWDefaultPort;
       ConnectAttemptWaitTime = 60;
-      MaxActiveBlockTransfers = 10;
+      MaxActiveBlockTransfers = 1;
       DefaultMaxBlockPacketSize = 40000;
       ThinkTimeGraceMilliseconds = 1000;
       DefaultBlockQuantity = 100;
@@ -123,7 +123,7 @@ namespace FuzzyHipster
       MinBlockSize = 65536;
       DesiredPeerListSize = MaxActivePeers * 2; // 2 times maximum active peers
       DefaultAdvertisementMoratorium = 100;
-      CatalogThinkInterval = 120000;
+      CatalogThinkInterval = 10000;
       CatalogThinkRequestSize = 10;
       DefaultRelayTimeToLive = 1; // can send it one hop
       UseEncryption = true;

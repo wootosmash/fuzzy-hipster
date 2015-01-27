@@ -20,7 +20,7 @@ namespace FuzzyHipster
 
 		public bool[] BlockAvailability;
 
-		public DateTime LastUpdated;
+		public DateTime LastUpdated;		
 	}
 }
 

@@ -2,6 +2,7 @@
 
 using System;
 using System.IO;
+using FuzzyHipster.Catalog;
 namespace FuzzyHipster.Network
 {
 	public abstract class TransferManager
@@ -11,7 +12,7 @@ namespace FuzzyHipster.Network
 			set;
 		}
 
-		public Guid FileWadId {
+		public FileWad FileWad {
 			get;
 			set;
 		}
@@ -20,6 +21,11 @@ namespace FuzzyHipster.Network
 			get;
 			set;
 		}
+	  
+	  public int MaxPacketSize { 
+	    get; 
+	    set; 
+	  }
 
 		public int ExpectedPackets {
 			get;
@@ -51,6 +57,11 @@ namespace FuzzyHipster.Network
 			get;
 			set;
 		}
+	  
+	  public Peer Peer {
+	    get;
+	    set;
+	  }
 
 		public TransferManager()
 		{
@@ -64,13 +75,13 @@ namespace FuzzyHipster.Network
 			if (String.IsNullOrWhiteSpace(TempFile)) 
 			{
 				string blocksPath = Path.Combine(MoustacheLayer.Singleton.Catalog.BasePath, 
-			                                   string.Format(@"Catalog\Blocks\{0}\", FileWadId));
+			                                   string.Format(@"Catalog\Blocks\{0}\", FileWad.Id));
 				TempFile = blocksPath + Block + "-" + TransferId + ".blk";
 				if (!Directory.Exists(blocksPath))
 					Directory.CreateDirectory(blocksPath);
 			}
 			
-			using (var stream = new FileStream(TempFile, FileMode.OpenOrCreate, FileAccess.Write)) 
+			using (var stream = new FileStream(TempFile, FileMode.OpenOrCreate, FileAccess.ReadWrite)) 
 			{
 				stream.Seek(CurrentPosition, SeekOrigin.Begin);
 				stream.Write(msg.Data, 0, msg.DataLength);

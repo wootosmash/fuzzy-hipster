@@ -30,6 +30,7 @@ namespace FuzzyHipster.Network
     
     public void WaitForLength()
     {
+      Buffer.Seek(0, SeekOrigin.Begin);
       if ( Peer == null )
         ExpectedLength = 4;
       else if ( Peer.SymmetricKey != null )
@@ -41,6 +42,7 @@ namespace FuzzyHipster.Network
     
     public void WaitForData()
     {
+      Buffer.Seek(0, SeekOrigin.Begin);
       WaitingLengthFrame = false;
     }
     

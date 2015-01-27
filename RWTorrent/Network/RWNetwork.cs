@@ -15,7 +15,23 @@ using FuzzyHipster.Crypto;
 
 namespace FuzzyHipster.Network
 {
-  
+  public class StreamTransferManagerCollection : SortedDictionary<Guid, TransferManager>
+  {
+    public void Remove( TransferManager mgr )
+    {
+      Remove(mgr.TransferId);
+    }
+    
+    public void Cancel( Guid id )
+    {
+      Remove(id);
+    }
+    
+    public void Cancel( TransferManager mgr )
+    {
+      Remove(mgr);
+    }
+  }
   
   public class RWNetwork
   {
@@ -25,7 +41,7 @@ namespace FuzzyHipster.Network
     public IPEndPoint LocalEndPoint { get; set; }
     public Socket Listener { get; set; }
     public Peer Me { get; set; }
-    public SortedList<Guid, TransferManager> InProgressTransfers { get; set; }
+    public StreamTransferManagerCollection InProgressTransfers { get; set; }
     public RateLimiter RateLimiter { get; set; }
     
     public long BytesReceived { get; set; }
@@ -194,9 +210,18 @@ namespace FuzzyHipster.Network
     /// </summary>
     public event EventHandler<BlockTransferStartedEventArgs> BlockTransferStarted;
 
-    protected virtual void OnBlockTransferStarted(BlockTransferStartedEventArgs e)
+    protected virtual void OnBlockTransferStarting(BlockTransferStartedEventArgs e)
     {
       var handler = BlockTransferStarted;
+      if (handler != null)
+        handler(this, e);
+    }
+    
+    public event EventHandler<BlockTransferStartedEventArgs> BlockTransferFailed;
+
+    protected virtual void OnBlockTransferFailed(BlockTransferStartedEventArgs e)
+    {
+      var handler = BlockTransferFailed;
       if (handler != null)
         handler(this, e);
     }
@@ -231,7 +256,7 @@ namespace FuzzyHipster.Network
     {
       Me = me;
       ActivePeers = new PeerCollection();
-      InProgressTransfers = new SortedList<Guid, TransferManager>();
+      InProgressTransfers = new StreamTransferManagerCollection();
       
       if ( MoustacheLayer.Singleton != null )
         RateLimiter = new RateLimiter(MoustacheLayer.Singleton.Settings.MaxReceiveRate);
@@ -316,6 +341,19 @@ namespace FuzzyHipster.Network
         peer.Socket = null;
       }
       ActivePeers.Remove(peer);
+      
+      var list = new List<TransferManager>();
+      
+      foreach( var mgr in InProgressTransfers.Values )
+        if ( mgr.Peer == peer )
+          list.Add(mgr);
+      
+      foreach( var mgr in list )
+      {
+        InProgressTransfers.Remove(mgr);
+        OnBlockTransferFailed(new BlockTransferStartedEventArgs(mgr.Peer, mgr.FileWad, mgr.Block));
+      }
+      
     }
 
     /// <summary>
@@ -428,20 +466,20 @@ namespace FuzzyHipster.Network
         peer.RateLimiter.GotPacket( bytesRead );
         // see if we need to limit ourselves
         RateLimiter.GotPacket( bytesRead );
-        
+
+        state.Buffer.Seek(bytesRead, SeekOrigin.Current);
         
         if ( bytesRead == 0 )
           Disconnect(peer, "Connection closed");
         else if ( bytesRead > 0 && bytesRead < state.ExpectedLength ) // partial receive
         {
           // buffering
-          state.Buffer.Seek(bytesRead, SeekOrigin.Current);
           state.ExpectedLength -= bytesRead;
           BeginReceive( peer, state.Buffer.GetBuffer(), (int)state.Buffer.Position, state.ExpectedLength, state);
         }
         else if ( bytesRead == state.ExpectedLength ) // receive finished
         {
-          state.Buffer.Seek(0, SeekOrigin.Begin);
+          //state.Buffer.Seek(0, SeekOrigin.Begin);
           
           if ( state.WaitingLengthFrame )
           {
@@ -647,56 +685,66 @@ namespace FuzzyHipster.Network
           
         case MessageType.RequestBlock:
           var requestBlock = msg as RequestBlockNetMessage;
-          OnBlockRequested( new BlockRequestedEventArgs(state.Peer, requestBlock.FileWadId, requestBlock.Block));
+          OnBlockRequested( new BlockRequestedEventArgs(state.Peer, MoustacheLayer.Singleton.Catalog.GetFileWad(requestBlock.FileWadId), requestBlock.Block));
           break;
           
-        case MessageType.StartBlockTransfer:
+        case MessageType.StartBlockTransferRequest:
           
-          var startTransfer = msg as StartBlockTransferNetMessage;
+          var startTransfer = msg as StartBlockTransferRequestNetMessage;
 
           var mgr = new BlockTransferManager();
+          mgr.Peer = state.Peer;
           mgr.ExpectedPackets = startTransfer.TotalPackets;
           mgr.TransferId = startTransfer.TransferId;
-          mgr.FileWadId = startTransfer.FileWadId;
           mgr.TotalLength = startTransfer.BlockSize;
+          mgr.FileWad = MoustacheLayer.Singleton.Catalog.GetFileWad(startTransfer.FileWadId);
           mgr.Block = startTransfer.Block;
-
+          mgr.FileWad.BlockIndex[mgr.Block].Downloading = true;
+          
           InProgressTransfers.Add(startTransfer.TransferId, mgr);
+          
+          
+          var btsevt = new BlockTransferStartedEventArgs(state.Peer, mgr.FileWad, mgr.Block);
+          OnBlockTransferStarting(btsevt);
+          SendBlockTransferAcknowledgement( mgr, btsevt.Accept, state.Peer );
+          
+          break;
+          
+        case MessageType.StartBlockTransferAck:
+          
+          var startTransferAck = msg as StartBlockTransferAcknowledgementNetMessage;
+          
+          if ( InProgressTransfers.ContainsKey(startTransferAck.TransferId))
+          {
+            if ( startTransferAck.Accept )
+              SendBlock( InProgressTransfers[startTransferAck.TransferId], state.Peer );
+            else
+              InProgressTransfers.Cancel(startTransferAck.TransferId);
+          }
+          else
+          {
+            Log("RECV: Ack for not existant transfer: {0}", startTransferAck.TransferId);
+          }
           
           break;
 
         case MessageType.BlockTransferPacket:
+          
           var packet = msg as BlockPacketNetMessage;
+          
           var transferManager = InProgressTransfers[packet.TransferId];
+          
           transferManager.SavePacket(packet);
           if ( transferManager.IsCompleted )
           {
             InProgressTransfers.Remove(transferManager.TransferId);
             
-            OnBlockReceived( new BlockReceivedEventArgs( state.Peer, transferManager.FileWadId, transferManager.Block ));
+            OnBlockReceived( new BlockReceivedEventArgs( state.Peer, transferManager.FileWad, transferManager.Block ));
           }
 
           break;
-          
-          
-          
-        case MessageType.Relay:
-          var relay = msg as RelayNetMessage;
-          
-          if ( relay.To == Me )
-            ProcessMessage(NetMessage.FromBytes(relay.Data), new ReceiveStateObject(){Peer = relay.From});
-          else if ( relay.TimeToLive > 0 )
-          {
-            relay.TimeToLive--;
-            SendMessageViaRelay(relay, relay.To);
-          }
-          break;
       }
     }
-    
-    
-    
-    
     
     public void RequestChannels( Peer peer, long recency, int count )
     {
@@ -791,7 +839,7 @@ namespace FuzzyHipster.Network
       Send(msg, to);
     }
     
-    public void SendBlock( FileWad fileWad, int block, params Peer [] to )
+    public void SendBlockTransferStartRequest( FileWad fileWad, int block, params Peer [] to )
     {
       foreach( Peer p in to )
       {
@@ -801,27 +849,60 @@ namespace FuzzyHipster.Network
         
         int totalPackets = (int)Math.Ceiling((decimal)fileWad.BlockIndex[block].Length / (decimal)maxBlockPacketSize);
         
-        var msg = new StartBlockTransferNetMessage();
+        var msg = new StartBlockTransferRequestNetMessage();
         msg.Block = block;
         msg.BlockSize = (int)fileWad.BlockIndex[block].Length;
         msg.TotalPackets = totalPackets;
         msg.TransferId = Guid.NewGuid();
         msg.FileWadId = fileWad.Id;
-        Send(msg, p);
         
-        using ( var stream = BlockStream.Create( fileWad, block ))
+        InProgressTransfers.Add(msg.TransferId, new BlockTransferManager()
+                                {
+                                  TransferId = msg.TransferId,
+                                  TotalLength = (int)fileWad.BlockIndex[block].Length,
+                                  NextPacket = 0,
+                                  CurrentPosition = 0,
+                                  FileWad = fileWad,
+                                  Block = block,
+                                  ExpectedPackets = totalPackets,
+                                  MaxPacketSize = maxBlockPacketSize,
+                                  TempFile = "",
+                                  Peer = p
+                                    
+                                });
+        
+        Send(msg, p);
+      }
+    }
+    
+    public void SendBlockTransferAcknowledgement( TransferManager mgr, bool accept, Peer to )
+    {
+      var msg = new StartBlockTransferAcknowledgementNetMessage();
+      msg.Accept = accept;
+      msg.Block = mgr.Block;
+      msg.FileWadId = mgr.FileWad.Id;
+      msg.TransferId = mgr.TransferId;
+      Send(msg, to);
+    }
+
+    
+    public void SendBlock( TransferManager mgr, params Peer[] to )
+    {
+      foreach( Peer p in to )
+      {
+        using ( var stream = BlockStream.Create( mgr.FileWad, mgr.Block ))
         {
-          long length = fileWad.BlockIndex[block].Length;
-          for ( int i=0;i<totalPackets;i++)
+          long length = mgr.FileWad.BlockIndex[mgr.Block].Length;
+          for ( int i=0;i<mgr.ExpectedPackets;i++)
           {
-            int packetSize = maxBlockPacketSize;
+            int packetSize = mgr.MaxPacketSize;
             if ( packetSize > length )
               packetSize = (int)length;
             
             var blockMsg = new BlockPacketNetMessage();
-            blockMsg.Data = new byte[maxBlockPacketSize];
+            blockMsg.Data = new byte[packetSize];
             blockMsg.DataLength = packetSize;
-            blockMsg.TransferId = msg.TransferId;
+            blockMsg.TransferId = mgr.TransferId;
             
             stream.Read(blockMsg.Data, 0, packetSize);
             
@@ -835,6 +916,11 @@ namespace FuzzyHipster.Network
     
     public void RequestBlock( Peer peer, FileWad fileWad, int block )
     {
+      if ( peer == null ) throw new Exception("peer is null for RequestBlock({0})" + block);
+      if ( fileWad == null ) return;
+      if ( block < 0 ) return;
+      if ( fileWad.BlockIndex.Count <= block ) return;
+      
       var msg = new RequestBlockNetMessage();
       msg.Block = block;
       msg.FileWadId = fileWad.Id;
@@ -862,31 +948,6 @@ namespace FuzzyHipster.Network
       Send(msg,to);
     }
 
-    /// <summary>
-    /// Sends data via relay. Need to know where the peer is
-    /// </summary>
-    public void SendMessageViaRelay( NetMessage msg, Peer to )
-    {
-      RelayNetMessage relay = msg as RelayNetMessage;
-      
-      if ( relay == null )
-      {
-        relay = new RelayNetMessage();
-        relay.Data = msg.ToBytes();
-        relay.From = Me;
-        relay.To = to;
-      }
-      
-      Send(relay, DetermineNextPeer(to));
-    }
-    
-    public Peer DetermineNextPeer( Peer toGetTo )
-    {
-      if ( ActivePeers.Contains(toGetTo))
-        return toGetTo;
-      
-      return ActivePeers.GetRandom();
-    }
     
     public void Send( NetMessage msg, params Peer[] peers )
     {
@@ -897,6 +958,10 @@ namespace FuzzyHipster.Network
         
         if ( !peer.IsConnected )
           continue;
+        
+        if ( peer == Me )
+          continue;
+        
         //          SendMessageViaRelay(msg, peer);
         
         var state = new SendState();
@@ -964,7 +1029,7 @@ namespace FuzzyHipster.Network
     byte[] ReceiveBytes( ReceiveStateObject state )
     {
       if ( state.Peer.SymmetricKey != null )
-        return state.Peer.SymmetricKey.Decrypt(state.Buffer.GetBuffer(), (int)state.ExpectedLength);
+        return state.Peer.SymmetricKey.Decrypt(state.Buffer.GetBuffer(), (int)state.Buffer.Position);
       else
         return state.Buffer.GetBuffer();
     }

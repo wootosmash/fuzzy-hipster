@@ -39,14 +39,18 @@ namespace FuzzyHipster.Strategy
 
     public override void Think()
     {
+      int connects = Network.ActivePeers.Count;
       // see if we need some new peers
-      if ( Network.ActivePeers.Count < Settings.MaxActivePeers )
+      if ( connects < Settings.MaxActivePeers )
       {
         foreach( var peer in Peers.ToArray() ) // for each peer that we're not connected to
-          if ( peer.Enabled )
-            if ( !peer.IsConnected ) // we're not connected
-              if ( peer.NextConnectionAttempt < DateTime.Now ) // wait is over
-                Network.Connect(peer);
+        {
+          if ( peer.Enabled && !peer.IsConnected && peer.NextConnectionAttempt < DateTime.Now && connects < Settings.MaxActivePeers )
+          {
+            connects++;
+            Network.Connect(peer);
+          }
+        }
       }
       
       if ( Peers.Count < Settings.DesiredPeerListSize && Peers.Count < Peers.MaximumPeerListSize )
@@ -80,6 +84,7 @@ namespace FuzzyHipster.Strategy
         return;
       
       Peers.RefreshPeer(e.Value);
+      Console.WriteLine("NEWPEER: " + e.Value);
     }
     
 

@@ -12,6 +12,9 @@ using System.Threading;
 using FuzzyHipster.Catalog;
 namespace FuzzyHipster.Network
 {
+  /// <summary>
+  /// EventArgs sent when a block transfer request arrives
+  /// </summary>
 	public class BlockTransferStartedEventArgs : EventArgs
 	{
 		public int Block {
@@ -19,7 +22,7 @@ namespace FuzzyHipster.Network
 			set;
 		}
 
-		public Guid FileWadId {
+		public FileWad FileWad {
 			get;
 			set;
 		}
@@ -28,12 +31,21 @@ namespace FuzzyHipster.Network
 			get;
 			set;
 		}
+	  
+	  /// <summary>
+	  /// Set to false if you don't want to accept
+	  /// </summary>
+	  public bool Accept {
+	    get;
+	    set; 
+	  }
 
-		public BlockTransferStartedEventArgs(Peer peer, Guid fileWadId, int block)
+		public BlockTransferStartedEventArgs(Peer peer, FileWad fileWad, int block)
 		{
 			this.Peer = peer;
 			this.Block = block;
-			this.FileWadId = fileWadId;
+			this.FileWad = fileWad;
+			this.Accept = true;
 		}
 	}
 }

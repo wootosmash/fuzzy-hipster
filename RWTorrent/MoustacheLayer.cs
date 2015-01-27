@@ -16,6 +16,58 @@ using FuzzyHipster.Strategy;
 
 namespace FuzzyHipster
 {
+  public class StrategyManager
+  {
+    List<Record> list = new List<Record>();
+    
+    public MoustacheStrategy Find( Type type )
+    {
+      foreach( var record in list )
+        if ( type.IsInstanceOfType(record.Strategy) )
+          return record.Strategy;
+      
+      return null;
+    }
+    
+    public void Add( MoustacheStrategy strategy, bool enabledOnStartup )
+    {
+      list.Add(new Record() {Strategy = strategy, EnabledOnStartup = enabledOnStartup});
+    }
+    
+    public void Startup()
+    {
+      foreach( var record in list )
+        if ( record.EnabledOnStartup )
+          record.Strategy.Enable();
+      
+    }
+    
+    public void Enable( Type type )
+    {
+      var strategy = Find(type);
+      strategy.Enable();
+    }
+    
+    public void Disable( Type type )
+    {
+      var strategy = Find(type);
+      strategy.Disable();
+    }
+    
+    public void Think()
+    {
+      foreach( var m in list )
+        if ( m.Strategy.Enabled )
+          m.Strategy.Think();
+    }
+    
+    public class Record
+    {
+      public MoustacheStrategy Strategy;
+      public bool EnabledOnStartup;
+    }
+  }
+  
   public class MoustacheLayer
   {
     public static MoustacheLayer Singleton { get; protected set; }
@@ -27,8 +79,9 @@ namespace FuzzyHipster
     public PeerCollection Peers { get; set; }
     public bool IsConnectedToGrid { get { return Network.ActivePeers.Count > 0; } }
     public Random Random { get; set; }
+    public BlockAvailabilityList BlockAvailability { get; set; }
     
-    public List<MoustacheStrategy> Strategies { get; set; }
+    public StrategyManager Strategies { get; set; }
 
     Timer HeartbeatTimer = new Timer();
 
@@ -40,7 +93,8 @@ namespace FuzzyHipster
       Random = new Random(DateTime.Now.Millisecond);
       Catalog = catalog;
       Settings = Settings.Load("settings.xml");
-      Strategies = new List<MoustacheStrategy>();
+      Strategies = new StrategyManager();
+      BlockAvailability = new BlockAvailabilityList();
 
       Me = new Peer();
       Me.Port = Settings.Port;
@@ -52,31 +106,32 @@ namespace FuzzyHipster
       Network = new RWNetwork(Me);
       
       // respond to requests
-      Strategies.Add( new InformationServiceMoustacheStrategy());
+      Strategies.Add( new InformationServiceMoustacheStrategy(), true);
+      
+      // keep availability of blocks
+      Strategies.Add( new BlockAvailabilityStrategy(), true);
       
       // get new channels and updates to existing ones
-      Strategies.Add( new CatalogManagementMoustacheStrategy());
+      Strategies.Add( new CatalogManagementMoustacheStrategy(), true);
       
       // get files
-      Strategies.Add( new BasicBlockAquisitionStrategy());
+      Strategies.Add( new BasicBlockAquisitionStrategy(), true);
       
       // get peers and connect to new ones
-      Strategies.Add( new BasicPeerManagementMoustacheStrategy());
+      Strategies.Add( new BasicPeerManagementMoustacheStrategy(), true);
       
       // send out our status
-      Strategies.Add( new KeepAliveMoustacheStrategy());
-            
-      foreach( MoustacheStrategy strategy in Strategies )
-        strategy.Enable();
+      Strategies.Add( new KeepAliveMoustacheStrategy(), true);
+      
+      // streaming blocks strategy - shut down initially
+      Strategies.Add( new StreamingBlockAquisitionStrategy(), false);
+      
+      Strategies.Startup();
       
       HeartbeatTimer = new Timer(Settings.HeartbeatInterval);
       HeartbeatTimer.Elapsed +=  HeartbeatElapsed;
       HeartbeatTimer.Start();
     }
-    
-    
-    
-    
     
     void HeartbeatElapsed(object sender, ElapsedEventArgs e)
     {
@@ -87,9 +142,7 @@ namespace FuzzyHipster
     {
       try
       {
-        foreach( var strategy in Strategies )
-          if ( strategy.Enabled )
-            strategy.Think();
+        Strategies.Think();
       }
       catch( Exception ex )
       {

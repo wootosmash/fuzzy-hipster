@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Threading;
 using FuzzyHipster.Catalog;
 using FuzzyHipster.Network;
+using FuzzyHipster.Strategy;
 
 namespace FuzzyHipster
 {
@@ -95,6 +96,14 @@ namespace FuzzyHipster
           Console.WriteLine("Peers " + stache.Me.Id);
           foreach( Peer p in stache.Network.ActivePeers )
             Console.WriteLine(p);
+        }
+        
+        if ( key.Key == ConsoleKey.O )
+        {
+          Console.WriteLine("Begin Streaming");
+          MoustacheLayer.Singleton.Strategies.Enable(typeof(StreamingBlockAquisitionStrategy));
+          (MoustacheLayer.Singleton.Strategies.Find(typeof(StreamingBlockAquisitionStrategy)) as StreamingBlockAquisitionStrategy).Setup(catalog.FileWads.Values[0], catalog.FileWads.Values[0].Files[0]);
+
         }
         
         key = Console.ReadKey(true);

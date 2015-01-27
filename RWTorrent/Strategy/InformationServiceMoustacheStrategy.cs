@@ -59,8 +59,14 @@ namespace FuzzyHipster.Strategy
         }
       }
       else
+      {
         for ( int i=0;i<e.Value.Count;i++ )
-          list.Add(Catalog.Channels.GetRandom());
+        {
+          Channel chan = Catalog.Channels.GetRandom();
+          if ( !list.Contains(chan))
+            list.Add(chan);
+        }
+      }
       
       Network.SendChannels(list.ToArray(), e.Peer);
     }
@@ -71,7 +77,7 @@ namespace FuzzyHipster.Strategy
       if (e.Value.ChannelGuid == Guid.Empty )
       {
         var list = new List<FileWad>();
-       
+        
         for ( int i=0;i<e.Value.Count;i++)
           list.Add(Catalog.FileWads.GetRandom());
         
@@ -97,8 +103,10 @@ namespace FuzzyHipster.Strategy
 
     void NetworkBlockRequested(object sender, BlockRequestedEventArgs e)
     {
-      Network.SendBlock(Catalog.GetFileWad(e.FileWadId), e.Block, e.Peer);
+      Network.SendBlockTransferStartRequest(e.FileWad, e.Block, e.Peer);
     }
+    
+    
   }
 }
 

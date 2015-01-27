@@ -143,6 +143,19 @@ namespace FuzzyHipster.Catalog
       return path;
     }
     
+    public string GetBlockPath( int block )
+    {
+      string path = GetBlocksPath();
+      
+      string[] files = Directory.GetFiles(path, block + "-*.blk");
+      if ( files.Length == 0 )
+        throw new FileNotFoundException("Can't find any files for " + block);
+      
+      path = Path.Combine(path, files[0]);
+      
+      return path;
+    }
+    
     public Stream GetBlockStream( int block )
     {
       string blocksPath = GetBlocksPath();
@@ -158,6 +171,10 @@ namespace FuzzyHipster.Catalog
       throw new Exception(string.Format("Cant find the file for block {0} in path {1}", block, blocksPath));
     }
     
+    /// <summary>
+    /// Gets an array of bools indicating which blocks we have available locally
+    /// </summary>
+    /// <returns></returns>
     public bool[] GetBlockAvailability()
     {
       bool[] availability = new bool[BlockIndex.Count];
@@ -173,7 +190,7 @@ namespace FuzzyHipster.Catalog
       var list = new List<int>();
       
       for ( int i=0;i<availability.Length;i++)
-        if ( availability[i] )
+        if ( availability[i] ) // if the array says its avail and we havent got it?
           if ( !BlockIndex[i].Downloaded )
             list.Add(i);
       

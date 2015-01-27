@@ -41,8 +41,10 @@ namespace FuzzyHipster
     
     public void RefreshPeer(Peer peer)
     {
-      Peer myPeer = null;
-      if ( peer.Socket != null )
+      Peer myPeer = Find( x => x.Id == peer.Id);
+      if (myPeer != null)
+        myPeer.UpdateFromCopy(peer);
+      else if ( peer.Socket != null )
       {
         myPeer = FindBySocket(peer.Socket);
         if ( myPeer != null )
@@ -57,11 +59,6 @@ namespace FuzzyHipster
           myPeer.UpdateFromCopy(peer);
         else
           Add(peer);
-      }
-      else if (Contains(peer))
-      {
-        myPeer = Find( x => x.Id == peer.Id);
-        myPeer.UpdateFromCopy(peer);
       }
       else
         Add(peer);
