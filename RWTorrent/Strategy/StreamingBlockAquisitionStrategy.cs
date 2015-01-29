@@ -73,14 +73,17 @@ namespace FuzzyHipster.Strategy
       if ( FileWad == null ) return;
       if ( File == null ) return;
       
-      File.WriteBlock(FileWad.GetBlockPath(e.Block), e.Block);
-      
-      var vector = BlockAvailability.GetBlockPeers(FileWad, BlockAvailabilityList.SearchStrategy.NextBlock, File.StartBlock, File.EndBlock);
-      
-      if ( !vector.IsValid )
-        TransferStarted = false;
-      else
-        Network.RequestBlock(vector.Peers.GetRandom(), FileWad, vector.Block);
+      if ( e.FileWad.BlockIndex[e.Block].Downloaded )
+      {        
+        File.WriteBlock(FileWad.GetBlockPath(e.Block), FileWad.GetFileOffset(File, e.Block));
+        
+        var vector = BlockAvailability.GetBlockPeers(FileWad, BlockAvailabilityList.SearchStrategy.NextBlock, File.StartBlock, File.EndBlock);
+        
+        if ( !vector.IsValid )
+          TransferStarted = false;
+        else
+          Network.RequestBlock(vector.Peers.GetRandom(), FileWad, vector.Block);
+      }
     }
     
   }

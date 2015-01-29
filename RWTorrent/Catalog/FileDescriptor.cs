@@ -77,7 +77,7 @@ namespace FuzzyHipster.Catalog
     public void BuildLocalFilePath()
     {
       if ( String.IsNullOrWhiteSpace(LocalFilepath))
-        LocalFilepath = Path.Combine(MoustacheLayer.Singleton.Catalog.BasePath, CatalogFilepath);
+        LocalFilepath = Path.Combine(MoustacheLayer.Singleton.Catalog.BasePath,@"Files\" + CatalogFilepath);
       
       if ( !Directory.Exists(Path.GetDirectoryName(LocalFilepath)))
         Directory.CreateDirectory(Path.GetDirectoryName(LocalFilepath));
@@ -93,25 +93,26 @@ namespace FuzzyHipster.Catalog
       IsAllocated = true;
     }
     
-    public void WriteBlock( string blockPath, int blockIndex)
+    public void WriteBlock( string blockPath, long startPosition)
     {
       byte [] buffer = new byte[1024];
-      long startPosition = blockIndex;
       
       if ( !IsAllocated )
         AllocateFile();
       
+      Console.WriteLine("WRiting to " + blockPath + " " + startPosition );
+      
       using (var file = new FileStream( LocalFilepath, FileMode.Open, FileAccess.Write, FileShare.ReadWrite))
       {
         file.Seek(startPosition, SeekOrigin.Begin);
-        using (var block = new FileStream(blockPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+        using (var block = new FileStream(blockPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         {
           int bytesRead = block.Read(buffer, 0, buffer.Length);
-          do
+          while ( bytesRead > 0 )
           {
             file.Write(buffer, 0, bytesRead);
             bytesRead = block.Read(buffer, 0, buffer.Length);
-          } while ( bytesRead > 0 );
+          } 
         }
       }
     }

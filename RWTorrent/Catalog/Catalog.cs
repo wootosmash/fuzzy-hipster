@@ -258,6 +258,9 @@ namespace FuzzyHipster.Catalog
     
     public void AddBlock( FileWad wad, int block )
     {
+      if (wad.IsFullyDownloaded)
+        wad.SaveFromBlocks(BasePath + @"\Files\");      
+      
       OnNotifyBlockIndexItem(new NotifyBlockIndexItemEventArgs(wad, block));
     }
     

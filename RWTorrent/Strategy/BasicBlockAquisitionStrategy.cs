@@ -22,14 +22,16 @@ namespace FuzzyHipster.Strategy
     {
       Network.BlockReceived += NetworkBlockReceived;
       Network.BlockTransferFailed += NetworkBlockTransferFailed;
+      Network.BlockTransferStarted += NetworkBlockTransferStarted;
       Catalog.NotifyFileWad += CatalogNotifyFileWad;
     }
 
     public override void Uninstall()
     {
       Network.BlockReceived -= NetworkBlockReceived;
-      Catalog.NotifyFileWad -= CatalogNotifyFileWad;
       Network.BlockTransferFailed -= NetworkBlockTransferFailed;
+      Network.BlockTransferStarted -= NetworkBlockTransferStarted;
+      Catalog.NotifyFileWad -= CatalogNotifyFileWad;
     }
 
     public override void Think()
@@ -80,8 +82,7 @@ namespace FuzzyHipster.Strategy
     
     void NetworkBlockReceived(object sender, BlockReceivedEventArgs e)
     {
-      if (e.FileWad.IsFullyDownloaded)
-        e.FileWad.SaveFromBlocks(Catalog.BasePath + @"\Files\");
+      Catalog.AddBlock(e.FileWad, e.Block);
     }
     
     void NetworkBlockTransferFailed(object sender, BlockTransferStartedEventArgs e)
@@ -90,7 +91,11 @@ namespace FuzzyHipster.Strategy
       // kills the availability matrix for a peer
       BlockAvailability.Invalidate(e.Peer);
     }
-    
+
+    void NetworkBlockTransferStarted(object sender, BlockTransferStartedEventArgs e)
+    {
+      Catalog.AddBlock(e.FileWad, e.Block);
+    }
     
     void CatalogNotifyFileWad(object sender, GenericEventArgs<FileWad> e)
     {
