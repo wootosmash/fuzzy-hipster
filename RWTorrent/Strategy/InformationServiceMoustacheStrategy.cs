@@ -103,7 +103,8 @@ namespace FuzzyHipster.Strategy
 
     void NetworkBlockRequested(object sender, BlockRequestedEventArgs e)
     {
-      Network.SendBlockTransferStartRequest(e.FileWad, e.Block, e.Peer);
+      if ( Network.InProgressTransfers.FindTransfer( e.FileWad, e.Block, e.Peer ) == null )
+        Network.SendBlockTransferStartRequest(e.FileWad, e.Block, e.Peer);
     }
     
     

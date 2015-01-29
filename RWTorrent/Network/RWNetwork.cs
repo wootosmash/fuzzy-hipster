@@ -31,6 +31,14 @@ namespace FuzzyHipster.Network
     {
       Remove(mgr);
     }
+    
+    public TransferManager FindTransfer( FileWad wad, int block, Peer peer )
+    {
+      foreach( var transfer in Values )
+        if ( transfer.FileWad.Id == wad.Id && transfer.Block == block && transfer.Peer == peer )
+          return transfer;
+      return null;
+    }
   }
   
   public class RWNetwork
@@ -717,7 +725,10 @@ namespace FuzzyHipster.Network
           if ( InProgressTransfers.ContainsKey(startTransferAck.TransferId))
           {
             if ( startTransferAck.Accept )
+            {
               SendBlock( InProgressTransfers[startTransferAck.TransferId], state.Peer );
+              InProgressTransfers.Remove(InProgressTransfers[startTransferAck.TransferId].TransferId);
+            }
             else
               InProgressTransfers.Cancel(startTransferAck.TransferId);
           }

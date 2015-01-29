@@ -185,6 +185,16 @@ namespace FuzzyHipster.Catalog
       return availability;
     }
     
+    public bool[] GetBlocksDownloading() 
+    {
+      bool[] availability = new bool[BlockIndex.Count];
+      
+      for( int i=0;i<BlockIndex.Count;i++)
+        availability[i] = BlockIndex[i].Downloading;
+      
+      return availability;      
+    }
+    
     public int[] GetAvailabilityNeededIntersection( bool[] availability )
     {
       var list = new List<int>();

@@ -93,9 +93,10 @@ namespace FuzzyHipster.Catalog
       IsAllocated = true;
     }
     
-    public void WriteBlock( string blockPath, int startPosition)
+    public void WriteBlock( string blockPath, int blockIndex)
     {
       byte [] buffer = new byte[1024];
+      long startPosition = blockIndex;
       
       if ( !IsAllocated )
         AllocateFile();

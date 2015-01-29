@@ -57,11 +57,12 @@ namespace FuzzyHipster
       Console.WriteLine("GetBlockPeers(" + block + ")");
       var peers = new PeerCollection();
       
-      if ( ContainsKey(wad.Id))
-        foreach( var matrix in this[wad.Id] )
-          if ( matrix.BlockAvailability.Length > block )
-            if ( matrix.BlockAvailability[block] )
-              peers.Add(matrix.Peer);
+      if ( block >= 0 )
+        if ( ContainsKey(wad.Id))
+          foreach( var matrix in this[wad.Id] )
+            if ( matrix.BlockAvailability.Length > block )
+              if ( matrix.BlockAvailability[block] )
+                peers.Add(matrix.Peer);
       
       return new BlockVector(block, peers);
     }
@@ -99,6 +100,11 @@ namespace FuzzyHipster
       if ( maxBlock >= 0 )
         for ( int i=maxBlock+1;i<avail.Length;i++)
           avail[i] = true;
+      
+      bool[] downloading = wad.GetBlocksDownloading();
+      for( int i=0;i<downloading.Length;i++)
+        if ( downloading[i] )
+          avail[i] = true; // treat it as available if we're downloading it
       
       if ( strategy == SearchStrategy.FirstBlock )
         vector = GetBlockPeers(wad, minBlock);

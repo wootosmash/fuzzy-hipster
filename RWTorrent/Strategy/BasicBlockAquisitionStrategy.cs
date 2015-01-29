@@ -68,8 +68,7 @@ namespace FuzzyHipster.Strategy
               continue; // skip this WAD, no block or no peers
             }
             
-            if ( !wad.BlockIndex[vector.Block].Downloading )
-              Network.RequestBlock(vector.Peers.GetRandom(), wad, vector.Block);
+            Network.RequestBlock(vector.Peers.GetRandom(), wad, vector.Block);
           }
         }
       }

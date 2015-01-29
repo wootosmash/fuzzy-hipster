@@ -27,12 +27,12 @@ namespace FuzzyHipster.Strategy
     
     public override void Install()
     {
-      Network.BlockReceived += NetworkBlockReceived;
+      Catalog.NotifyBlockIndexItem += CatalogNotifyBlockIndexItem;;
     }
     
     public override void Uninstall()
     {
-      Network.BlockReceived -= NetworkBlockReceived;
+      Catalog.NotifyBlockIndexItem -= CatalogNotifyBlockIndexItem;
     }
     
     public override void Think()
@@ -68,15 +68,12 @@ namespace FuzzyHipster.Strategy
           Network.RequestBlocksAvailable(peer, FileWad);
     }
 
-    void NetworkBlockReceived(object sender, BlockReceivedEventArgs e)
+    void CatalogNotifyBlockIndexItem(object sender, NotifyBlockIndexItemEventArgs e)
     {
       if ( FileWad == null ) return;
       if ( File == null ) return;
       
       File.WriteBlock(FileWad.GetBlockPath(e.Block), e.Block);
-
-      
-      Console.WriteLine("Streaming " + e.Block);
       
       var vector = BlockAvailability.GetBlockPeers(FileWad, BlockAvailabilityList.SearchStrategy.NextBlock, File.StartBlock, File.EndBlock);
       

@@ -17,6 +17,18 @@ using FuzzyHipster.Crypto;
 using FuzzyHipster.Network;
 namespace FuzzyHipster.Catalog
 {
+  public class NotifyBlockIndexItemEventArgs : EventArgs 
+  {
+    public int Block { get; set; }
+    public FileWad FileWad { get; set; }
+    
+    public NotifyBlockIndexItemEventArgs( FileWad fileWad, int block )
+    {
+      Block = block;
+      FileWad = fileWad;
+    }
+  }
+  
   public class Catalog : CatalogItem
   {
     public string Namespace { get; set; }
@@ -47,8 +59,8 @@ namespace FuzzyHipster.Catalog
     /// <summary>
     /// When theres an update to a block index item
     /// </summary>
-    public event EventHandler<GenericEventArgs<BlockIndexItem>> NotifyBlockIndexItem;
-    protected virtual void OnNotifyBlockIndexItem(GenericEventArgs<BlockIndexItem> e)
+    public event EventHandler<NotifyBlockIndexItemEventArgs> NotifyBlockIndexItem;
+    protected virtual void OnNotifyBlockIndexItem(NotifyBlockIndexItemEventArgs e)
     {
       var handler = NotifyBlockIndexItem;
       if (handler != null)
@@ -242,6 +254,11 @@ namespace FuzzyHipster.Catalog
       Keys.Save();
       OnNotifyKey(new GenericEventArgs<Key>(key));
       return key;
+    }
+    
+    public void AddBlock( FileWad wad, int block )
+    {
+      OnNotifyBlockIndexItem(new NotifyBlockIndexItemEventArgs(wad, block));
     }
     
     public bool Verify( Peer sender, CatalogItem item )

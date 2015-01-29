@@ -13,6 +13,7 @@ namespace FuzzyHipster.Network
 			FileWad.BlockIndex[Block].Downloading = false;
 			FileWad.BlockIndex[Block].Downloaded = true;
 			FileWad.CatalogBlock(Block, TempFile);
+			MoustacheLayer.Singleton.Catalog.AddBlock(FileWad, Block);
 		}
 	}
 }
